@@ -52,7 +52,7 @@ Get the type of data record based on the main product header
 # Example
 ```julia-repl
 julia> file_pointer = open("ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z")
-julia> main_header = MetopNative.native_read(file_pointer, MainProductHeader)
+julia> main_header = MetopDatasets.native_read(file_pointer, MainProductHeader)
 julia> data_record_type(main_header)
 ASCA_SZO_1B_V13
 ```
@@ -87,7 +87,7 @@ Dict{String, Int64} with 2 entries:
 """
 function get_dimensions(T::Type{<:BinaryRecord})::Dict{String, <:Integer}
     # find all array fields size
-    array_sizes = [MetopNative._get_array_size(T, n)
+    array_sizes = [MetopDatasets._get_array_size(T, n)
                    for n in fieldnames(T) if fieldtype(T, n) <: Array]
 
     # get all unique dimensions

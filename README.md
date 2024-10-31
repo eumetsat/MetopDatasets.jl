@@ -1,12 +1,10 @@
 # Under development 
-This package is still in the early development phase. 
-# MetopNative.jl
-[![Build Status](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl/badges/main/pipeline.svg)](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl/pipelines)
-[![Coverage](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl/badges/main/coverage.svg)](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl/commits/main)
+This package is still in the early development phase. Note that the package was previously named **MetopNative.jl** and was hosted on the [EUMETSAT GitLab](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl) 
+# MetopDatasets.jl
 
-MetopNative.jl is a package for reading products from the [METOP satellites](https://www.eumetsat.int/our-satellites/metop-series) using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and produces long series of near-realtime weather and climate observation. Learn more and access the products on [EUMETSATs user-portal](https://user.eumetsat.int/dashboard).
+MetopDatasets.jl is a package for reading products from the [METOP satellites](https://www.eumetsat.int/our-satellites/metop-series) using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and produce long series of near real-time weather and climate observation. Learn more and access the products on [EUMETSATs user-portal](https://user.eumetsat.int/dashboard).
 
-MetopNative.jl has two API's for reading native products. The first API is `MetopDataset` that implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl). The second API is `MetopProduct` which reads an entire product into a Julia object with a data structure similar to the native file structure. 
+MetopDatasets.jl has two APIs for reading native products. The first API is `MetopDataset` that implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl). The second API is `MetopProduct` which reads an entire product into a Julia object with a data structure similar to the native file structure. 
 
 Only a subset of the METOP native formats are supported currently but we are contiguously adding formats. The goal is to support all publicly available native METOP products.
 
@@ -18,17 +16,17 @@ This code is licensed under MIT license. See file LICENSE for details on the usa
 * [Jonas Wilzewski](mailto://jonas.wilzewski@eumetsat.int) - *Contributor* - [EUMETSAT](http://www.eumetsat.int)
 
 ## Installation
-MetopNative.jl can be installed via Pkg and the url to the gitlab repo.
+MetopDatasets.jl can be installed via Pkg and the url to the github.com repo.
 
 ```julia
 import Pkg
-Pkg.add(url="https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl") 
+Pkg.add(url="https://github.com/eumetsat/MetopDatasets.jl") 
 ```
 
 ## Uninstall
 ```julia
 import Pkg
-Pkg.rm("MetopNative")
+Pkg.rm("MetopDatasets")
 ```
 
 
@@ -51,7 +49,7 @@ The package is implemented based on
 To read a Metop Native binary file:
 
 ```julia
-julia> using MetopNative
+julia> using MetopDatasets
 
 julia> ds = MetopDataset("ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat")
 
@@ -331,10 +329,10 @@ julia> ds.attrib["instrument_id"]
 ### Convert a Metop Native binary file to netCDF
 
 A Metop Native binary file can be converted to netCDF using the [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) package. This 
-is possible because both MetopNative.jl and NCDatasets.jl implement the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface.
+is possible because both MetopDatasets.jl and NCDatasets.jl implement the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface.
 
 ```julia
-using MetopNative
+using MetopDatasets
 using NCDatasets
 
 input_file = "ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat"
@@ -350,7 +348,7 @@ close(ds_nc)
 It is also possible to use the safe `do` syntax that ensures the files are closed correctly even in the case of exceptions.
 
 ```julia
-using MetopNative
+using MetopDatasets
 using NCDatasets
 
 input_file = "ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat"

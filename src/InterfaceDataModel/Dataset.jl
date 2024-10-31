@@ -23,7 +23,7 @@ Only the meta data is loaded upon creation and all variables are lazy loaded.
 The variables corresponds to the different fields of the data records in the file.
 The attributes have all the information from the main product header in the file.
 
-`auto_convert=true` will automatically convert `MetopNative` specific types such as `VInteger` to
+`auto_convert=true` will automatically convert `MetopDatasets` specific types such as `VInteger` to
 common netCDF complaint types such as `Float64`. This will also automatically scale variable where the 
 scaling can't be expressed through a simple scale factor e.g. the IASI spectrum where different bands of 
 the spectrum have different scaling factors.

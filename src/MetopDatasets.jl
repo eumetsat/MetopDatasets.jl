@@ -1,7 +1,7 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-module MetopNative
+module MetopDatasets
 
 using Dates: DateFormat, Day, Millisecond, Microsecond, format
 import CommonDataModel as CDM

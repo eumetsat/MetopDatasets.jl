@@ -1,17 +1,17 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-using MetopNative, Test
+using MetopDatasets, Test
 using Dates
 
 # Helper function to create MetopDiskArray.
 function _chunks(file_pointer)
     seekstart(file_pointer)
-    main_product_header = MetopNative.native_read(file_pointer,
-        MetopNative.MainProductHeader)
+    main_product_header = MetopDatasets.native_read(file_pointer,
+        MetopDatasets.MainProductHeader)
 
-    MetopNative._skip_sphr(file_pointer, main_product_header.total_sphr)
-    record_chunks, _ = MetopNative._read_record_chunks(file_pointer, main_product_header)
+    MetopDatasets._skip_sphr(file_pointer, main_product_header.total_sphr)
+    record_chunks, _ = MetopDatasets._read_record_chunks(file_pointer, main_product_header)
     return record_chunks
 end
 
@@ -23,23 +23,23 @@ end
     record_chunks = _chunks(file_pointer)
     number_of_records = 3264
 
-    utc_time = MetopNative.MetopDiskArray(
+    utc_time = MetopDatasets.MetopDiskArray(
         file_pointer, record_chunks, :utc_line_nodes; auto_convert = false)
-    @test utc_time isa MetopNative.MetopDiskArray{MetopNative.ShortCdsTime, 1}
-    @test utc_time.field_type <: MetopNative.ShortCdsTime
+    @test utc_time isa MetopDatasets.MetopDiskArray{MetopDatasets.ShortCdsTime, 1}
+    @test utc_time.field_type <: MetopDatasets.ShortCdsTime
     @test utc_time.record_count == number_of_records
     @test utc_time.offset_in_record == 22
     @test size(utc_time) == (number_of_records,)
 
-    sigma0 = MetopNative.MetopDiskArray(file_pointer, record_chunks, :sigma0_trip)
-    @test sigma0 isa MetopNative.MetopDiskArray{Int32, 3}
+    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :sigma0_trip)
+    @test sigma0 isa MetopDatasets.MetopDiskArray{Int32, 3}
     @test sigma0.field_type <: Matrix{Int32}
     @test sigma0.record_count == number_of_records
     @test sigma0.offset_in_record == 773
     @test size(sigma0) == (3, 82, number_of_records)
 
-    latitude = MetopNative.MetopDiskArray(file_pointer, record_chunks, :latitude)
-    @test latitude isa MetopNative.MetopDiskArray{Int32, 2}
+    latitude = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :latitude)
+    @test latitude isa MetopDatasets.MetopDiskArray{Int32, 2}
     @test latitude.field_type <: Vector{Int32}
     @test latitude.record_count == number_of_records
     @test latitude.offset_in_record == 117
@@ -55,17 +55,17 @@ end
     file_pointer = open(test_file, "r")
     record_chunks = _chunks(file_pointer)
 
-    utc_time = MetopNative.MetopDiskArray(file_pointer, record_chunks, :utc_line_nodes;
+    utc_time = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :utc_line_nodes;
         auto_convert = false)
-    sigma0 = MetopNative.MetopDiskArray(file_pointer, record_chunks, :sigma0_trip)
-    record_start_time = MetopNative.MetopDiskArray(
+    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :sigma0_trip)
+    record_start_time = MetopDatasets.MetopDiskArray(
         file_pointer, record_chunks, :record_start_time)
 
     @test !isnothing(utc_time[7])
     @test !isnothing(utc_time[1:60])
     @test !isnothing(utc_time[1:4:60])
     @test !isnothing(utc_time[:])
-    @test utc_time[1:60] isa Vector{MetopNative.ShortCdsTime}
+    @test utc_time[1:60] isa Vector{MetopDatasets.ShortCdsTime}
     compare_times = DateTime.(utc_time[1:2:5]) .== [
         DateTime("2019-01-09T12:56:59.999"),
         DateTime("2019-01-09T12:57:03.750"),
@@ -92,13 +92,13 @@ end
     file_pointer = open(test_file, "r")
     record_chunks = _chunks(file_pointer)
 
-    utc_time = MetopNative.MetopDiskArray(file_pointer, record_chunks, :utc_localisation)
-    sigma0 = MetopNative.MetopDiskArray(file_pointer, record_chunks, :sigma0_full)
+    utc_time = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :utc_localisation)
+    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :sigma0_full)
 
     utc_time_prod = [r.utc_localisation for r in product.data_records]
     sigma0_prod = reduce(hcat, [r.sigma0_full for r in product.data_records])
 
-    @test utc_time[:] == MetopNative.seconds_since_epoch.(utc_time_prod[:])
+    @test utc_time[:] == MetopDatasets.seconds_since_epoch.(utc_time_prod[:])
     @test sigma0_prod[:, :] == sigma0_prod[:, :]
 
     close(file_pointer)

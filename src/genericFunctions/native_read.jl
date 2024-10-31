@@ -10,7 +10,7 @@ Endianness is automatically converted.
 # Example
 ```julia-repl
 julia> file_pointer = open("ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z")
-julia> main_header = MetopNative.native_read(file_pointer, MainProductHeader)
+julia> main_header = MetopDatasets.native_read(file_pointer, MainProductHeader)
 julia> main_header.sensing_start
 2023-03-29T06:33:00
 ```
