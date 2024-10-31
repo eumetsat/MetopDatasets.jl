@@ -1,0 +1,53 @@
+﻿FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,,,1,1,1,REC_HEAD,20,20,0
+LINE OF 25 KM RES NODES and associated data,,,,,,,,,,
+UTC_LINE_NODES,UTC time of line of 25 km nodes,n/a,UTC,1,1,1,short cds time,6,6,20
+SAT_TRACK_AZI,Azimuth angle bearing of nadir track velocity,2,deg,1,1,1,u-integer2,2,2,26
+25 KM RESOLUTION NODE and associated data,,,,,,,,,,
+NODE_NUM,"25 km node number as used in the PGF (ref AD-2]), i.e., (20 to -20) for the left swath in the left-to-right order, (-20 to 20) for the right swath in the left-to-right order, 0 corresponding to the mid swath position in both swaths. ",0,count,82,1,1,integer2,2,164,28
+SWATH INDICATOR,Swath (right or left),n/a,n/a,82,1,1,boolean,1,82,192
+LATITUDE,Latitude (-90 to 90 deg),6,deg,82,1,1,integer4,4,328,274
+LONGITUDE,Longitude (0 to 360 deg),6,deg,82,1,1,integer4,4,328,602
+ATMOSPHERIC_HEIGHT,Height of atmowphere used,3,km,82,1,1,u-integer2,2,164,930
+ATMOSPHERIC_LOSS,Atmospheric loss per unit length of atmosphere,10,dB/km,82,1,1,u-integer4,4,328,1094
+25 KM RESOLUTION TRIPLET COMPONENT and associated data,,,,,,,,,,
+SIGMA0_TRIP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) sigma zero values",6,dB,3,82,1,integer4,4,984,1422
+KP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) kp values (values between 0 and 1)",4,n/a,3,82,1,u-integer2,2,492,2406
+INC_ANGLE_TRIP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) incidence angle values",2,deg,3,82,1,u-integer2,2,492,2898
+AZI_ANGLE_TRIP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) azimuth angle values",2,deg,3,82,1,integer2,2,492,3390
+F_KP,Flag related to the quality of the Kp estimate (ref. Ad-2),n/a,n/a,3,82,1,boolean,1,246,3882
+F_USABLE,Flag related to the usability of the averaged value (ref. Ad-2),n/a,n/a,3,82,1,enumerated,1,246,4128
+F_F,Flag related to the use of synthetic data in the generation of averaged value (ref. Ad-2) (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,4374
+F_V,Flag related to the quality of the used of synthetic data in the generation of averaged value (ref. Ad-2)  (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,4866
+F_OA,Flag related to orbit/atticute quality in the generation of averaged value (ref. Ad-2)  (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,5358
+F_SA,Flag related to solar array reflection contamination in the generation of averaged value (ref. Ad-2)  (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,5850
+F_TEL,Flag related to telemtry quality in the generation of averaged value (ref. Ad-2) (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,6342
+F_EXT_FIL,Flag related to the presence of extrapolated reference functions in the generation of averaged value (ref. Ad-2) (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,6834
+F_LAND,Flag related to the use of measurements over land in the generation of averaged value (ref. Ad-2)  (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,7326
+SIZE OF THE RECORD,,,,,,,,,,7818
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,

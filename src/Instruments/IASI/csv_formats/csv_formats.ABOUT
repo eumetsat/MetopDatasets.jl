@@ -1,0 +1,15 @@
+# Component information
+name: CSV formats
+description: The product format specifications in CSV format. These are auto generated from the publicly available product format specifications.
+copyright: 2024 EUMETSAT
+license_spdx: MIT
+home_url: https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl/
+
+# Package IPR documentation
+license_text_file: ./LICENSE
+
+# File(s) associated to this component - CSV formats
+about_resource: .src/Instruments/IASI/csv_formats/*
+
+# File(s) associated to this component - CSV formats (test)
+about_resource: ./test/*.csv

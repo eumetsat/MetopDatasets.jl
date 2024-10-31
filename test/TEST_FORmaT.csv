@@ -1,0 +1,21 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,,,1,1,1,REC_HEAD,20,20,0
+DEGRADED_INST_MDR,Quality of MDR has been degraded from nominal due to an instrument degradation.,n/a,n/a,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation. ,n/a,n/a,1,1,1,boolean,1,1,21
+UTC_LINE_NODES,UTC time of line of nodes,n/a,UTC,1,1,1,short cds time,6,6,22
+ABS_LINE_NUMBER,Absolute (unique) counter for the line of nodes (from format version 12.0 onwards only),n/a,count,1,1,1,integer4,4,4,28
+SAT_TRACK_AZI,Azimuth angle bearing (range: 0 to 360) of nadir track velocity,2,deg,1,1,1,u-integer2,2,2,32
+AS_DES_PASS,"Ascending/descending pass indicator (0=DESC, 1=ASC)",n/a,n/a,1,1,1,boolean,1,1,34
+SWATH INDICATOR,"Swath (0=LEFT, 1=RIGHT)",n/a,n/a,82,1,1,boolean,1,82,35
+LATITUDE,Latitude (-90 to 90 deg),6,deg,82,1,1,integer4,4,328,117
+LONGITUDE,Longitude (0 to 360 deg),6,deg,82,1,1,integer4,4,328,445
+SIGMA0_TRIP,"Sigma0 triplet, re-sampled to swath grid, for 3 beams (fore, mid, aft) ",6,dB,3,82,1,integer4,4,984,773
+KP,Kp for re-sampled sigma0 triplet. Values between 0 and 1,4,n/a,3,82,1,u-integer2,2,492,1757
+INC_ANGLE_TRIP,Incidence angle for re-sampled sigma0 triplet.,2,deg,3,82,1,u-integer2,2,492,2249
+AZI_ANGLE_TRIP,"Azimuth angle of the up-wind direction for a given measurement triplet (range: -180 to +180, where minus is west and plus is east with respect to North)",2,deg,3,82,1,integer2,2,492,2741
+NUM_VAL_TRIP,Number of full resolution sigma0 values contributing to the re-sampled sigma0 triplet.,0,count,3,82,1,u-integer4,4,984,3233
+F_KP,"Flag related to the quality of the Kp estimate (0=NOMINAL, 1=NON-NOMINAL)",n/a,n/a,3,82,1,boolean,1,246,4217
+F_USABLE,"Flag related to the usability of the sigma0 triplet (0=GOOD, 1=USABLE, 2=NOT USABLE)",n/a,n/a,3,82,1,enumerated,1,246,4463
+F_LAND,Flag related to presence of land in the re-sampled sigma0 triplet (based on land mask; value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,4709
+LCR,Land Contamination Ratio estimate (based on SRF),4,n/a,3,82,1,u-integer2,2,492,5201
+FLAGFIELD,Flag field containing quality information,n/a,n/a,3,82,1,u-integer4,4,984,5693
