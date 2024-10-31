@@ -1,10 +1,10 @@
 # Under development 
-This package is still in the early development phase. Note that the package was previously name **MetopNative.jl** and was hosted on the [EUMETSAT GitLab](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl) 
+This package is still in the early development phase. Note that the package was previously named **MetopNative.jl** and was hosted on the [EUMETSAT GitLab](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl) 
 # MetopDatasets.jl
 
-MetopDatasets.jl is a package for reading products from the [METOP satellites](https://www.eumetsat.int/our-satellites/metop-series) using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and produces long series of near-realtime weather and climate observation. Learn more and access the products on [EUMETSATs user-portal](https://user.eumetsat.int/dashboard).
+MetopDatasets.jl is a package for reading products from the [METOP satellites](https://www.eumetsat.int/our-satellites/metop-series) using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and produce long series of near real-time weather and climate observation. Learn more and access the products on [EUMETSATs user-portal](https://user.eumetsat.int/dashboard).
 
-MetopDatasets.jl has two API's for reading native products. The first API is `MetopDataset` that implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl). The second API is `MetopProduct` which reads an entire product into a Julia object with a data structure similar to the native file structure. 
+MetopDatasets.jl has two APIs for reading native products. The first API is `MetopDataset` that implements the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl). The second API is `MetopProduct` which reads an entire product into a Julia object with a data structure similar to the native file structure. 
 
 Only a subset of the METOP native formats are supported currently but we are contiguously adding formats. The goal is to support all publicly available native METOP products.
 
