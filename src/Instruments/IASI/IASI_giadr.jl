@@ -62,11 +62,11 @@ filled with `0.0`.
 ```julia-repl
 julia> file_path = "test/testData/IASI_xxx_1C_M01_20240819103856Z_20240819104152Z_N_C_20240819112911Z"
 julia> ds = MetopDataset(file_path, auto_convert = false);
-julia> giadr = MetopNative.read_first_record(ds, MetopNative.GIADR_IASI_XXX_1C_V11)
+julia> giadr = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_XXX_1C_V11)
 julia> # Scale full spectrum.
-julia> scaled_spectrum = MetopNative.scale_iasi_spectrum(ds["gs1cspect"], giadr)
+julia> scaled_spectrum = MetopDatasets.scale_iasi_spectrum(ds["gs1cspect"], giadr)
 julia> # Scale subset of spectrum.
-julia> scaled_spectrum_subset = MetopNative.scale_iasi_spectrum(ds["gs1cspect"][10:20,:,:,:], giadr, 10:20)
+julia> scaled_spectrum_subset = MetopDatasets.scale_iasi_spectrum(ds["gs1cspect"][10:20,:,:,:], giadr, 10:20)
 ```
 """
 function scale_iasi_spectrum(

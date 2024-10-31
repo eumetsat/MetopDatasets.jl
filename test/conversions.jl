@@ -1,7 +1,7 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-using MetopNative, NCDatasets, Test
+using MetopDatasets, NCDatasets, Test
 
 # move attributes to be part of netcdf
 @testset "ASCAT SZF to netCDF" begin

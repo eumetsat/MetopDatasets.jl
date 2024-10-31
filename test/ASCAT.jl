@@ -1,7 +1,7 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-using MetopNative, Test
+using MetopDatasets, Test
 using Dates
 
 SZO_V13_test_file = "testData/ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z"
@@ -17,83 +17,83 @@ SZF_with_dummy_in_mid = "testData/ASCA_SZF_1B_M01_20221107123600Z_20221107141459
 
 function test_dimensions(record_type)
     fields = fieldnames(record_type)
-    return !isnothing(MetopNative.get_field_dimensions.(record_type, fields))
+    return !isnothing(MetopDatasets.get_field_dimensions.(record_type, fields))
 end
 
 @testset "ASCAT data records types" begin
     ## ASCA_SZR_1B_V13
-    @test MetopNative.ASCA_SZR_1B_V13 <: DataRecord
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZR_1B_V13) == 6677
-    @test test_dimensions(MetopNative.ASCA_SZR_1B_V13)
+    @test MetopDatasets.ASCA_SZR_1B_V13 <: DataRecord
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZR_1B_V13) == 6677
+    @test test_dimensions(MetopDatasets.ASCA_SZR_1B_V13)
 
-    field_index = findfirst(fieldnames(MetopNative.ASCA_SZR_1B_V13) .== :sigma0_trip)
+    field_index = findfirst(fieldnames(MetopDatasets.ASCA_SZR_1B_V13) .== :sigma0_trip)
     @test field_index == 11
-    @test fieldtypes(MetopNative.ASCA_SZR_1B_V13)[field_index] <: Matrix{Int32}
+    @test fieldtypes(MetopDatasets.ASCA_SZR_1B_V13)[field_index] <: Matrix{Int32}
 
     ## test that all arrays have length > 1
-    is_array_field = fieldtypes(MetopNative.ASCA_SZR_1B_V13) .<: Array
-    array_field_names = [fieldnames(MetopNative.ASCA_SZR_1B_V13)...][[is_array_field...]]
-    raw_array_dimensions = MetopNative.get_raw_format_dim.(
-        MetopNative.ASCA_SZR_1B_V13, array_field_names)
+    is_array_field = fieldtypes(MetopDatasets.ASCA_SZR_1B_V13) .<: Array
+    array_field_names = [fieldnames(MetopDatasets.ASCA_SZR_1B_V13)...][[is_array_field...]]
+    raw_array_dimensions = MetopDatasets.get_raw_format_dim.(
+        MetopDatasets.ASCA_SZR_1B_V13, array_field_names)
     @test all([prod(elem) > 1 for elem in raw_array_dimensions])
 
-    @test MetopNative.get_scale_factor(MetopNative.ASCA_SZR_1B_V13, :sigma0_trip) == 6
-    @test MetopNative.get_dimensions(MetopNative.ASCA_SZR_1B_V13) ==
+    @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) == 6
+    @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZR_1B_V13) ==
           Dict("num_band" => 3, "xtrack" => 82)
-    @test MetopNative.get_field_dimensions(MetopNative.ASCA_SZR_1B_V13, :sigma0_trip) ==
+    @test MetopDatasets.get_field_dimensions(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) ==
           ["num_band", "xtrack"]
-    @test MetopNative.get_field_dimensions(MetopNative.ASCA_SZR_1B_V13, :abs_line_number) ==
+    @test MetopDatasets.get_field_dimensions(MetopDatasets.ASCA_SZR_1B_V13, :abs_line_number) ==
           String[]
-    @test MetopNative.get_description(MetopNative.ASCA_SZR_1B_V13, :sigma0_trip) ==
+    @test MetopDatasets.get_description(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) ==
           "Sigma0 triplet, re-sampled to swath grid, for 3 beams (fore, mid, aft) "
 
     # other formats
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZO_1B_V13) == 3437
-    @test test_dimensions(MetopNative.ASCA_SZO_1B_V13)
-    @test MetopNative.get_scale_factor(MetopNative.ASCA_SZO_1B_V13, :sigma0_trip) == 6
-    @test isnothing(MetopNative.get_scale_factor(MetopNative.ASCA_SZO_1B_V13,
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZO_1B_V13) == 3437
+    @test test_dimensions(MetopDatasets.ASCA_SZO_1B_V13)
+    @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZO_1B_V13, :sigma0_trip) == 6
+    @test isnothing(MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZO_1B_V13,
         :record_header))
-    @test MetopNative.get_dimensions(MetopNative.ASCA_SZO_1B_V13) ==
+    @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZO_1B_V13) ==
           Dict("num_band" => 3, "xtrack" => 42)
 
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZF_1B_V13) == 4256
-    @test test_dimensions(MetopNative.ASCA_SZF_1B_V13)
-    @test MetopNative.get_scale_factor(MetopNative.ASCA_SZF_1B_V13, :inc_angle_full) == 2
-    @test MetopNative.get_dimensions(MetopNative.ASCA_SZF_1B_V13) == Dict("xtrack" => 192)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V13) == 4256
+    @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V13)
+    @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZF_1B_V13, :inc_angle_full) == 2
+    @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZF_1B_V13) == Dict("xtrack" => 192)
 
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZF_1B_V12) == 3684
-    @test test_dimensions(MetopNative.ASCA_SZF_1B_V12)
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZR_1B_V12) == 8153
-    @test test_dimensions(MetopNative.ASCA_SZR_1B_V12)
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZO_1B_V12) == 4193
-    @test test_dimensions(MetopNative.ASCA_SZO_1B_V12)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V12) == 3684
+    @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V12)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZR_1B_V12) == 8153
+    @test test_dimensions(MetopDatasets.ASCA_SZR_1B_V12)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZO_1B_V12) == 4193
+    @test test_dimensions(MetopDatasets.ASCA_SZO_1B_V12)
 
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZF_1B_V11) == 41624
-    @test test_dimensions(MetopNative.ASCA_SZF_1B_V11)
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZR_1B_V11) == 7818
-    @test test_dimensions(MetopNative.ASCA_SZR_1B_V11)
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SZO_1B_V11) == 4018
-    @test test_dimensions(MetopNative.ASCA_SZO_1B_V11)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V11) == 41624
+    @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V11)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZR_1B_V11) == 7818
+    @test test_dimensions(MetopDatasets.ASCA_SZR_1B_V11)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZO_1B_V11) == 4018
+    @test test_dimensions(MetopDatasets.ASCA_SZO_1B_V11)
 
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SMO_02_V12) == 6003
-    @test test_dimensions(MetopNative.ASCA_SMO_02_V12)
-    @test MetopNative.native_sizeof(MetopNative.ASCA_SMR_02_V12) == 11683
-    @test test_dimensions(MetopNative.ASCA_SMR_02_V12)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SMO_02_V12) == 6003
+    @test test_dimensions(MetopDatasets.ASCA_SMO_02_V12)
+    @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SMR_02_V12) == 11683
+    @test test_dimensions(MetopDatasets.ASCA_SMR_02_V12)
 end
 
 function get_data_record_type(file)
     data_record_type = open(file, "r") do file_pointer
-        main_header = MetopNative.native_read(file_pointer, MetopNative.MainProductHeader)
-        return MetopNative.data_record_type(main_header)
+        main_header = MetopDatasets.native_read(file_pointer, MetopDatasets.MainProductHeader)
+        return MetopDatasets.data_record_type(main_header)
     end
     return data_record_type
 end
 
 if isdir("testData") #TODO test data should be handle as an artifact or something similar.
     @testset "Test data_record_type" begin
-        @test get_data_record_type(SZO_V13_test_file) == MetopNative.ASCA_SZO_1B_V13
-        @test get_data_record_type(SZR_V13_test_file) == MetopNative.ASCA_SZR_1B_V13
-        @test get_data_record_type(SZR_V12_test_file) == MetopNative.ASCA_SZR_1B_V12
+        @test get_data_record_type(SZO_V13_test_file) == MetopDatasets.ASCA_SZO_1B_V13
+        @test get_data_record_type(SZR_V13_test_file) == MetopDatasets.ASCA_SZR_1B_V13
+        @test get_data_record_type(SZR_V12_test_file) == MetopDatasets.ASCA_SZR_1B_V12
     end
 end
 
@@ -108,10 +108,10 @@ if isdir("testData") #TODO test data should be handle as an artifact or somethin
 
             # check that longitude and latitude are in the correct range
             longitude = [rec.longitude_full for rec in product.data_records] ./
-                        10^MetopNative.get_scale_factor(eltype(product.data_records),
+                        10^MetopDatasets.get_scale_factor(eltype(product.data_records),
                 :longitude_full)
             latitude = [rec.latitude_full for rec in product.data_records] ./
-                       10^MetopNative.get_scale_factor(eltype(product.data_records),
+                       10^MetopDatasets.get_scale_factor(eltype(product.data_records),
                 :latitude_full)
 
             @test all([all((0 .<= arr) .& (arr .<= 360)) for arr in longitude])
@@ -134,10 +134,10 @@ if isdir("testData") #TODO test data should be handle as an artifact or somethin
 
             # check that longitude and latitude are in the correct range
             longitude = [rec.longitude for rec in product.data_records] ./
-                        10^MetopNative.get_scale_factor(eltype(product.data_records),
+                        10^MetopDatasets.get_scale_factor(eltype(product.data_records),
                 :longitude)
             latitude = [rec.latitude for rec in product.data_records] ./
-                       10^MetopNative.get_scale_factor(eltype(product.data_records),
+                       10^MetopDatasets.get_scale_factor(eltype(product.data_records),
                 :latitude)
 
             @test all([all((0 .<= arr) .& (arr .<= 360)) for arr in longitude])

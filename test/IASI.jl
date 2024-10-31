@@ -1,24 +1,24 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-using MetopNative, Test
+using MetopDatasets, Test
 import CommonDataModel as CDM
 
 @testset "IASI data records" begin
-    @test MetopNative.IASI_XXX_1C_V11 <: DataRecord
-    @test MetopNative.native_sizeof(MetopNative.IASI_XXX_1C_V11) == 2728908
-    @test MetopNative.get_scale_factor(MetopNative.IASI_XXX_1C_V11, :ggeosondloc) == 6
-    field_index = findfirst(fieldnames(MetopNative.IASI_XXX_1C_V11) .== :gs1cspect)
+    @test MetopDatasets.IASI_XXX_1C_V11 <: DataRecord
+    @test MetopDatasets.native_sizeof(MetopDatasets.IASI_XXX_1C_V11) == 2728908
+    @test MetopDatasets.get_scale_factor(MetopDatasets.IASI_XXX_1C_V11, :ggeosondloc) == 6
+    field_index = findfirst(fieldnames(MetopDatasets.IASI_XXX_1C_V11) .== :gs1cspect)
     @test field_index == 40
 
-    field_index = findfirst(fieldnames(MetopNative.IASI_XXX_1C_V11) .== :gqisflagqual)
+    field_index = findfirst(fieldnames(MetopDatasets.IASI_XXX_1C_V11) .== :gqisflagqual)
     @test field_index == 21
 
-    all_dims = [MetopNative.get_field_dimensions(MetopNative.IASI_XXX_1C_V11, x)
-                for x in fieldnames(MetopNative.IASI_XXX_1C_V11)]
+    all_dims = [MetopDatasets.get_field_dimensions(MetopDatasets.IASI_XXX_1C_V11, x)
+                for x in fieldnames(MetopDatasets.IASI_XXX_1C_V11)]
     @test !isempty(all_dims)
 
-    @test MetopNative.native_sizeof(MetopNative.GIADR_IASI_XXX_1C_V11) == 84
+    @test MetopDatasets.native_sizeof(MetopDatasets.GIADR_IASI_XXX_1C_V11) == 84
 
     ## testData
     if isdir("testData")
@@ -26,27 +26,27 @@ import CommonDataModel as CDM
         ds = MetopDataset(test_file)
 
         # test all dimensions are valid
-        @test MetopNative._valid_dimensions(ds)
+        @test MetopDatasets._valid_dimensions(ds)
 
         # test GIADR
-        giadr = MetopNative.read_first_record(ds, MetopNative.GIADR_IASI_XXX_1C_V11)
+        giadr = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_XXX_1C_V11)
         @test giadr.idefscalesondnsfirst ==
               Int16[2581, 5921, 9009, 9541, 10721, 0, 0, 0, 0, 0]
         @test giadr.idefscalesondnslast ==
               Int16[5920, 9008, 9540, 10720, 11041, 0, 0, 0, 0, 0]
         @test giadr.idefscalesondscalefactor == Int16[7, 8, 9, 8, 9, 0, 0, 0, 0, 0]
 
-        @test MetopNative.max_giadr_channel(giadr) == 8461
+        @test MetopDatasets.max_giadr_channel(giadr) == 8461
 
-        @test MetopNative.get_channel_scale_factor(giadr, 1) == 7
-        @test MetopNative.get_channel_scale_factor(giadr, 3340) == 7
-        @test MetopNative.get_channel_scale_factor(giadr, 3341) == 8
-        @test MetopNative.get_channel_scale_factor(giadr, 6428) == 8
-        @test MetopNative.get_channel_scale_factor(giadr, 6429) == 9
-        @test MetopNative.get_channel_scale_factor(giadr, 8461) == 9
-        @test_throws "Channel 0 scale factor not found" MetopNative.get_channel_scale_factor(
+        @test MetopDatasets.get_channel_scale_factor(giadr, 1) == 7
+        @test MetopDatasets.get_channel_scale_factor(giadr, 3340) == 7
+        @test MetopDatasets.get_channel_scale_factor(giadr, 3341) == 8
+        @test MetopDatasets.get_channel_scale_factor(giadr, 6428) == 8
+        @test MetopDatasets.get_channel_scale_factor(giadr, 6429) == 9
+        @test MetopDatasets.get_channel_scale_factor(giadr, 8461) == 9
+        @test_throws "Channel 0 scale factor not found" MetopDatasets.get_channel_scale_factor(
             giadr, 0)
-        @test_throws "Channel 8462 scale factor not found" MetopNative.get_channel_scale_factor(
+        @test_throws "Channel 8462 scale factor not found" MetopDatasets.get_channel_scale_factor(
             giadr, 8462)
 
         @test log10(ds["gircimage"].attrib["scale_factor"]) ≈ -giadr.idefscaleiisscalefactor
@@ -107,10 +107,10 @@ end
         test_file = "testData/IASI_xxx_1C_M01_20240819103856Z_20240819104152Z_N_C_20240819112911Z"
         ds = MetopDataset(test_file, auto_convert = false)
 
-        @test ds["obt"][1:5] isa Array{MetopNative.BitString{6}, 1}
-        @test ds["gepslociasiavhrr_iasi"][1:5] isa Array{MetopNative.VInteger{Int32}, 1}
+        @test ds["obt"][1:5] isa Array{MetopDatasets.BitString{6}, 1}
+        @test ds["gepslociasiavhrr_iasi"][1:5] isa Array{MetopDatasets.VInteger{Int32}, 1}
 
-        giadr = MetopNative.read_first_record(ds, MetopNative.GIADR_IASI_XXX_1C_V11)
+        giadr = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_XXX_1C_V11)
 
         ## The gircimage should still have a scale_factor.
         @test log10(ds["gircimage"].attrib["scale_factor"]) ≈ -giadr.idefscaleiisscalefactor
@@ -119,7 +119,7 @@ end
         @test selected_spectra isa Array{Int16}
 
         #test manuel scaling of spectrum
-        scaled_spectra = MetopNative.scale_iasi_spectrum(selected_spectra, giadr)
+        scaled_spectra = MetopDatasets.scale_iasi_spectrum(selected_spectra, giadr)
         @test scaled_spectra[92, 1, 1]≈0.0006165 atol=2e-5
 
         # spectra_wave_number is only computed for auto_convert = true

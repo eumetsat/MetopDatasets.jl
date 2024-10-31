@@ -155,14 +155,14 @@ function record_struct_expression(file_name, record_type)
             $(fields...)
         end
 
-        const $description_dict_name = MetopNative.description_dict($file_name)
-        MetopNative.get_description(T::Type{$struct_name}) = $description_dict_name
+        const $description_dict_name = MetopDatasets.description_dict($file_name)
+        MetopDatasets.get_description(T::Type{$struct_name}) = $description_dict_name
 
-        const $scale_dict_name = MetopNative.scale_factor_dict($file_name)
-        MetopNative.get_scale_factor(T::Type{$struct_name}) = $scale_dict_name
+        const $scale_dict_name = MetopDatasets.scale_factor_dict($file_name)
+        MetopDatasets.get_scale_factor(T::Type{$struct_name}) = $scale_dict_name
 
-        const $dimension_dict_name = MetopNative.raw_format_dim_dict($file_name)
-        MetopNative.get_raw_format_dim(T::Type{$struct_name}) = $dimension_dict_name
+        const $dimension_dict_name = MetopDatasets.raw_format_dim_dict($file_name)
+        MetopDatasets.get_raw_format_dim(T::Type{$struct_name}) = $dimension_dict_name
     end
 
     return auto_generated_code

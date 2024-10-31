@@ -3,7 +3,7 @@ name: CSV formats
 description: The product format specifications in CSV format. These are auto generated from the publicly available product format specifications.
 copyright: 2024 EUMETSAT
 license_spdx: MIT
-home_url: https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl/
+home_url: https://github.com/eumetsat/MetopDatasets.jl/
 
 # Package IPR documentation
 license_text_file: ./LICENSE

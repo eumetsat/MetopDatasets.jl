@@ -1,5 +1,5 @@
-name = "MetopNative"
-uuid = "2d43608d-9231-4d63-b8d4-32ea7df2cf68"
+name = "MetopDatasets"
+uuid = "0c26954c-4046-4b98-a13c-f9377ca4b9b7"
 authors = ["lupemba <simon.koklupemba@eumetsat.int> and contributors"]
 version = "0.0.5"
 

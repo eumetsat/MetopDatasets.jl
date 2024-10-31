@@ -1,10 +1,10 @@
 ```@meta
-CurrentModule = MetopNative
+CurrentModule = MetopDatasets
 ```
 
-# MetopNative
+# MetopDatasets
 
-Documentation for [MetopNative](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl).
+Documentation for [MetopDatasets](https://github.com/eumetsat/MetopDatasets.jl).
 
 ## Copyright and License
 
@@ -13,14 +13,14 @@ This code is licensed under MIT license. See file LICENSE for details on the usa
 ## Public functions and types
 
 ```@autodocs
-Modules = [MetopNative]
+Modules = [MetopDatasets]
 Private = false
 Order = [:function, :type, :macro]
 ```
 
 ## Internal functions and types
 ```@autodocs
-Modules = [MetopNative]
+Modules = [MetopDatasets]
 Public = false
 Order = [:function, :type, :macro]
 ```

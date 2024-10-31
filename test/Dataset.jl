@@ -1,7 +1,7 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-using MetopNative, Test
+using MetopDatasets, Test
 import CommonDataModel as CDM
 using Dates
 
@@ -11,9 +11,9 @@ using Dates
     ds = MetopDataset(test_file)
 
     # test all dimensions are valid
-    @test MetopNative._valid_dimensions(ds)
+    @test MetopDatasets._valid_dimensions(ds)
 
-    @test ds isa MetopDataset{MetopNative.ASCA_SZR_1B_V12}
+    @test ds isa MetopDataset{MetopDatasets.ASCA_SZR_1B_V12}
     @test keys(ds) == (
         "record_start_time", "record_stop_time", "degraded_inst_mdr", "degraded_proc_mdr",
         "utc_line_nodes", "abs_line_number", "sat_track_azi", "as_des_pass",
@@ -35,7 +35,7 @@ end
     ds = MetopDataset(test_file)
 
     sigma_var = CDM.variable(ds, :sigma0_trip)
-    @test sigma_var isa MetopNative.MetopVariable
+    @test sigma_var isa MetopDatasets.MetopVariable
     a = sigma_var[:, 1:4, 5:4:20]
     @test a isa Array{Int32, 3}
     @test CDM.name(sigma_var) == "sigma0_trip"
@@ -45,7 +45,7 @@ end
     @test size(sigma_var) == (3, 82, 96)
 
     start_time_var = CDM.variable(ds, :record_start_time)
-    @test start_time_var isa MetopNative.MetopVariable
+    @test start_time_var isa MetopDatasets.MetopVariable
     @test start_time_var[1:20] isa Vector{Float64}
     @test CDM.name(start_time_var) == "record_start_time"
     @test CDM.dimnames(start_time_var) == ["atrack"]
@@ -83,14 +83,14 @@ end
     ds = MetopDataset(test_file, auto_convert = false)
 
     times = ds["utc_line_nodes"][1:2:5]
-    @test times isa Array{MetopNative.ShortCdsTime, 1}
+    @test times isa Array{MetopDatasets.ShortCdsTime, 1}
     @test DateTime.(times) == [
         DateTime("2023-03-29T06:33:00"),
         DateTime("2023-03-29T06:33:03.750"),
         DateTime("2023-03-29T06:33:07.500")
     ]
 
-    @test ds["record_start_time"][1:2:5] isa Array{MetopNative.ShortCdsTime, 1}
+    @test ds["record_start_time"][1:2:5] isa Array{MetopDatasets.ShortCdsTime, 1}
 
     close(ds)
 end
@@ -99,11 +99,11 @@ end
     test_file = "testData/ASCA_SZR_1B_M03_20230329063300Z_20230329063558Z_N_C_20230329081417Z"
     ds = MetopDataset(test_file, auto_convert = false)
 
-    mphr = MetopNative.read_first_record(ds, MetopNative.MainProductHeader)
-    @test mphr isa MetopNative.MainProductHeader
-    ipr = MetopNative.read_first_record(ds, MetopNative.InternalPointerRecord)
-    @test ipr isa MetopNative.InternalPointerRecord
-    mdr = MetopNative.read_first_record(ds, MetopNative.ASCA_SZR_1B_V13)
-    @test mdr isa MetopNative.ASCA_SZR_1B_V13
+    mphr = MetopDatasets.read_first_record(ds, MetopDatasets.MainProductHeader)
+    @test mphr isa MetopDatasets.MainProductHeader
+    ipr = MetopDatasets.read_first_record(ds, MetopDatasets.InternalPointerRecord)
+    @test ipr isa MetopDatasets.InternalPointerRecord
+    mdr = MetopDatasets.read_first_record(ds, MetopDatasets.ASCA_SZR_1B_V13)
+    @test mdr isa MetopDatasets.ASCA_SZR_1B_V13
     close(ds)
 end
