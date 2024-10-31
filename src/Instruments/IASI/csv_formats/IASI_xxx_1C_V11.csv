@@ -1,0 +1,61 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,DIM4,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,0,,1,1,1,1,REC_HEAD,20,20,0
+DEGRADED_INST_MDR,Quality of MDR has been degraded from nominal due to an instrument degradation,,,1,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation,,,1,1,1,1,boolean,1,1,21
+GEPSIasiMode,Instrument mode,,,1,1,1,1,bitst(32),4,4,22
+GEPSOPSProcessingMode,Processing mode,,,1,1,1,1,bitst(32),4,4,26
+GEPSIdConf,"System configuration at line level: PTSI, TEC conf file ID,..",,,1,1,1,1,bitst(256),32,32,30
+GEPSLocIasiAvhrr_IASI,"Measure positioning relatively to AVHRR: position of 4 IASI sounder pixels in AVHRR raster with DIM1 equal to 2 corresponding to (line, column) ",,"ms in line, Avhrr pixels in column",2,4,30,1,V-INTEGER4,5,1200,62
+GEPSLocIasiAvhrr_IIS,"Measure positioning relatively to AVHRR: position of IIS pixels for a subgrid 5*5 of IIS with DIM1 equal to 2 corresponding to (line, column) ",,"ms in line, Avhrr pixels in column",2,25,30,1,V-INTEGER4,5,7500,1262
+OBT,On Board Time (Coarse time + Fine time),,,30,1,1,1,bitst(48),6,180,8762
+OnboardUTC,Date of IASI measure (on board UTC): Number of Days since 1 January 2000; Number of ms in the day,,,30,1,1,1,short cds time,6,180,8942
+GEPSDatIasi,"Date of IASI measure (Corrected UTC): Number of Days since 1 January 2000; Number of ms in the day",,UTC,30,1,1,1,short cds time,6,180,9122
+GIsfLinOrigin,Zero point in line in the interpolation grid of the spectral database,,,2,1,1,1,integer4,4,8,9302
+GIsfColOrigin,Zero point in column in the interpolation grid of the spectral database,,,2,1,1,1,integer4,4,8,9310
+GIsfPds1,Weight of interpolation point 1,6,,2,1,1,1,integer4,4,8,9318
+GIsfPds2,Weight of interpolation point 2,6,,2,1,1,1,integer4,4,8,9326
+GIsfPds3,Weight of interpolation point 3,6,,2,1,1,1,integer4,4,8,9334
+GIsfPds4,Weight of interpolation point 4,6,,2,1,1,1,integer4,4,8,9342
+GEPS_CCD,Corner Cube Direction for all observational targets,,,30,1,1,1,boolean,1,30,9350
+GEPS_SP,Scan position for all observational targets,,,30,1,1,1,integer4,4,120,9380
+GIrcImage,Calibrated IASI images,,W/m2/sr/m-1,64,64,30,1,u-integer2,2,245760,9500
+GQisFlagQual,Quality flag for the system,,,3,4,30,1,boolean,1,360,255260
+GQisFlagQualDetailed,Quality flag for the system,,,4,30,1,1,bitst(16),2,240,255620
+GQisQualIndex,System-IASI general quality index,,,1,1,1,1,V-INTEGER4,5,5,255860
+GQisQualIndexIIS,IIS imager quality index inside 1c product,,,1,1,1,1,V-INTEGER4,5,5,255865
+GQisQualIndexLoc,Geometric quality index for sounder product,,,1,1,1,1,V-INTEGER4,5,5,255870
+GQisQualIndexRad,Radiometric quality index for sounder product,,,1,1,1,1,V-INTEGER4,5,5,255875
+GQisQualIndexSpect,Spectral quality index for sounder product,,,1,1,1,1,V-INTEGER4,5,5,255880
+GQisSysTecIISQual,System -TEC quality index for IIS,,,1,1,1,1,u-integer4,4,4,255885
+GQisSysTecSondQual,System -TEC quality index for sounder,,,1,1,1,1,u-integer4,4,4,255889
+GGeoSondLoc,"Location of pixel centre in geodetic coordinates (long, lat) for each sounder pixel",6,degrees,2,4,30,1,integer4,4,960,255893
+GGeoSondAnglesMETOP,"Measurement angles for each sounder pixel (zenith, azimuth)",6,degrees,2,4,30,1,integer4,4,960,256853
+GGeoIISAnglesMETOP,"Measurement angles for a subgrid of IASI imager (zenith, azimuth)",6,degrees,2,25,30,1,integer4,4,6000,257813
+GGeoSondAnglesSUN,"Solar angles at the surface for each sounder pixel (zenith, azimuth)",6,degrees,2,4,30,1,integer4,4,960,263813
+GGeoIISAnglesSUN,"Solar angles at the surface for a subgrid (5x5) of IASI imager (zenith, azimuth)",6,degrees,2,25,30,1,integer4,4,6000,264773
+GGeoIISLoc,Location of pixel centre in geodetic coordinates for a sub grid (5x5) of the imager pixels,6,degrees,2,25,30,1,integer4,4,6000,270773
+EARTH_SATELLITE_DISTANCE,Distance  of satellite from Earth centre,,m,1,1,1,1,u-integer4,4,4,276773
+IDefSpectDWn1b,Sample width of IASI 1C spectra (same as 1B),,m-1,1,1,1,1,V-INTEGER4,5,5,276777
+IDefNsfirst1b,Number of the first sample of IASI 1C spectra (same as 1B),,,1,1,1,1,integer4,4,4,276782
+IDefNslast1b,Number of the last sample of IASI 1C spectra (same as 1B),,,1,1,1,1,integer4,4,4,276786
+GS1cSpect,Level 1C spectra,,W/m2/sr/m-1,8700,4,30,1,integer2,2,2088000,276790
+IDefCovarMatEigenVal1c,Level 1c noise variance-covariance matrix index,,,2,100,1,1,V-INTEGER4,5,1000,2364790
+IDefCcsChannelId,Radiance Analysis: Identification of the AVHRR channel or pseudo-channels used for Radiance Analysis,,,6,1,1,1,integer4,4,24,2365790
+GCcsRadAnalNbClass,Radiance Analysis: Number of identified classes in the sounder FOV,,,4,30,1,1,integer4,4,480,2365814
+GCcsRadAnalWgt,Radiance Analysis: sounder FOV Radiance Analysis (% covered by each class),,,7,4,30,1,V-INTEGER4,5,4200,2366294
+GCcsRadAnalY,Radiance Analysis: Y Angular position of the centre of gravity,6,degrees,7,4,30,1,integer4,4,3360,2370494
+GCcsRadAnalZ,Radiance Analysis: Z Angular position of the centre of gravity,6,degrees,7,4,30,1,integer4,4,3360,2373854
+GCcsRadAnalMean,Radiance Analysis: Mean AVHRR radiances (all channels) of the sounder FOV classes,,"W/(m^2 * sr) for channel 1,2,3a and W/(m^2*sr*m^-1) for 3b,4,5  ",6,7,4,30,V-INTEGER4,5,25200,2377214
+GCcsRadAnalStd,Radiance Analysis: Standard deviation AVHRR radiances (all channels) of the sounder FOV classes,,"W/(m^2 * sr) for channel 1,2,3a and W/(m^2*sr*m^-1) for 3b,4,5 ",6,7,4,30,V-INTEGER4,5,25200,2402414
+GCcsImageClassified,Radiance Analysis: Image AVHRR or IIS classified,,,100,100,30,1,u-byte,1,300000,2427614
+IDefCcsMode,Radiance Analysis:  Image used is from AVHRR or IIS imager (degraded cases) ,,,1,1,1,1,bitst(32),4,4,2727614
+GCcsImageClassifiedNbLin,Radiance Analysis: Number of usefull lines,,,30,1,1,1,integer2,2,60,2727618
+GCcsImageClassifiedNbCol,Radiance Analysis: Number of usefull columns,,,30,1,1,1,integer2,2,60,2727678
+GCcsImageClassifiedFirstLin,"First line of the classified image (number in the Avhrr raster, as per section 2.5 ) ",,ms,30,1,1,1,V-INTEGER4,5,150,2727738
+GCcsImageClassifiedFirstCol,"First column of the classified image (number in the Avhrr raster, as per section 2.5 )",,Avhrr pixels,30,1,1,1,V-INTEGER4,5,150,2727888
+GCcsRadAnalType,Radiance Analysis: boolean reporting if classes are of extreme type,,,7,30,1,1,boolean,1,210,2728038
+GIacVarImagIIS,Variance of IIS image  ,,W/(m sr m^-1),30,1,1,1,V-INTEGER4,5,150,2728248
+GIacAvgImagIIS,Average of IIS image  ,,W/(m sr m^-1),30,1,1,1,V-INTEGER4,5,150,2728398
+GEUMAvhrr1BCldFrac,Cloud fraction in IASI FOV from AVHRR 1B in IASI FOV   ,,%,4,30,1,1,u-byte,1,120,2728548
+GEUMAvhrr1BLandFrac,Land and Coast fraction in IASI FOV from AVHRR 1B,,%,4,30,1,1,u-byte,1,120,2728668
+GEUMAvhrr1BQual,"Quality indicator. If the quality is good, it gives the coverage of snow/ice.",,,4,30,1,1,bitst(8),1,120,2728788

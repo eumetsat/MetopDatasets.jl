@@ -1,0 +1,60 @@
+﻿FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,,,1,1,1,REC_HEAD,20,20,0
+Quality of MDR has been degraded from nominal due to a processing degradation. ,,,,,,,,,,
+DEGRADED_INST_MDR,Quality of MDR has been degraded from nominal due to an instrument degradation.,n/a,n/a,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation. ,n/a,n/a,1,1,1,boolean,1,1,21
+SWATH GRID LINE and associated data,,,,,,,,,,
+UTC_LINE_NODES,UTC time of line of nodes,n/a,UTC,1,1,1,short cds time,6,6,22
+ABS_LINE_NUMBER,Absolute (unique) counter for the line of nodes (from format version 12.0 onwards only),n/a,count,1,1,1,integer4,4,4,28
+SAT_TRACK_AZI,Azimuth angle bearing (range: 0 to 360) of nadir track velocity,2,deg,1,1,1,u-integer2,2,2,32
+AS_DES_PASS,Ascending/descending pass indicator,n/a,n/a,1,1,1,boolean,1,1,34
+NODE and associated data,,,,,,,,,,
+NODE_NUM,"Node number as used in the PGF (ref AD-2]), i.e., (20 to -20) for the left swath in the left-to-right order, (-20 to 20) for the right swath in the left-to-right order, 0 corresponding to the mid swath position in both swaths. ",0,count,82,1,1,integer2,2,164,Deleted
+SWATH INDICATOR,"Swath (0=LEFT, 1=RIGHT)",n/a,n/a,82,1,1,boolean,1,82,35
+LATITUDE,Latitude (-90 to 90 deg),6,deg,82,1,1,integer4,4,328,117
+LONGITUDE,Longitude (0 to 360 deg),6,deg,82,1,1,integer4,4,328,445
+ATMOSPHERIC_HEIGHT,Height of atmowphere used,3,km,82,1,1,u-integer2,2,164,Deleted
+ATMOSPHERIC_LOSS,Atmospheric loss per unit length of atmosphere,10,dB/km,82,1,1,u-integer4,4,328,Deleted
+TRIPLET and associated data,,,,,,,,,,
+SIGMA0_TRIP,"Sigma0 triplet, re-sampled to swath grid, for 3 beams (fore, mid, aft) ",6,dB,3,82,1,integer4,4,984,773
+KP,Kp for re-sampled sigma0 tripplet. Values between 0 and 1,4,n/a,3,82,1,u-integer2,2,492,1757
+INC_ANGLE_TRIP,Incidence angle for re-sampled sigma0 tripplet.,2,deg,3,82,1,u-integer2,2,492,2249
+AZI_ANGLE_TRIP,"Incidence angle for re-sampled sigma0 tripplet. Values range from -180 to +180, where minus is west and plus is east.",2,deg,3,82,1,integer2,2,492,2741
+NUM_VAL_TRIP,Number of full resolution sigma0 values contributing to the re-sampled sigma0 tripplet.,0,count,3,82,1,u-integer4,4,984,3233
+F_KP,"Flag related to the quality of the Kp estimate (0=NOMINAL, 1=NON-NOMINAL)",n/a,n/a,3,82,1,boolean,1,246,4217
+F_USABLE,"Flag related to the usability of the sigma0 tripplet (0=GOOD, 1=USABLE, 2=NOT USABLE)",n/a,n/a,3,82,1,enumerated,1,246,4463
+F_F,Flag related to non-nominal amount of input raw data to calculate echo corrections (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,4709
+F_V,Flag related to non enough amount of input raw data to calculate echo corrections (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,5201
+F_OA,Flag related to lack of accuracy of orbit/atticute knowledge (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,5693
+F_SA,Flag related to solar array reflection contamination (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,6185
+F_TEL,Flag related to non-nominal telemetry check results (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,6677
+F_EXT_FIL,Flag related to the presence of extrapolated reference functions in the generation of averaged value (ref. Ad-2) (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,Deleted
+F_REF,Flag related to non-nominal raw echo correction reference functions (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,7169
+F_LAND,Flag related to presence of land in the re-sampled sigma0 tripllet (value between 0 and 1 shows the fraction of original samples affected),3,n/a,3,82,1,u-integer2,2,492,7661
+SIZE OF THE RECORD,,,,,,,,,,8153
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,

@@ -1,0 +1,11 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,0,,1,1,1,REC_HEAD,20,20,0
+Scale Factors,,,,,,,,,,20
+IDefScaleSondNbScale,Number of bands used for applying scale factors to spectra (up to a maximum of 10),NA,NA,1,1,1,integer2,2,2,20
+IDefScaleSondNsfirst,Begin channel number for each of the bands to which the scale factors are applied ,0,channel number,10,1,1,integer2,2,20,22
+IDefScaleSondNslast,End channel number for each of the bands to which the scale factors are applied ,0,channel number,10,1,1,integer2,2,20,42
+IDefScaleSondScaleFactor,Scale factors (power of 10)  to be applied within each band defined above. ,0,NA,10,1,1,integer2,2,20,62
+IDefScaleIISScaleFactor,Scale factor (power of 10)  to be applied to the IIS imager. ,0,NA,1,1,1,integer2,2,2,82
+TOTAL SIZE,,,,,,,,,,84
+,,,,,,,,,,
+,,,,,,,,,,
