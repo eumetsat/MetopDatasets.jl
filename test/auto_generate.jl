@@ -35,7 +35,8 @@ eval(MetopDatasets.record_struct_expression(
 
     # test fallback functions for dimensions
     @test MetopDatasets.get_dimensions(TEST_FORMAT) == Dict("dim_1" => 3, "dim_2" => 82)
-    @test MetopDatasets.get_field_dimensions(TEST_FORMAT, :sigma0_trip) == ["dim_1", "dim_2"]
+    @test MetopDatasets.get_field_dimensions(TEST_FORMAT, :sigma0_trip) ==
+          ["dim_1", "dim_2"]
     @test MetopDatasets.get_field_dimensions(TEST_FORMAT, :latitude) == ["dim_2"]
     @test MetopDatasets.get_field_dimensions(TEST_FORMAT, :utc_line_nodes) == String[]
 

@@ -78,9 +78,12 @@ import CommonDataModel as CDM
         @test ds["ggeosondloc"][1, 1, 1, 1]≈156 atol=1 # test first longitude in file
         @test ds["ggeosondloc"][2, 1, 1, 1]≈-52 atol=1 # test first latitude in file
 
-        @test sort(CDM.dimnames(ds)) == ["atrack", "avhrr_channel", "avhrr_image_column", "avhrr_image_line", "band", 
-            "corner_cube_direction", "eigenvalue", "fov_class", "integrated_imager_column", "integrated_imager_line", 
-            "line_column", "lon_lat", "sounder_pixel", "spectral", "subgrid_imager_pixel", "xtrack", "zenith_azimuth"]
+        @test sort(CDM.dimnames(ds)) ==
+              ["atrack", "avhrr_channel", "avhrr_image_column", "avhrr_image_line", "band",
+            "corner_cube_direction", "eigenvalue", "fov_class",
+            "integrated_imager_column", "integrated_imager_line",
+            "line_column", "lon_lat", "sounder_pixel", "spectral",
+            "subgrid_imager_pixel", "xtrack", "zenith_azimuth"]
         @test CDM.dim(ds, :spectral) == 8700
         @test CDM.dim(ds, "atrack") == ds.main_product_header.total_mdr
 
