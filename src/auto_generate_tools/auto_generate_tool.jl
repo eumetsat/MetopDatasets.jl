@@ -33,7 +33,10 @@ function _get_field_name(row::CSV.Row)
     return Symbol(lowercase(replace(row.FIELD, ' ' => '_')))
 end
 
-function _get_description(row::CSV.Row)
+function _get_description(row::CSV.Row)::AbstractString
+    if ismissing(row.DESCRIPTION)
+        return ""
+    end
     return row.DESCRIPTION
 end
 

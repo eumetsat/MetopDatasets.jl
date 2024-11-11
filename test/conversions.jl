@@ -38,6 +38,8 @@ end
     netcdf_file = tempname(; cleanup = true)
 
     # convert file to netCDF
+    # TODO fix warnings. DiskArrays gives a warning because BitString is converted to a string and strings array_length
+    # not a Base.isbitstype()
     MetopDataset(test_file) do ds_nat
         NCDataset(netcdf_file, "c") do ds_temp
             NCDatasets.write(ds_temp, ds_nat)
