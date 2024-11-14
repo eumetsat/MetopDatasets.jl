@@ -24,5 +24,6 @@ makedocs(;
 
 deploydocs(;
     repo = "github.com/eumetsat/MetopDatasets.jl",
-    devbranch = "main"
+    devbranch = "main",
+    push_preview = true
 )
