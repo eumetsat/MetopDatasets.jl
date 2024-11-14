@@ -1,9 +1,6 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-"""
-    MetopDataset{R <: DataRecord} <: CommonDataModel.AbstractDataset
-"""
 struct MetopDataset{R <: DataRecord} <: CDM.AbstractDataset
     file_pointer::IO
     main_product_header::MainProductHeader

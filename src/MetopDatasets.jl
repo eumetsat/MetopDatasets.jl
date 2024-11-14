@@ -24,6 +24,6 @@ include("Instruments/IASI/IASI.jl")
 
 const RECORD_DIM_NAME = "atrack"
 
-export Record, DataRecord, MetopProduct, MetopDataset
+export MetopProduct, MetopDataset
 
 end
