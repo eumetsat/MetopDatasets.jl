@@ -54,10 +54,11 @@ The package is implemented based on
 To read a Metop Native binary file:
 
 ```julia
-julia> using MetopDatasets
-
-julia> ds = MetopDataset("ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat")
-
+using MetopDatasets
+ds = MetopDataset("ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat")
+```
+REPL output:
+```
 Dataset: 
 Group: /
 
@@ -313,10 +314,18 @@ Global attributes
 The variables can be loaded from MetopDataset by indexing the dataset. The variable then works as a lazy array loading the data on indexing:
 
 ```julia
-julia> ds["latitude"][2,4];
+ds["latitude"][2,4]
+```
+REPL output:
+```
 66.707944
-
-julia> ds["latitude"][:,:]
+```
+It is also possible to load the complete array
+```julia
+ds["latitude"][:,:]
+```
+REPL output:
+```
 82×3264 Matrix{Float64}:
  66.862   66.7841  66.706   66.6276  66.5489  …  65.6304  65.5487  65.4667  65.3844  65.3019   
  66.9431  66.865   66.7866  66.7079  66.629      65.7077  65.6257  65.5434  65.4609  65.3782
@@ -324,13 +333,14 @@ julia> ds["latitude"][:,:]
  74.2237  74.1153  74.007   73.8986  73.7903  …  72.5493  72.4409  72.3325  72.2241  72.1157   
  74.2342  74.1259  74.0175  73.9092  73.8008     72.5597  72.4513  72.3429  72.2345  72.1261
 ```
-
 Data from the main product header is accessed as attributes.
 ```julia
-julia> ds.attrib["instrument_id"]
+ds.attrib["instrument_id"]
+```
+REPL output:
+```
 "ASCA"
 ```
-
 ### Convert a Metop Native binary file to netCDF
 
 A Metop Native binary file can be converted to netCDF using the [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) package. This 

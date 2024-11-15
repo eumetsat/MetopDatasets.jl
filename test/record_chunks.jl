@@ -74,7 +74,8 @@ using MetopDatasets, Test
         total_size,
         data_record_type)
 
-    datarecord_chunks = filter(x -> x.record_type != MetopDatasets.DummyRecord, record_chunks)
+    datarecord_chunks = filter(
+        x -> x.record_type != MetopDatasets.DummyRecord, record_chunks)
     dummyrecord_chunks = filter(x -> x.record_type == MetopDatasets.DummyRecord,
         record_chunks)
 
@@ -159,7 +160,8 @@ end
         total_size,
         data_record_type)
 
-    datarecord_chunks = filter(x -> x.record_type != MetopDatasets.DummyRecord, record_chunks)
+    datarecord_chunks = filter(
+        x -> x.record_type != MetopDatasets.DummyRecord, record_chunks)
     dummyrecord_chunks = filter(x -> x.record_type == MetopDatasets.DummyRecord,
         record_chunks)
 

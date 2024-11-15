@@ -7,7 +7,8 @@ using MetopDatasets, Test, Dates
     test_files = "testData/ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z"
 
     main_header, bytes_read = open(test_files, "r") do file_pointer
-        main_header = MetopDatasets.native_read(file_pointer, MetopDatasets.MainProductHeader)
+        main_header = MetopDatasets.native_read(
+            file_pointer, MetopDatasets.MainProductHeader)
         return main_header, position(file_pointer)
     end
 
