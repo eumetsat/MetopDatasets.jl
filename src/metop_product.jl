@@ -2,11 +2,11 @@
 # License: MIT
 
 """
-MetopProduct{T <: DataRecord} 
-    main_product_header::MainProductHeader
-    internal_pointer_records::Vector{InternalPointerRecord}
-    data_records::Vector{T}
-    dummy_records::Vector{DummyRecord}
+    MetopProduct{T <: DataRecord} 
+        main_product_header::MainProductHeader
+        internal_pointer_records::Vector{InternalPointerRecord}
+        data_records::Vector{T}
+        dummy_records::Vector{DummyRecord}
 
 Generic Metop Product
 """
@@ -21,11 +21,11 @@ struct MetopProduct{T <: DataRecord}
 end
 
 """
-MetopProduct(file_path::AbstractString)
-    main_product_header::MainProductHeader
-    internal_pointer_records::Vector{InternalPointerRecord}
-    data_records::Vector{T}
-    dummy_records::Vector{DummyRecord}
+    MetopProduct(file_path::AbstractString)
+        main_product_header::MainProductHeader
+        internal_pointer_records::Vector{InternalPointerRecord}
+        data_records::Vector{T}
+        dummy_records::Vector{DummyRecord}
 
 Construct a MetopProduct from a file. This allows you to load the entire native file with one function.
 """

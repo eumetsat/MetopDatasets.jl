@@ -4,13 +4,13 @@
 using MetopDatasets, Test
 
 eval(MetopDatasets.record_struct_expression(
-    joinpath(@__DIR__, "TEST_FORmaT.csv"), DataRecord))
+    joinpath(@__DIR__, "TEST_FORmaT.csv"), MetopDatasets.DataRecord))
 eval(MetopDatasets.record_struct_expression(
-    joinpath(@__DIR__, "TEST_FORMAT2.csv"), DataRecord))
+    joinpath(@__DIR__, "TEST_FORMAT2.csv"), MetopDatasets.DataRecord))
 
 @testset "generate structs" begin
-    @test TEST_FORMAT <: DataRecord
-    @test TEST_FORMAT <: Record
+    @test TEST_FORMAT <: MetopDatasets.DataRecord
+    @test TEST_FORMAT <: MetopDatasets.Record
 
     expected_fields = [:record_header, :degraded_inst_mdr, :degraded_proc_mdr,
         :utc_line_nodes,

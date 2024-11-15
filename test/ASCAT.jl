@@ -22,7 +22,7 @@ end
 
 @testset "ASCAT data records types" begin
     ## ASCA_SZR_1B_V13
-    @test MetopDatasets.ASCA_SZR_1B_V13 <: DataRecord
+    @test MetopDatasets.ASCA_SZR_1B_V13 <: MetopDatasets.DataRecord
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZR_1B_V13) == 6677
     @test test_dimensions(MetopDatasets.ASCA_SZR_1B_V13)
 

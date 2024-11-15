@@ -5,7 +5,7 @@ using MetopDatasets, Test
 import CommonDataModel as CDM
 
 @testset "IASI data records" begin
-    @test MetopDatasets.IASI_XXX_1C_V11 <: DataRecord
+    @test MetopDatasets.IASI_XXX_1C_V11 <: MetopDatasets.DataRecord
     @test MetopDatasets.native_sizeof(MetopDatasets.IASI_XXX_1C_V11) == 2728908
     @test MetopDatasets.get_scale_factor(MetopDatasets.IASI_XXX_1C_V11, :ggeosondloc) == 6
     field_index = findfirst(fieldnames(MetopDatasets.IASI_XXX_1C_V11) .== :gs1cspect)
