@@ -3,7 +3,7 @@
 
 using MetopDatasets, Test
 
-struct TestRecord <: DataRecord
+struct TestRecord <: MetopDatasets.DataRecord
     f1::Array{Int16, 3}
     f2::Array{MetopDatasets.ShortCdsTime, 4}
     f3::Int64

@@ -22,7 +22,7 @@ end
 
 @testset "ASCAT data records types" begin
     ## ASCA_SZR_1B_V13
-    @test MetopDatasets.ASCA_SZR_1B_V13 <: DataRecord
+    @test MetopDatasets.ASCA_SZR_1B_V13 <: MetopDatasets.DataRecord
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZR_1B_V13) == 6677
     @test test_dimensions(MetopDatasets.ASCA_SZR_1B_V13)
 
@@ -42,7 +42,8 @@ end
           Dict("num_band" => 3, "xtrack" => 82)
     @test MetopDatasets.get_field_dimensions(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) ==
           ["num_band", "xtrack"]
-    @test MetopDatasets.get_field_dimensions(MetopDatasets.ASCA_SZR_1B_V13, :abs_line_number) ==
+    @test MetopDatasets.get_field_dimensions(
+        MetopDatasets.ASCA_SZR_1B_V13, :abs_line_number) ==
           String[]
     @test MetopDatasets.get_description(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) ==
           "Sigma0 triplet, re-sampled to swath grid, for 3 beams (fore, mid, aft) "
@@ -58,8 +59,10 @@ end
 
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V13) == 4256
     @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V13)
-    @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZF_1B_V13, :inc_angle_full) == 2
-    @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZF_1B_V13) == Dict("xtrack" => 192)
+    @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZF_1B_V13, :inc_angle_full) ==
+          2
+    @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZF_1B_V13) ==
+          Dict("xtrack" => 192)
 
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V12) == 3684
     @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V12)
@@ -83,7 +86,8 @@ end
 
 function get_data_record_type(file)
     data_record_type = open(file, "r") do file_pointer
-        main_header = MetopDatasets.native_read(file_pointer, MetopDatasets.MainProductHeader)
+        main_header = MetopDatasets.native_read(
+            file_pointer, MetopDatasets.MainProductHeader)
         return MetopDatasets.data_record_type(main_header)
     end
     return data_record_type

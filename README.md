@@ -1,6 +1,11 @@
 # Under development 
 This package is still in the early development phase. Note that the package was previously named **MetopNative.jl** and was hosted on the [EUMETSAT GitLab](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl) 
+
 # MetopDatasets.jl
+
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://eumetsat.github.io/MetopDatasets.jl/dev/)
+[![Build Status](https://github.com/eumetsat/MetopDatasets.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/eumetsat/MetopDatasets.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
 MetopDatasets.jl is a package for reading products from the [METOP satellites](https://www.eumetsat.int/our-satellites/metop-series) using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and produce long series of near real-time weather and climate observation. Learn more and access the products on [EUMETSATs user-portal](https://user.eumetsat.int/dashboard).
 
