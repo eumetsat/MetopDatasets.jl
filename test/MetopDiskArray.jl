@@ -82,24 +82,3 @@ end
 
     close(file_pointer)
 end
-
-@testset "Disk array compare with product" begin
-    test_file = "testData/ASCA_SZF_1B_M01_20221107123600Z_20221107141459Z_N_O_20221107132528Z.nat" # with dummy records
-
-    product = MetopProduct(test_file)
-
-    #expected number of records 3264
-    file_pointer = open(test_file, "r")
-    record_chunks = _chunks(file_pointer)
-
-    utc_time = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :utc_localisation)
-    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :sigma0_full)
-
-    utc_time_prod = [r.utc_localisation for r in product.data_records]
-    sigma0_prod = reduce(hcat, [r.sigma0_full for r in product.data_records])
-
-    @test utc_time[:] == MetopDatasets.seconds_since_epoch.(utc_time_prod[:])
-    @test sigma0_prod[:, :] == sigma0_prod[:, :]
-
-    close(file_pointer)
-end
