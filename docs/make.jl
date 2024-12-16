@@ -1,6 +1,12 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
+#### Code to build docs manually from terminal
+# julia --project=docs
+# import Pkg
+# Pkg.resolve()
+# include("docs/make.jl")'
+
 using MetopDatasets
 using Documenter
 

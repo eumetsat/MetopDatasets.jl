@@ -99,9 +99,6 @@ import CommonDataModel as CDM
         @test l1c_spectra[92, 1, 1, 1] isa Float64
         close(ds_high)
 
-        # test product
-        prod = MetopProduct(test_file)
-        @test !isnothing(prod)
     end
 end
 

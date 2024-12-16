@@ -111,6 +111,15 @@ function native_read(io::IO, T::Type{MainProductHeader})::MainProductHeader
 
     #extract the values as string
     main_header_content = String(ntoh.(main_header_content))
+
+    # Check for corrupted CRLF header
+    if occursin('\r',main_header_content)
+        msg = raw"Corrupted file with \r in main product header."
+        msg *= "\n This issue often occurs when transferring native binary files via FTP using ASCII mode."
+        msg *= "\n The native binary files should always be transferred in binary mode."
+        error(msg)
+    end
+
     main_header_content = split(main_header_content, "\n")
     filter!(x -> !isempty(x), main_header_content)
     string_values = [strip(split(row, '=')[2]) for row in main_header_content]
