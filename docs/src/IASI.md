@@ -201,7 +201,7 @@ fig = let
     fig
 end
 ```
-![Interactive IASI spectrum](iasi_interactive.png)
+![Interactive IASI spectrum](interactive_IASI.png)
 It is now possible to interactively explore the nearly 100 000 observation from an obit of IASI with the background map giving important context. 
 
 ## Level 2 spectrums
