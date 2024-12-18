@@ -98,7 +98,6 @@ import CommonDataModel as CDM
         @test l1c_spectra[92, 1, 1, 1]≈0.0006165 atol=2e-5
         @test l1c_spectra[92, 1, 1, 1] isa Float64
         close(ds_high)
-
     end
 end
 

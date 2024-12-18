@@ -3,11 +3,11 @@
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: IASI_XXX_1C}
     if ds.auto_convert
-        public_names = (string(IASI_WAVE_NUMBER_NAME), _standard_varnames(ds)...)
+        public_names = (string(IASI_WAVE_NUMBER_NAME), default_varnames(ds)...)
         return public_names
     end
 
-    return _standard_varnames(ds)
+    return default_varnames(ds)
 end
 
 # Overload to enable special scaling for IASI spectrum.
@@ -28,7 +28,7 @@ function CDM.variable(
         return MetopVariable{T, N, R}(ds, wave_number_disk_array)
     end
 
-    return _standard_variable(ds, varname)
+    return default_variable(ds, varname)
 end
 
 # Overload to add :gircimage scale_factor from giadr. Not given in the format specs like the rest.
@@ -40,7 +40,7 @@ function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
         )
     end
 
-    cf_attributes = _standard_cf_attributes(R, field, auto_convert)
+    cf_attributes = default_cf_attributes(R, field, auto_convert)
 
     if field == :gircimage
         giadr = read_first_record(ds, GIADR_IASI_XXX_1C_V11)
@@ -57,5 +57,5 @@ function CDM.attrib(
         return IASI_WAVE_NUMBER_DESCRIPTION
     end
 
-    return _standard_attrib(v, name)
+    return default_attrib(v, name)
 end
