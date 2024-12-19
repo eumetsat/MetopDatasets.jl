@@ -54,8 +54,8 @@ end
 """
     IasiWaveNumberDiskArray <: AbstractMetopDiskArray{Float64, 2}
 
-The `IasiWaveNumberDiskArray` is a disk array that computes the wave number of the IASI spectrum. The 
-wave number is computed using `:idefnsfirst1b` and `:idefspectdwn1b` from each data record.
+The `IasiWaveNumberDiskArray` is a disk array that computes the wavenumber of the IASI spectrum. The 
+wavenumber is computed using `:idefnsfirst1b` and `:idefspectdwn1b` from each data record.
 """
 struct IasiWaveNumberDiskArray <: AbstractMetopDiskArray{Float64, 2}
     record_type::Type{<:IASI_XXX_1C}
@@ -65,12 +65,12 @@ struct IasiWaveNumberDiskArray <: AbstractMetopDiskArray{Float64, 2}
     size::Tuple{Int64, Int64}
 end
 
-const IASI_WAVE_NUMBER_NAME = :spectra_wave_number
-const IASI_WAVE_NUMBER_DESCRIPTION = "Wave number of IASI 1C spectra samples"
+const IASI_WAVENUMBER_NAME = :spectra_wavenumber
+const IASI_WAVENUMBER_DESCRIPTION = "Wavenumber of IASI 1C spectra samples"
 
 function IasiWaveNumberDiskArray(
         ds::MetopDataset{R}, field_name::Symbol) where {R <: IASI_XXX_1C}
-    @assert field_name == IASI_WAVE_NUMBER_NAME
+    @assert field_name == IASI_WAVENUMBER_NAME
 
     number_of_first_sample = MetopDiskArray(
         ds.file_pointer, ds.data_record_chunks, :idefnsfirst1b)

@@ -1,17 +1,17 @@
 ## IASI
 
-The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral measuring the radiation from the atmosphere and earth in many spectral channels. These measurements are used to derive temperature and humidity profiles at high vertical resolution. This makes IASI an key data source for numerical weather prediction (NWP).
+The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral sensor measuring the radiation from the atmosphere and earth in 8461 spectral channels. These measurements are used to derive used to derive a plethora of geophysical variables (e.g. temperature and humidity profiles). This makes IASI a key data source for numerical weather prediction (NWP) and applications in atmospheric chemistry and monitoring of essential climate variables.
 See [ASI Level 1: Product Guide](https://user.eumetsat.int/s3/eup-strapi-media/pdf_iasi_pg_487c765315.pdf) and [IASI Level 2: Product Guide](https://user.eumetsat.int/s3/eup-strapi-media/IASI_Level_2_Product_Guide_8f61a2369f.pdf) for more information.
 
 
-## Static plot of L1C spectrums
+## Static plot of L1C spectra
 This example is made using the following packages.
 ```
 [13f3f980] CairoMakie v0.12.16
 [db073c08] GeoMakie v0.7.9
 ```
 
-The main key variable in the "gs1cspect" which contains the radiance spectrum measured by the IASI instrument. The spectrum from a full orbits is almost 2 GB of data. In this example we will just load one data record with observations locations and plot the spectrum of two observations. The spectrums are converted from radiances to brightness temperature since this is often most convenient when interpreting the IASI spectrums. The cloud cover is also read from the file and included as legends on the plot of the spectrums. Cloud cover is essential to understanding the spectrums and normally only cloud free observations are assimilated in NWP.  
+The key variable is the "gs1cspect" which contains the radiance spectrum measured by the IASI instrument. The spectrum from a full orbit is almost 2 GB of data. In this example we will just load one data record with observation locations and plot the spectrum of two observations. The spectra are converted from radiances to brightness temperature since this is often most convenient when interpreting the IASI spectra. The cloud cover is also read from the file and included as legends on the plot of the spectra. Cloud cover is essential to understanding the spectra and normally only cloud free observations are assimilated in NWP.  
 
 ```julia
 using MetopDatasets
@@ -33,11 +33,11 @@ longitude, latitude = let
 end
 
 # read spectrum as brightness temperature
-wave_number = ds["spectra_wave_number"][:, data_record_index]
+wavenumber = ds["spectra_wavenumber"][:, data_record_index]
 selected_T_b = let 
-    spectrums = ds["gs1cspect"][:,:,:,data_record_index]
-    # convert select spectrums to brightness temperature
-    [brightness_temperature.(spectrums[:,i] , wave_number) 
+    spectra = ds["gs1cspect"][:,:,:,data_record_index]
+    # convert select spectra to brightness temperature
+    [brightness_temperature.(spectra[:,i] , wavenumber) 
         for i in selected_points]
 end
 
@@ -68,13 +68,13 @@ fig = let
     # Plot the selected spectra
     ax2 = Axis(fig[2, 1],
         title = "Selected spectra",
-        xlabel = "Wave number (cm-1)",
+        xlabel = "Wavenumber (cm-1)",
         ylabel = "Brightness Temperature (K)",
         limits=((500,3500), (150,300)))
 
     for i in eachindex(selected_points)
         cloud_cover_i = Int(selected_cloud_cover[i])
-        lines!(ax2, wave_number./100, selected_T_b[i], color = selected_colors[i],
+        lines!(ax2, wavenumber./100, selected_T_b[i], color = selected_colors[i],
             label = "$(cloud_cover_i)% cloud cover")
     end
 
@@ -89,8 +89,8 @@ The top plot shows a row of observations west of the French coast. Two observati
 
 
 
-## Advanced interactive plots of L1C spectrums
-This example shows how the IASI spectrums can be shown interactively on responsive map. The example relies on [Tyler.jl](https://makieorg.github.io/Tyler.jl/v0.2.0/) and [GLMakie.jl](https://docs.makie.org/stable/explanations/backends/glmakie#glmakie). It is recommend to first try some examples from the Tyler documentation if you are new to this package. 
+## Advanced interactive plots of L1C spectra
+This example shows how the IASI spectra can be shown interactively on a responsive map. The example relies on [Tyler.jl](https://makieorg.github.io/Tyler.jl/v0.2.0/) and [GLMakie.jl](https://docs.makie.org/stable/explanations/backends/glmakie#glmakie). It is recommend to first try some examples from the Tyler documentation if you are new to this package. 
 ```
 [e9467ef8] GLMakie v0.10.16
 [e170d443] Tyler v0.2.0
@@ -127,16 +127,16 @@ cloud_fraction = Float32.(ds["geumavhrr1bcldfrac"][:]);
 
 # helper function to read the spectrum for a single point
 function read_spectrum_pts(ds, index::CartesianIndex)
-    # read spectrum and wave number
+    # read spectrum and wavenumber
     spectrum = ds["gs1cspect"][:,Tuple(index)...]
-    wave_number = ds["spectra_wave_number"][:, Tuple(index)[end]]
+    wavenumber = ds["spectra_wavenumber"][:, Tuple(index)[end]]
 
     # covert to brightness temperature
-    T_B = brightness_temperature.(spectrum, wave_number)
-    wave_number_cm = wave_number./100
+    T_B = brightness_temperature.(spectrum, wavenumber)
+    wavenumber_cm = wavenumber./100
 
-    # join brightness temperature and wave number to points
-    spectrum_pts = Point2f.(tuple.(wave_number_cm, T_B))
+    # join brightness temperature and wavenumber to points
+    spectrum_pts = Point2f.(tuple.(wavenumber_cm, T_B))
     return spectrum_pts
 end
 
@@ -176,7 +176,7 @@ fig = let
     # Create the second plot for the spectrum
     ax2 = Axis(fig[2, 1],
         title = "Observation spectrum",
-        xlabel = "Wave number (cm-1)",
+        xlabel = "Wavenumber (cm-1)",
         ylabel = "Brightness Temperature (K)")
 
     # plot the spectrum
@@ -202,7 +202,7 @@ fig = let
 end
 ```
 ![Interactive IASI spectrum](interactive_IASI.png)
-It is now possible to interactively explore the nearly 100 000 observation from an obit of IASI with the background map giving important context. 
+It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context. 
 
-## Level 2 spectrums
+## Level 2 profiles
 MetopDatasets.jl does not support IASI level 2 products yet.

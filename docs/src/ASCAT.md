@@ -1,13 +1,13 @@
 ## ASCAT
 
-The Advanced Scatterometer (ASCAT) is an instrument on the METOP satellites. It is a fixed beam C-band scatterometer with 6 antenna beams used to retrieve wind vectors over the ocean and soil moisture over the land. The level 1 product are normalised backscatter coefficients (sigma0) that the increment measures directly. The level 2 products are soil moisture and wind vectors derived from the backscatter. The wind vector product does not use the native binary format so they are not described further here. It should be noted that the winds are available as NetCDF.
+The Advanced Scatterometer (ASCAT) is an instrument on the METOP satellites. It is a fixed beam C-band scatterometer with 6 antenna beams used to retrieve wind vectors over the ocean and soil moisture over the land. The level 1 products are normalised backscatter coefficients (sigma0) that the instrument measures directly. The level 2 products are soil moisture and wind vectors derived from the backscatter. The wind vector product does not use the native binary format so they are not described further here. It should be noted that the winds are available as NetCDF.
 For more information see [ASCAT User Guide](https://user.eumetsat.int/s3/eup-strapi-media/ASCAT_User_Guide_1618a3d741.pdf)
 
 All data used in examples are available from [EUMETSAT data store](https://data.eumetsat.int/extended?query=&filter=instrument__ASCAT&filter=availableFormats__Native)
 
 ## SZF beam statistics
 The level 1B SZF files contain full resolution backscatter from the 6 antenna beams. See the [ASCAT level 1B SZF product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZF1B) for more information.  
-This examples shows how we can get the 5% and 95% quantile of the backscatter from each beam only considering the observations with no flags. It should be noted that observations over land are are flagged with a land-flag so theses statistics only considers oceans.
+This example shows how we can get the 5% and 95% quantile of the backscatter from each beam only considering the observations with no flags. It should be noted that observations over land are are flagged with a land-flag so theses statistics only consider oceans.
 
 Read and inspect the variables:
 ```julia
@@ -33,7 +33,7 @@ size(sigma0) = (192, 43236)
 size(flags) = (192, 43236)
 Number of observations with no flag: 5948489
 ```
-We can see that `beam_numbers` only have 1 dimension but `sigma0` and `flags` has two. This is because there is only one beam number per data record but each data record have a line with 192 observations across the swath. 
+We can see that `beam_numbers` only have 1 dimension but `sigma0` and `flags` have two. This is because there is only one beam number per data record but each data record contain a line with 192 observations across the swath. 
 Printing the quantiles for each beam.
 ```julia
 for i in 1:6 # same as `i in sort(unique(beam_numbers))`
@@ -61,16 +61,16 @@ Beam: 6, Sigma0 (q05,q95) range: (-28.4, -12.02)
 We can now see the sigma0 quintile ranges for each beam.
 
 ## SZR and SZO plot
-The level 1B SZR files contains backscatter values from the 6 ASCAT beams are resampled to a common 12.5 km grid. There is three beams imaging each side of the satellite so this results in 3 backscatter measurements for each grid points. The level 1B SZO files are identical but resampled to a 25 km grid instead. See [ASCAT level 1B SZR product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZR1B) and [ASCAT level 1B SZO product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZO1B) for more information.
+The level 1B SZR files contain backscatter values from the 6 ASCAT beams, resampled to a common 12.5 x 12.5 km grid. There are three beams imaging each side of the satellite so this results in 3 backscatter measurements for each grid point. The level 1B SZO files are identical but resampled to a 25 x 25 km grid instead. See [ASCAT level 1B SZR product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZR1B) and [ASCAT level 1B SZO product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZO1B) for more information.
 
-These example will work to both plot SZR and SZO data. The examples are made using the following packages.
+These examples will work to both plot SZR and SZO data. The examples are made using the following packages.
 ```
 [13f3f980] CairoMakie v0.12.16
 [db073c08] GeoMakie v0.7.9
 ```
 Note that the plot can become interactive by replacing CarioMakie with GLMakie. See [Makie documentation](https://docs.makie.org/) for more information on plotting.
 ### Global plot of SZR or SZO
-This examples plots the backscatter from and entire orbit. The backscatter is just plotted for one beam direction. 
+This example plots the backscatter from and entire orbit. The backscatter is just plotted for one beam direction. 
 ```julia
 using MetopDatasets
 using CairoMakie, GeoMakie, Statistics
@@ -126,11 +126,11 @@ end
 ```
 ![Global SZR plot](global_szr_plot.png)
 
-The plots shows the left and right swath ASCAT mapped for an orbit. 
+The plot shows the left and right swath ASCAT mapped for an orbit. 
 
 
 ### Plotting a subset of SZR or SZO
-This examples shows how to plot the backscatter for a small subset of the SZR product.
+This example shows how to plot the backscatter for a small subset of the SZR product.
 ```julia
 using MetopDatasets
 using CairoMakie, GeoMakie, Statistics
@@ -200,19 +200,19 @@ end
 ```
 ![Subset SZR plot](subset_szr_plot.png)
 
-The subset shows the measured backscatter from the right swath over the mediterranean and across italy. The red spots shows the measurements flagged as "bad". This is probably caused by radio frequency interference from ground equipment resulting in a low signal to noise ratio.
+The subset shows the measured backscatter from the right swath over the mediterranean and across Italy. The red spots shows the measurements flagged as "bad". This is probably caused by radio frequency interference from ground equipment resulting in a low signal-to-noise ratio.
 
 ## Soil moisture example
-The ASCAT Level 2 SMR product contains relative soil moisture on a 12.5 km grid. The SMO product is identical but resampled to a 25 km grid instead.
+The ASCAT Level 2 SMR product contains relative soil moisture on a 12.5 x 12.5 km grid. The SMO product is identical but resampled to a 25 x 25 km grid instead.
 See [ASCAT level 2 SMR product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:SOMO12) and [ASCAT level 2 SMO product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:SOMO25) for more information.
 
-These example will work to both plot SMR and SMO data. The examples are made using the following packages.
+These examples will work to plot both SMR and SMO data. The examples are made using the following packages.
 ```
 [13f3f980] CairoMakie v0.12.16
 [db073c08] GeoMakie v0.7.9
 ```
 ### Plotting a subset of SMR or SMO
-This examples shows how to plot the soil moisture for from a SMR or SMO product.
+This example shows how to plot the soil moisture for from a SMR or SMO product.
 ```julia
 using MetopDatasets
 using CairoMakie, GeoMakie, Dates
@@ -270,4 +270,4 @@ fig = let
 end
 ```
 ![Subset SZR plot](subset_smr_plot.png)
-The plots shows the estimate soil moisture. The filtering on flags in this example is very rough. It might be good to have a close look at the individual flag variables depending on the application.
+The plot shows the retrieved soil moisture. The filtering on flags in this example is very rough. It might be good to have a close look at the individual flag variables depending on the application.
