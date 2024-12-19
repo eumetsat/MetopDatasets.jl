@@ -14,10 +14,10 @@ end
 ### helper functions to get_cf_attributes.
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
         auto_convert::Bool)::Dict{Symbol, Any} where {R <: DataRecord}
-    return _standard_cf_attributes(R, field, auto_convert) # logic is factored out for reusability
+    return default_cf_attributes(R, field, auto_convert) # logic is factored out for reusability
 end
 
-function _standard_cf_attributes(
+function default_cf_attributes(
         R::Type{<:DataRecord}, field::Symbol, auto_convert::Bool)::Dict{Symbol, Any}
     cf_attributes = Dict{Symbol, Any}()
 
@@ -55,10 +55,10 @@ end
 
 ## Extend CommonDataModel.AbstractVariable interface
 function CDM.variable(ds::MetopDataset, varname::CDM.SymbolOrString)
-    return _standard_variable(ds, varname) # logic is factored out for reusability
+    return default_variable(ds, varname) # logic is factored out for reusability
 end
 
-function _standard_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R}
+function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R}
     disk_array = MetopDiskArray(ds.file_pointer, ds.data_record_chunks,
         Symbol(varname); auto_convert = ds.auto_convert)
     T = eltype(disk_array)
@@ -97,7 +97,7 @@ function CDM.attribnames(v::MetopVariable)
     return ("description", string.(cf_attributes)...)
 end
 
-function _standard_attrib(v::MetopVariable, name::CDM.SymbolOrString)
+function default_attrib(v::MetopVariable, name::CDM.SymbolOrString)
     if !(string(name) in CDM.attribnames(v))
         error("$name not found")
     end
@@ -112,7 +112,7 @@ function _standard_attrib(v::MetopVariable, name::CDM.SymbolOrString)
 end
 
 function CDM.attrib(v::MetopVariable, name::CDM.SymbolOrString)
-    return _standard_attrib(v, name)
+    return default_attrib(v, name)
 end
 
 Base.size(v::MetopVariable) = size(v.disk_array)

@@ -3,11 +3,11 @@
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: IASI_XXX_1C}
     if ds.auto_convert
-        public_names = (string(IASI_WAVE_NUMBER_NAME), _standard_varnames(ds)...)
+        public_names = (string(IASI_WAVENUMBER_NAME), default_varnames(ds)...)
         return public_names
     end
 
-    return _standard_varnames(ds)
+    return default_varnames(ds)
 end
 
 # Overload to enable special scaling for IASI spectrum.
@@ -20,27 +20,27 @@ function CDM.variable(
         N = ndims(sepctrum_disk_array)
         return MetopVariable{T, N, R}(ds, sepctrum_disk_array)
 
-    elseif ds.auto_convert && Symbol(varname) == IASI_WAVE_NUMBER_NAME
-        wave_number_disk_array = IasiWaveNumberDiskArray(ds, Symbol(varname))
-        T = eltype(wave_number_disk_array)
-        N = ndims(wave_number_disk_array)
+    elseif ds.auto_convert && Symbol(varname) == IASI_WAVENUMBER_NAME
+        wavenumber_disk_array = IasiWaveNumberDiskArray(ds, Symbol(varname))
+        T = eltype(wavenumber_disk_array)
+        N = ndims(wavenumber_disk_array)
 
-        return MetopVariable{T, N, R}(ds, wave_number_disk_array)
+        return MetopVariable{T, N, R}(ds, wavenumber_disk_array)
     end
 
-    return _standard_variable(ds, varname)
+    return default_variable(ds, varname)
 end
 
 # Overload to add :gircimage scale_factor from giadr. Not given in the format specs like the rest.
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
         auto_convert::Bool)::Dict{Symbol, Any} where {R <: IASI_XXX_1C}
-    if field == IASI_WAVE_NUMBER_NAME
+    if field == IASI_WAVENUMBER_NAME
         return Dict{Symbol, Any}(
             :units => "m-1"
         )
     end
 
-    cf_attributes = _standard_cf_attributes(R, field, auto_convert)
+    cf_attributes = default_cf_attributes(R, field, auto_convert)
 
     if field == :gircimage
         giadr = read_first_record(ds, GIADR_IASI_XXX_1C_V11)
@@ -53,9 +53,9 @@ end
 
 function CDM.attrib(
         v::MetopVariable{T, N, R}, name::CDM.SymbolOrString) where {T, N, R <: IASI_XXX_1C}
-    if (v.disk_array.field_name == IASI_WAVE_NUMBER_NAME) && (string(name) == "description")
-        return IASI_WAVE_NUMBER_DESCRIPTION
+    if (v.disk_array.field_name == IASI_WAVENUMBER_NAME) && (string(name) == "description")
+        return IASI_WAVENUMBER_DESCRIPTION
     end
 
-    return _standard_attrib(v, name)
+    return default_attrib(v, name)
 end

@@ -56,11 +56,11 @@ import CommonDataModel as CDM
         @test l1c_spectra[92, 1, 1, 1]≈0.0006165 atol=2e-5
         @test l1c_spectra[92, 1, 1, 1] isa Float32
 
-        l1c_wave_number = ds["spectra_wave_number"]
+        l1c_wavenumber = ds["spectra_wavenumber"]
         # test wavelength of CO2 Q (spectral index 92) should be 15 microns
-        @test all((1 ./ l1c_wave_number[92, :]) .≈ 14.97566454511419e-6)
-        @test l1c_wave_number[1, 1] isa Float64
-        @test CDM.dimnames(l1c_wave_number) == ["spectral", "atrack"]
+        @test all((1 ./ l1c_wavenumber[92, :]) .≈ 14.97566454511419e-6)
+        @test l1c_wavenumber[1, 1] isa Float64
+        @test CDM.dimnames(l1c_wavenumber) == ["spectral", "atrack"]
 
         # test that channels with no scaling is 0
         @test all(l1c_spectra[8462:end, 1:3, 1, 4] .== 0)
@@ -98,7 +98,6 @@ import CommonDataModel as CDM
         @test l1c_spectra[92, 1, 1, 1]≈0.0006165 atol=2e-5
         @test l1c_spectra[92, 1, 1, 1] isa Float64
         close(ds_high)
-
     end
 end
 
@@ -122,8 +121,8 @@ end
         scaled_spectra = MetopDatasets.scale_iasi_spectrum(selected_spectra, giadr)
         @test scaled_spectra[92, 1, 1]≈0.0006165 atol=2e-5
 
-        # spectra_wave_number is only computed for auto_convert = true
-        @test !("spectra_wave_number" in keys(ds))
+        # spectra_wavenumber is only computed for auto_convert = true
+        @test !("spectra_wavenumber" in keys(ds))
 
         close(ds)
     end

@@ -91,7 +91,7 @@ function MetopDataset(
 end
 
 ## Extend CommonDataModel.AbstractDataset interface
-function _standard_varnames(ds::MetopDataset{R}) where {R}
+function default_varnames(ds::MetopDataset{R}) where {R}
     filed_names_no_record_header = string.(fieldnames(R))[2:end]
     public_fields = (
         "record_start_time", "record_stop_time", filed_names_no_record_header...)
@@ -99,7 +99,7 @@ function _standard_varnames(ds::MetopDataset{R}) where {R}
 end
 
 function CDM.varnames(ds::MetopDataset{R}) where {R}
-    return _standard_varnames(ds)
+    return default_varnames(ds)
 end
 
 # needed for CommonDataModel 0.3.6 and older

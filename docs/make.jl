@@ -23,8 +23,12 @@ makedocs(;
     ),
     pages = [
         "Introduction" => "index.md",
-        "Public API" => "public_api.md",
-        "Internal API" => "internal_api.md"
+        "Use with Python" => "python.md",
+        "Examples" => [
+            "ASCAT" => "ASCAT.md",
+            "IASI" => "IASI.md"
+        ],
+        "Full API" => "full_api.md"
     ]
 )
 
