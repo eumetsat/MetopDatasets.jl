@@ -105,5 +105,10 @@ end
     @test ipr isa MetopDatasets.InternalPointerRecord
     mdr = MetopDatasets.read_first_record(ds, MetopDatasets.ASCA_SZR_1B_V13)
     @test mdr isa MetopDatasets.ASCA_SZR_1B_V13
+
+    # read directly from file
+    mphr2 = MetopDatasets.read_first_record(test_file, MetopDatasets.MainProductHeader)
+    @test mphr2 isa MetopDatasets.MainProductHeader
+
     close(ds)
 end

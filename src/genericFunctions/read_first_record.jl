@@ -33,3 +33,10 @@ function read_first_record(file_pointer::IO, record_type::Type{<:Record})
     seek(file_pointer, record_offset)
     return native_read(file_pointer, record_type)
 end
+
+function read_first_record(file_path::AbstractString, record_type::Type{<:Record})
+    record = open(file_path) do file_pointer
+        return read_first_record(file_pointer, record_type)
+    end
+    return record
+end
