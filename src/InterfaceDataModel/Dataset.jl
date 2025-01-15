@@ -139,11 +139,11 @@ Base.close(ds::MetopDataset) = close(ds.file_pointer)
 """
     read_first_record(ds::MetopDataset, record_type::Type{<:Record})
 
-Read the first record of type `record_type` from the dataset. This can be used to access records that are 
+Read the n'th record of type `record_type` from the dataset. This can be used to access records that are 
 not directly exposed through the `MetopDataset` interface.
 """
-read_first_record(ds::MetopDataset, record_type::Type{<:Record}) = read_first_record(
-    ds.file_pointer, record_type)
+read_single_record(ds::MetopDataset, record_type::Type{<:Record}, n::Integer) = read_single_record(
+    ds.file_pointer, record_type, n::Integer)
 
 # helper function to test and/or debug dimension
 function _valid_dimensions(ds::MetopDataset)

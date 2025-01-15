@@ -28,6 +28,10 @@ function native_read(io::IO, T::Type{<:RecordSubType})::T
 end
 
 function native_read(io::IO, T::Type{<:Record})::T
+    return native_read(io, T, Val(fixed_size(T)))
+end
+
+function native_read(io::IO, T::Type{<:Record}, fixed_size::Val{true})::T
     return T((native_read(io, T, ft, n) for (ft, n) in zip(fieldtypes(T), fieldnames(T)))...)
 end
 
@@ -39,8 +43,15 @@ end
 native_read(io::IO, parent_type::Type, T::Type, field_name::Symbol)::T = native_read(io, T)
 
 ## read fields based on type and array size for array fields
+
 function native_read(
         io::IO, parent_type::Type, T::Type{<:AbstractArray}, field_name::Symbol)::T
+    return native_read(io, parent_type, T, field_name, Val(fixed_size(parent_type)))
+end
+
+function native_read(
+        io::IO, parent_type::Type, T::Type{<:AbstractArray},
+        field_name::Symbol, fixed_size::Val{true})::T
     array_size = _get_array_size(parent_type, field_name)
     return native_read_array(io, T, array_size)
 end
@@ -56,4 +67,77 @@ function native_read_array(
     A = T(undef, array_size)
     read!(io, A)
     return ntoh.(A)
+end
+
+## Flexible sizes 
+
+function native_read(
+        io::IO, parent_type::Type, T::Type{<:AbstractArray},
+        field_name::Symbol, fixed_size::Val{false})::T
+    return error("Flexible record type $T is missing native_read method")
+end
+
+function native_read(io::IO, T::Type{<:Record}, fixed_size::Val{false})::T
+    return native_read_flexible(io, T, Dict{Symbol, Int64}())
+end
+
+function native_read_flexible(io::IO, T::Type{<:Record},
+        flexible_size_in)::T
+    record_size_field = get_size_fields(T)
+    flexible_size_mdr = Dict{Symbol, Int64}()
+
+    vals = (_read_flex_field!(io, T, field_name,
+                record_size_field, flexible_size_in, flexible_size_mdr) for field_name in fieldnames(T))
+
+    return T(vals...)
+end
+
+function _read_flex_field!(
+        io::IO, parent_type::Type, field_name::Symbol, record_size_field,
+        flexible_size_fixed, flexible_size_mut)
+    return _read_flex_field!(io::IO, parent_type::Type, fieldtype(parent_type, field_name),
+        field_name, record_size_field,
+        flexible_size_fixed, flexible_size_mut)
+end
+
+function _read_flex_field!(io::IO, parent_type::Type, T::Type{<:AbstractArray},
+        field_name::Symbol, record_size_field,
+        flexible_size_fixed, flexible_size_mut)::T
+    array_size_raw = _get_array_size(parent_type, field_name)
+    array_size = Tuple((_lookup_flexible_dim(dim_i, flexible_size_fixed, flexible_size_mut)
+    for dim_i in array_size_raw))
+    return native_read_array(io, T, array_size)
+end
+
+function _read_flex_field!(io::IO, parent_type::Type, T::Type{<:Integer},
+        field_name::Symbol, record_size_field,
+        flexible_size_fixed, flexible_size_mut)::T
+    field_val = native_read(io, T)
+
+    if haskey(record_size_field, field_name)
+        k = record_size_field[field_name]
+        flexible_size_mut[k] = field_val
+    end
+
+    return field_val
+end
+
+function _read_flex_field!(
+        io::IO, parent_type::Type, T::Type, field_name::Symbol, record_size_field,
+        flexible_size_fixed, flexible_size_mut)::T
+    return native_read(io, T)
+end
+
+_lookup_flexible_dim(dim_size::Integer, size_dict1::Dict, size_dict2::Dict)::Int64 = dim_size
+
+function _lookup_flexible_dim(dim_size::Symbol, size_dict1::Dict, size_dict2::Dict)::Int64
+    if haskey(size_dict1, dim_size)
+        return size_dict1[dim_size]
+    elseif haskey(size_dict2, dim_size)
+        return size_dict2[dim_size]
+    else
+        @show size_dict1
+        @show size_dict2
+        error("Could not find flexible dimension $dim_size")
+    end
 end

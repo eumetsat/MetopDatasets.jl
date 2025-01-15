@@ -4,8 +4,9 @@
 using MetopDatasets, Test
 import CommonDataModel as CDM
 
-@testset "IASI data records" begin
+@testset "IASI L1C data records" begin
     @test MetopDatasets.IASI_XXX_1C_V11 <: MetopDatasets.DataRecord
+    @test MetopDatasets.fixed_size(MetopDatasets.IASI_XXX_1C_V11) == true
     @test MetopDatasets.native_sizeof(MetopDatasets.IASI_XXX_1C_V11) == 2728908
     @test MetopDatasets.get_scale_factor(MetopDatasets.IASI_XXX_1C_V11, :ggeosondloc) == 6
     field_index = findfirst(fieldnames(MetopDatasets.IASI_XXX_1C_V11) .== :gs1cspect)
@@ -19,6 +20,7 @@ import CommonDataModel as CDM
     @test !isempty(all_dims)
 
     @test MetopDatasets.native_sizeof(MetopDatasets.GIADR_IASI_XXX_1C_V11) == 84
+    @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_XXX_1C_V11) == true
 
     ## testData
     if isdir("testData")
@@ -125,5 +127,56 @@ end
         @test !("spectra_wavenumber" in keys(ds))
 
         close(ds)
+    end
+end
+
+@testset "IASI L02 data records" begin
+
+    # giard
+    @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_SND_02_V11) == false
+
+    dims_in_giard = MetopDatasets.get_size_fields(MetopDatasets.GIADR_IASI_SND_02_V11)
+    giard_fields_with_dim = sort(collect(keys(dims_in_giard)))
+    giard_flexible_dim_names = [dims_in_giard[k] for k in giard_fields_with_dim]
+
+    @test giard_fields_with_dim ==
+          [:brescia_num_altitudes_so2, :forli_num_layers_co, :forli_num_layers_hno3,
+        :forli_num_layers_o3, :num_ozone_pcs, :num_pressure_levels_humidity, :num_pressure_levels_ozone,
+        :num_pressure_levels_temp, :num_surface_emissivity_wavelengths,
+        :num_temperature_pcs, :num_water_vapour_pcs]
+
+    @test giard_flexible_dim_names ==
+          [:NL_SO2, :NL_CO, :NL_HNO3, :NL_O3, :NPCO, :NLQ, :NLO, :NLT, :NEW, :NPCT, :NPCW]
+
+    ## testData
+    if isdir("testData")
+        test_file = "testData/IASI_SND_02_M01_20241215173256Z_20241215173552Z_N_C_20241215182326Z"
+
+        giard = read_first_record(test_file, MetopDatasets.GIADR_IASI_SND_02_V11)
+        @test giard isa MetopDatasets.GIADR_IASI_SND_02_V11
+
+        # test sizes against std values
+        flex_sizes = MetopDatasets.get_iasi_l2_flex_size(giard)
+
+        @test flex_sizes[:NEW] == 12
+        @test flex_sizes[:NLO] == 101
+        @test flex_sizes[:NLQ] == 101
+        @test flex_sizes[:NLT] == 101
+        @test flex_sizes[:NL_CO] == 19
+        @test flex_sizes[:NL_HNO3] == 41
+        @test flex_sizes[:NL_O3] == 41
+        @test flex_sizes[:NL_SO2] == 5
+        @test flex_sizes[:NPCT] == 28
+        @test flex_sizes[:NPCW] == 18
+        @test flex_sizes[:NPCO] == 10
+        @test flex_sizes[:NEVA_CO] == 10
+        @test flex_sizes[:NEVE_CO] == 190
+        @test flex_sizes[:NEVA_HNO3] == 21
+        @test flex_sizes[:NEVE_HNO3] == 861
+        @test flex_sizes[:NEVA_O3] == 21
+        @test flex_sizes[:NEVE_O3] == 861
+        @test flex_sizes[:NERRT] == 406
+        @test flex_sizes[:NERRW] == 171
+        @test flex_sizes[:NERRO] == 55
     end
 end

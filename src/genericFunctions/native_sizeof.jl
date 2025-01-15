@@ -16,9 +16,15 @@ native_sizeof(T::Type)::Integer = error("not implemented for $T")
 native_sizeof(T::Type{<:Number})::Integer = sizeof(T)
 
 native_sizeof(T::Type{<:RecordSubType})::Integer = sum(native_sizeof.(T, fieldnames(T)))
-native_sizeof(T::Type{<:BinaryRecord})::Integer = sum(native_sizeof.(T, fieldnames(T)))
 
-function native_sizeof(T::Type, field_name::Symbol)::Integer
+native_sizeof(T::Type{<:BinaryRecord}) = native_sizeof(T, Val(fixed_size(T)))
+native_sizeof(T::Type{<:BinaryRecord}, fixed_size::Val{true})::Integer = sum(native_sizeof.(
+    T, fieldnames(T)))
+
+function native_sizeof(T::Type, field_name::Symbol)
+    return native_sizeof(T, field_name, Val(fixed_size(T)))
+end
+function native_sizeof(T::Type, field_name::Symbol, fixed_size::Val{true})::Integer
     f_type = fieldtype(T, field_name)
     if f_type <: AbstractArray
         element_size = native_sizeof(eltype(f_type))
@@ -29,8 +35,13 @@ function native_sizeof(T::Type, field_name::Symbol)::Integer
     end
 end
 
-# Array helpers
-_get_array_length(T::Type, field_name::Symbol) = prod(get_raw_format_dim(T, field_name))
+# Array helpers for fixed size types
+function _get_array_length(T::Type, field_name::Symbol)
+    return _get_array_length(T, field_name, Val(fixed_size(T)))
+end
+function _get_array_length(T::Type, field_name::Symbol, fixed_size::Val{true})
+    return prod(get_raw_format_dim(T, field_name))
+end
 
 function _get_array_size(T::Type, field_name::Symbol)
     f_type = fieldtype(T, field_name)

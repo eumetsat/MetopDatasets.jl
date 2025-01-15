@@ -30,7 +30,7 @@ function get_field_dimensions(T::Type{<:ASCA_SZR_1B},
     end
 end
 
-function data_record_type(header::MainProductHeader, ::Val{:ASCA_SZR_1B})::Type
+function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SZR_1B})::Type
     if header.format_major_version == 13
         return ASCA_SZR_1B_V13
     elseif header.format_major_version == 12
@@ -67,7 +67,7 @@ function get_field_dimensions(T::Type{<:ASCA_SZO_1B},
     end
 end
 
-function data_record_type(header::MainProductHeader, ::Val{:ASCA_SZO_1B})::Type
+function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SZO_1B})::Type
     if header.format_major_version == 13
         return ASCA_SZO_1B_V13
     elseif header.format_major_version == 12
@@ -119,7 +119,7 @@ function get_field_dimensions(T::Type{ASCA_SZF_1B_V11},
     end
 end
 
-function data_record_type(header::MainProductHeader, ::Val{:ASCA_SZF_1B})::Type
+function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SZF_1B})::Type
     if header.format_major_version == 13
         return ASCA_SZF_1B_V13
     elseif header.format_major_version == 12
@@ -152,7 +152,7 @@ function get_field_dimensions(T::Type{<:ASCA_SMR_02},
     end
 end
 
-function data_record_type(header::MainProductHeader, ::Val{:ASCA_SMR_02})::Type
+function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SMR_02})::Type
     if header.format_major_version == 12
         return ASCA_SMR_02_V12
     else
@@ -181,7 +181,7 @@ function get_field_dimensions(T::Type{<:ASCA_SMO_02},
     end
 end
 
-function data_record_type(header::MainProductHeader, ::Val{:ASCA_SMO_02})::Type
+function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SMO_02})::Type
     if header.format_major_version == 12
         return ASCA_SMO_02_V12
     else

@@ -27,7 +27,8 @@ const RECORD_DIM_NAME = "atrack"
 export MetopDataset
 
 # helper functions
-export read_first_record, scale_iasi_spectrum, max_giadr_channel, brightness_temperature
+export read_single_record, read_first_record, scale_iasi_spectrum, max_giadr_channel,
+       brightness_temperature
 
 # Function and types needed to extend the interface
 @compat public record_struct_expression, data_record_type

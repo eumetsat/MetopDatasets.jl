@@ -43,7 +43,7 @@ julia> get_raw_format_dim(ASCA_SZR_1B_V13, :sigma0_trip)
 (3, 82, 1, 1)
 ```
 """
-get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol)::NTuple{4, Int64} = get_raw_format_dim(T)[field]
+get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol) = get_raw_format_dim(T)[field]
 
 """
     data_record_type(header::MainProductHeader)::Type
@@ -67,8 +67,16 @@ get_description(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 get_scale_factor(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 get_raw_format_dim(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 
+# add docs
+# Record and RecordSubType without arrays are automatically fixed sized.
+fixed_size(T::Type{<:BinaryRecord}) = !any(fieldtypes(T) .<: AbstractArray)
+fixed_size(T::Type{<:RecordSubType}) = !any(fieldtypes(T) .<: AbstractArray)
+
+# add docs
+get_size_fields(T::Type{<:BinaryRecord}) = error("Method missing for $T")
+
 # data_record_type must be defined manually
-function data_record_type(header::MainProductHeader, ::Val{T}) where {T}
+function data_record_type(header::MainProductHeader, product_type::Val{T}) where {T}
     return error("Method missing for $T")
 end
 

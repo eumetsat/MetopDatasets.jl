@@ -7,7 +7,7 @@
 The Internal Pointer Records (IPR) specifies the start of each block of records in the file
 sharing the same record type. This can be used to find the locations of data records or dummy records.
 """
-struct InternalPointerRecord <: Record
+struct InternalPointerRecord <: BinaryRecord
     record_header::RecordHeader
     record_class::UInt8
     instrument_group::UInt8
