@@ -4,7 +4,7 @@
 struct MetopDataset{R <: DataRecord} <: CDM.AbstractDataset
     file_pointer::IO
     main_product_header::MainProductHeader
-    data_record_chunks::Vector{RecordChunk}
+    data_record_layouts::Vector{<:RecordLayout}
     data_record_count::Int64
     auto_convert::Bool
     high_precision::Bool
@@ -78,13 +78,13 @@ function MetopDataset(
     # skip secondary header if present
     _skip_sphr(file_pointer, main_product_header.total_sphr)
 
-    record_chunks, _ = _read_record_chunks(file_pointer, main_product_header)
-    data_record_chunks = filter(x -> x.record_type == record_type, record_chunks)
-    data_record_count = data_record_chunks[end].record_range[end]
+    record_layouts = _read_record_layouts(file_pointer, main_product_header)
+    data_record_layouts = filter(x -> x.record_type == record_type, record_layouts)
+    data_record_count = data_record_layouts[end].record_range[end]
 
     return MetopDataset{record_type}(file_pointer,
         main_product_header,
-        data_record_chunks,
+        data_record_layouts,
         data_record_count,
         auto_convert,
         high_precision)
@@ -182,4 +182,16 @@ function _valid_dimensions(ds::MetopDataset)
     end
 
     return no_error_found
+end
+
+
+## helper function
+function _skip_sphr(file_pointer, n_headers)
+    for _ in 1:n_headers
+        record_header = native_read(file_pointer, RecordHeader)
+        @assert record_header.record_class == get_record_class(SecondaryProductHeader)
+        content_size = record_header.record_size - native_sizeof(RecordHeader)
+        skip(file_pointer, content_size)
+    end
+    return nothing
 end

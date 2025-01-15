@@ -34,6 +34,6 @@ export read_single_record, read_first_record, scale_iasi_spectrum, max_giadr_cha
 @compat public record_struct_expression, data_record_type
 @compat public get_cf_attributes, default_cf_attributes, default_variable
 @compat public AbstractMetopDiskArray, MetopDiskArray, MetopVariable
-@compat public MainProductHeader, RecordChunk, DataRecord
+@compat public MainProductHeader, FixedRecordLayout, DataRecord
 
 end

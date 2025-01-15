@@ -105,4 +105,3 @@ SO2_COL_AT_ALTITUDES,SO2 column for a plume at different estimated altitudes,1,D
 SO2_ALTITUDE,Retrieved plume altitude ,0,m,120,1,1,u-integer2,2,240,814141
 SO2_COL,SO2 column at the retrieved plume altitude from an OEM approach,1,DU,120,1,1,u-integer2,2,240,814381
 SO2_BT_DIFFERENCE,Indicative brightness temperature difference,2,K,120,1,1,integer2,2,240,814621
-FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET

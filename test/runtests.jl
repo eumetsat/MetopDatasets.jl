@@ -21,8 +21,8 @@ end
         include("generic_types.jl")
     end
 
-    @safetestset "Record chunks" begin
-        include("record_chunks.jl")
+    @safetestset "Record layouts" begin
+        include("record_layout.jl")
     end
 
     @safetestset "ASCAT" begin

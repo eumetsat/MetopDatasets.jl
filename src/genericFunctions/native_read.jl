@@ -105,7 +105,7 @@ function _read_flex_field!(io::IO, parent_type::Type, T::Type{<:AbstractArray},
         flexible_size_fixed, flexible_size_mut)::T
     array_size_raw = _get_array_size(parent_type, field_name)
     array_size = Tuple((_lookup_flexible_dim(dim_i, flexible_size_fixed, flexible_size_mut)
-    for dim_i in array_size_raw))
+        for dim_i in array_size_raw))
     return native_read_array(io, T, array_size)
 end
 
@@ -140,4 +140,42 @@ function _lookup_flexible_dim(dim_size::Symbol, size_dict1::Dict, size_dict2::Di
         @show size_dict2
         error("Could not find flexible dimension $dim_size")
     end
+end
+
+
+function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_size_in)
+    start_pos = position(io)
+    record_size_field = get_size_fields(T)
+    
+    record_size = 0
+    flexible_size_mdr = Dict{Symbol, Int64}()
+    
+    for field_name in fieldnames(T)
+        field_type = fieldtype(T, field_name)
+
+        if field_type <: RecordHeader
+            header = native_read(io,field_type)
+            record_size = header.record_size
+
+        elseif haskey(record_size_field, field_name)
+            k = record_size_field[field_name]
+            flexible_size_mdr[k] = native_read(io, field_type)
+
+        elseif field_type <: AbstractArray # skip arrays
+            array_size_raw = _get_array_size(T, field_name)
+            array_size = Tuple((_lookup_flexible_dim(dim_i, flexible_size_in, flexible_size_mdr) 
+                for dim_i in array_size_raw))
+
+            field_size = prod(array_size) * native_sizeof(eltype(field_type))
+            skip(io, field_size)
+        
+        else # skip other fields 
+            skip(io, native_sizeof(field_type))
+        end
+    end
+
+    # set io to end of record
+    seek(io, start_pos + record_size)
+
+    return flexible_size_mdr, record_size
 end

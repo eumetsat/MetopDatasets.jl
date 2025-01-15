@@ -132,6 +132,8 @@ end
 
 @testset "IASI L02 data records" begin
 
+    @test MetopDatasets.fixed_size(MetopDatasets.IASI_SND_02_V11) == false
+
     # giard
     @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_SND_02_V11) == false
 
