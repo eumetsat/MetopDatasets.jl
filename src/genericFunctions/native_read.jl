@@ -78,104 +78,111 @@ function native_read(
 end
 
 function native_read(io::IO, T::Type{<:Record}, fixed_size::Val{false})::T
-    return native_read_flexible(io, T, Dict{Symbol, Int64}())
+    flexible_dims_file = get_flexible_dims_file(io, T)
+    return native_read_flexible(io, T, flexible_dims_file)
 end
 
 function native_read_flexible(io::IO, T::Type{<:Record},
-        flexible_size_in)::T
-    record_size_field = get_size_fields(T)
-    flexible_size_mdr = Dict{Symbol, Int64}()
+        flexible_dims_file)::T
+    record_dim_fields = get_dim_fields(T)
+    flexible_dims_record = Dict{Symbol, Int64}()
 
     vals = (_read_flex_field!(io, T, field_name,
-                record_size_field, flexible_size_in, flexible_size_mdr) for field_name in fieldnames(T))
+                record_dim_fields, flexible_dims_file, flexible_dims_record) for field_name in fieldnames(T))
 
     return T(vals...)
 end
 
 function _read_flex_field!(
-        io::IO, parent_type::Type, field_name::Symbol, record_size_field,
-        flexible_size_fixed, flexible_size_mut)
+        io::IO, parent_type::Type, field_name::Symbol, record_dim_fields,
+        flexible_dims_file, flexible_dims_record)
     return _read_flex_field!(io::IO, parent_type::Type, fieldtype(parent_type, field_name),
-        field_name, record_size_field,
-        flexible_size_fixed, flexible_size_mut)
+        field_name, record_dim_fields,
+        flexible_dims_file, flexible_dims_record)
 end
 
 function _read_flex_field!(io::IO, parent_type::Type, T::Type{<:AbstractArray},
-        field_name::Symbol, record_size_field,
-        flexible_size_fixed, flexible_size_mut)::T
-    array_size_raw = _get_array_size(parent_type, field_name)
-    array_size = Tuple((_lookup_flexible_dim(dim_i, flexible_size_fixed, flexible_size_mut)
-        for dim_i in array_size_raw))
+        field_name::Symbol, record_dim_fields,
+        flexible_dims_file, flexible_dims_record)::T
+    array_size = _get_array_size_flexible(parent_type, field_name,
+        flexible_dims_file, flexible_dims_record)
+
     return native_read_array(io, T, array_size)
 end
 
 function _read_flex_field!(io::IO, parent_type::Type, T::Type{<:Integer},
-        field_name::Symbol, record_size_field,
-        flexible_size_fixed, flexible_size_mut)::T
+        field_name::Symbol, record_dim_fields,
+        flexible_dims_file, flexible_dims_record)::T
     field_val = native_read(io, T)
 
-    if haskey(record_size_field, field_name)
-        k = record_size_field[field_name]
-        flexible_size_mut[k] = field_val
+    if haskey(record_dim_fields, field_name)
+        k = record_dim_fields[field_name]
+        flexible_dims_record[k] = field_val
     end
 
     return field_val
 end
 
 function _read_flex_field!(
-        io::IO, parent_type::Type, T::Type, field_name::Symbol, record_size_field,
-        flexible_size_fixed, flexible_size_mut)::T
+        io::IO, parent_type::Type, T::Type, field_name::Symbol, record_dim_fields,
+        flexible_dims_file, flexible_dims_record)::T
     return native_read(io, T)
 end
 
-_lookup_flexible_dim(dim_size::Integer, size_dict1::Dict, size_dict2::Dict)::Int64 = dim_size
+_lookup_flexible_dim(dim_size::Integer, flexible_dims_file::Dict, flexible_dims_record::Dict)::Int64 = dim_size
 
-function _lookup_flexible_dim(dim_size::Symbol, size_dict1::Dict, size_dict2::Dict)::Int64
-    if haskey(size_dict1, dim_size)
-        return size_dict1[dim_size]
-    elseif haskey(size_dict2, dim_size)
-        return size_dict2[dim_size]
+function _lookup_flexible_dim(
+        dim_size::Symbol, flexible_dims_file::Dict, flexible_dims_record::Dict)::Int64
+    if haskey(flexible_dims_file, dim_size)
+        return flexible_dims_file[dim_size]
+    elseif haskey(flexible_dims_record, dim_size)
+        return flexible_dims_record[dim_size]
     else
-        @show size_dict1
-        @show size_dict2
+        @show flexible_dims_file
+        @show flexible_dims_record
         error("Could not find flexible dimension $dim_size")
     end
 end
 
+function _get_array_size_flexible(parent_type::Type, field_name::Symbol,
+        flexible_dims_file::Dict, flexible_dims_record::Dict)
+    array_size_raw = _get_array_size(parent_type, field_name)
+    array_size = Tuple((_lookup_flexible_dim(
+                            dim_i, flexible_dims_file, flexible_dims_record)
+    for dim_i in array_size_raw))
 
-function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_size_in)
-    start_pos = position(io)
-    record_size_field = get_size_fields(T)
-    
-    record_size = 0
-    flexible_size_mdr = Dict{Symbol, Int64}()
-    
-    for field_name in fieldnames(T)
+    return array_size
+end
+
+function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_dims_file::Dict)
+    header = native_read(io, RecordHeader)
+    flexible_dims_record = _read_flex_dims_from_record_no_header(io, T, flexible_dims_file)
+
+    return flexible_dims_record, header.record_size
+end
+
+function _read_flex_dims_from_record_no_header(
+        io::IO, T::Type{<:Record}, flexible_dims_file::Dict)
+    record_dim_fields = get_dim_fields(T)
+    flexible_dims_record = Dict{Symbol, Int64}()
+
+    for field_name in fieldnames(T)[2:end]
         field_type = fieldtype(T, field_name)
 
-        if field_type <: RecordHeader
-            header = native_read(io,field_type)
-            record_size = header.record_size
-
-        elseif haskey(record_size_field, field_name)
-            k = record_size_field[field_name]
-            flexible_size_mdr[k] = native_read(io, field_type)
+        if haskey(record_dim_fields, field_name)
+            k = record_dim_fields[field_name]
+            flexible_dims_record[k] = native_read(io, field_type)
 
         elseif field_type <: AbstractArray # skip arrays
-            array_size_raw = _get_array_size(T, field_name)
-            array_size = Tuple((_lookup_flexible_dim(dim_i, flexible_size_in, flexible_size_mdr) 
-                for dim_i in array_size_raw))
+            array_size = _get_array_size_flexible(T, field_name,
+                flexible_dims_file, flexible_dims_record)
 
             field_size = prod(array_size) * native_sizeof(eltype(field_type))
             skip(io, field_size)
-        
         else # skip other fields 
             skip(io, native_sizeof(field_type))
         end
     end
 
-    # set io to end of record
-    seek(io, start_pos + record_size)
-
-    return flexible_size_mdr, record_size
+    return flexible_dims_record
 end

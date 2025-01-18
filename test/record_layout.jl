@@ -174,7 +174,7 @@ end
 
     size_layout_1 = data_record_size * length(datarecord_layouts[1].record_range)
     size_layout_2 = MetopDatasets.native_sizeof(MetopDatasets.DummyRecord) *
-                   length(dummyrecord_layouts[1].record_range)
+                    length(dummyrecord_layouts[1].record_range)
     size_layout_3 = data_record_size * length(datarecord_layouts[2].record_range)
 
     @test (size_layout_1 + datarecord_layouts[1].offset) == dummyrecord_layouts[1].offset

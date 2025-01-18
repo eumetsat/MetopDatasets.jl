@@ -72,3 +72,59 @@ function get_field_dimensions(T::Type{<:IASI_XXX_1C},
         error("Dimensions not set for $field_type")
     end
 end
+
+function get_dimensions(T::Type{<:IASI_SND_02},
+        data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
+    dimensions_dict = Dict{String, Integer}()
+    layout = only(data_record_layouts)
+
+    flexible_dims_max = MetopDatasets.get_flex_dim_max(layout)
+
+    array_sizes = [MetopDatasets._get_array_size(T, n)
+                   for n in fieldnames(T) if fieldtype(T, n) <: Array]
+
+    # get all unique dimensions
+    dims = reduce(vcat, [[t...] for t in array_sizes])
+    unique!(dims)
+
+    # default symbols
+    dims_sym = filter(x -> x isa Symbol, dims)
+    for d in dims_sym
+        if haskey(layout.flexible_dims_file, d)
+            dimensions_dict[string(d)] = layout.flexible_dims_file[d]
+        else
+            dimensions_dict[string(d)] = flexible_dims_max[d]
+        end
+    end
+
+    # default others
+    dims_ints = filter(x -> x isa Integer, dims)
+    sort!(dims_ints)
+    for i in eachindex(dims_ints)
+        dimensions_dict["dim_$i"] = dims_ints[i]
+    end
+
+    return dimensions_dict
+end
+
+function get_field_dimensions(
+        T::Type{<:IASI_SND_02}, layout::FlexibleRecordLayout, field_name::Symbol)
+    res = String[]
+
+    if !(fieldtype(T, field_name) <: Array)
+        return res
+    end
+
+    dimension_dict = get_dimensions(T, [layout])
+    array_size = _get_array_size(T, field_name)
+
+    for d in array_size
+        if d isa Symbol
+            push!(res, string(d))
+        else
+            names = [dim_name for (dim_name, dim_val) in dimension_dict if dim_val == d]
+            push!(res, string(first(names)))
+        end
+    end
+    return res
+end

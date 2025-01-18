@@ -1,5 +1,7 @@
+# Copyright (c) 2025 EUMETSAT
+# License: MIT
 
-# Add IASI Level 1C meta data record.
+# Add IASI Level 2 meta data record.
 GIADR_IASI_SND_02_V11_format = joinpath(@__DIR__, "csv_formats/GIADR_IASI_SND_02_V11.csv")
 
 abstract type GIADR_IASI_SND_02 <: GlobalInternalAuxillary end
@@ -8,7 +10,7 @@ eval(record_struct_expression(GIADR_IASI_SND_02_V11_format, GIADR_IASI_SND_02))
 
 get_instrument_subclass(::Type{<:GIADR_IASI_SND_02}) = 1
 
-function get_size_fields(::Type{<:GIADR_IASI_SND_02})
+function get_dim_fields(::Type{<:GIADR_IASI_SND_02})
     return Dict(
         :num_temperature_pcs => :NPCT,
         :num_pressure_levels_temp => :NLT,
@@ -25,7 +27,7 @@ end
 
 function get_iasi_l2_flex_size(giard::GIADR_IASI_SND_02)
     flex_size_prod = Dict{Symbol, Int64}()
-    giard_size_fields = get_size_fields(typeof(giard))
+    giard_size_fields = get_dim_fields(typeof(giard))
 
     for k in keys(giard_size_fields)
         value = getfield(giard, k)

@@ -1,10 +1,10 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-struct MetopDataset{R <: DataRecord} <: CDM.AbstractDataset
+struct MetopDataset{R <: DataRecord, L <: RecordLayout} <: CDM.AbstractDataset
     file_pointer::IO
     main_product_header::MainProductHeader
-    data_record_layouts::Vector{<:RecordLayout}
+    data_record_layouts::Vector{L}
     data_record_count::Int64
     auto_convert::Bool
     high_precision::Bool
@@ -82,7 +82,7 @@ function MetopDataset(
     data_record_layouts = filter(x -> x.record_type == record_type, record_layouts)
     data_record_count = data_record_layouts[end].record_range[end]
 
-    return MetopDataset{record_type}(file_pointer,
+    return MetopDataset{record_type, eltype(data_record_layouts)}(file_pointer,
         main_product_header,
         data_record_layouts,
         data_record_count,
@@ -98,15 +98,20 @@ function default_varnames(ds::MetopDataset{R}) where {R}
     return public_fields
 end
 
-function CDM.varnames(ds::MetopDataset{R}) where {R}
+function CDM.varnames(ds::MetopDataset)
     return default_varnames(ds)
 end
 
 # needed for CommonDataModel 0.3.6 and older
 Base.keys(ds::MetopDataset) = CDM.varnames(ds)
 
+function get_dimensions(R::Type{<:DataRecord},
+        data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
+    return get_dimensions(R)
+end
+
 function CDM.dimnames(ds::MetopDataset{R}) where {R}
-    names = collect(keys(get_dimensions(R)))
+    names = collect(keys(get_dimensions(R, ds.data_record_layouts)))
     push!(names, RECORD_DIM_NAME)
     return names
 end
@@ -117,7 +122,7 @@ function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R}
         return ds.data_record_count
     end
 
-    return get_dimensions(R)[name]
+    return get_dimensions(R, ds.data_record_layouts)[name]
 end
 
 CDM.attribnames(ds::MetopDataset) = string.(fieldnames(MainProductHeader))[2:end] ## Skip record_header
@@ -183,7 +188,6 @@ function _valid_dimensions(ds::MetopDataset)
 
     return no_error_found
 end
-
 
 ## helper function
 function _skip_sphr(file_pointer, n_headers)

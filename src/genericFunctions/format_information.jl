@@ -69,11 +69,22 @@ get_raw_format_dim(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 
 # add docs
 # Record and RecordSubType without arrays are automatically fixed sized.
-fixed_size(T::Type{<:BinaryRecord}) = !any(fieldtypes(T) .<: AbstractArray)
-fixed_size(T::Type{<:RecordSubType}) = !any(fieldtypes(T) .<: AbstractArray)
+fixed_size(T::Type{<:BinaryRecord}) = !any(x -> x <: AbstractArray, fieldtypes(T))
+fixed_size(T::Type{<:RecordSubType}) = !any(x -> x <: AbstractArray, fieldtypes(T))
+function fixed_size(T::Type{<:BinaryRecord}, fieldname::Symbol)
+    if (fieldname == :record_start_time) || (fieldname == :record_stop_time)
+        return true
+    end
+    if fieldtype(T, fieldname) <: AbstractArray
+        return !any(x -> x isa Symbol, get_raw_format_dim(T, fieldname))
+    else
+        return true
+    end
+end
+get_missing_value(T::Type{<:BinaryRecord}, field::Symbol) = nothing
 
 # add docs
-get_size_fields(T::Type{<:BinaryRecord}) = error("Method missing for $T")
+get_dim_fields(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 
 # data_record_type must be defined manually
 function data_record_type(header::MainProductHeader, product_type::Val{T}) where {T}

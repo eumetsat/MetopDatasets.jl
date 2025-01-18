@@ -14,7 +14,8 @@ end
 function CDM.variable(
         ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R <: IASI_XXX_1C}
     if ds.auto_convert && Symbol(varname) == :gs1cspect
-        sepctrum_disk_array = IasiSpectrumDiskArray(ds.file_pointer, ds.data_record_layouts,
+        sepctrum_disk_array = IasiSpectrumDiskArray(
+            ds.file_pointer, ds.data_record_layouts,
             Symbol(varname); high_precision = ds.high_precision)
         T = eltype(sepctrum_disk_array)
         N = ndims(sepctrum_disk_array)

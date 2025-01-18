@@ -131,13 +131,12 @@ end
 end
 
 @testset "IASI L02 data records" begin
-
     @test MetopDatasets.fixed_size(MetopDatasets.IASI_SND_02_V11) == false
 
     # giard
     @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_SND_02_V11) == false
 
-    dims_in_giard = MetopDatasets.get_size_fields(MetopDatasets.GIADR_IASI_SND_02_V11)
+    dims_in_giard = MetopDatasets.get_dim_fields(MetopDatasets.GIADR_IASI_SND_02_V11)
     giard_fields_with_dim = sort(collect(keys(dims_in_giard)))
     giard_flexible_dim_names = [dims_in_giard[k] for k in giard_fields_with_dim]
 
@@ -180,5 +179,42 @@ end
         @test flex_sizes[:NERRT] == 406
         @test flex_sizes[:NERRW] == 171
         @test flex_sizes[:NERRO] == 55
+
+        flexible_record_layout, total_mdr = open(test_file) do file_pointer
+            main_header = MetopDatasets.native_read(
+                file_pointer, MetopDatasets.MainProductHeader)
+            return only(MetopDatasets._read_record_layouts(file_pointer, main_header)),
+            main_header.total_mdr
+        end
+
+        @test flexible_record_layout.record_range[end] == total_mdr
+        @test length(flexible_record_layout.offsets) == total_mdr
+        @test length(flexible_record_layout.record_sizes) == total_mdr
+        @test flexible_record_layout.flexible_dims_file == flex_sizes
+
+        # get dim from giard 
+        @test MetopDatasets.get_flex_dim_max(flexible_record_layout, :NLQ) == 101
+
+        # get max dim from records
+        @test MetopDatasets.get_flex_dim_max(flexible_record_layout, :HNO3_NBR) == 111
+        @test MetopDatasets.get_flex_dim_max(flexible_record_layout, :CO_NBR) == 113
+
+        ### test dataset
+        ds = MetopDataset(test_file)
+
+        # test dims and size
+        @test !isnothing(ds.dim)
+        @test CDM.dimnames(ds["co_h_eigenvalues"]) == ["NEVA_CO", "CO_NBR", "atrack"]
+        @test size(ds["co_h_eigenvalues"]) == (10, 113, 22)
+
+        # test read 
+        @test all(isapprox.(ds["fg_qi_surface_temperature"][1:5, 3],
+            [1.7000000000000002, 1.5, 1.8, 1.6, 2.6]))
+
+        # test that lazy load work for complex indexes with missing values
+        weird_index = (4:2:10, 111:-2:3, 3:5)
+        lazy_read = ds["hno3_cp_air"][weird_index...]
+        eager_read = Array(ds["hno3_cp_air"])[weird_index...]
+        @test lazy_read[.!ismissing.(lazy_read)] == lazy_read[.!ismissing.(eager_read)]
     end
 end

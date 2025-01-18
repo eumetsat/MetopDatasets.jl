@@ -7,7 +7,7 @@ end
 
 function BitString(bytes::AbstractVector)
     n_bytes = length(bytes)
-    return BitString{n_bytes}(Vector{n_bytes, UInt8}(bytes))
+    return BitString{n_bytes}(Tuple(UInt8.(bytes)))
 end
 
 ## Helper functions

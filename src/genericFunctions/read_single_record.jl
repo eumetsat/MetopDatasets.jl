@@ -1,25 +1,34 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-function _find_nth_record(file_pointer::IO, record_type::Type{<:Record}, n::Integer)
-    @assert n > 0
-    seekstart(file_pointer)
-
+function header_match_record_type(header::RecordHeader, record_type::Type{<:Record})
     record_class = get_record_class(record_type)
     instrument_group = get_instrument_group(record_type)
     instrument_subclass = get_instrument_subclass(record_type)
+
+    match = header.record_class == record_class
+    match &= isnothing(instrument_group) ||
+             (header.instrument_group == instrument_group)
+    match &= isnothing(instrument_subclass) ||
+             (header.instrument_subclass == instrument_subclass)
+
+    if record_type <: DataRecord
+        ## remove DummyRecords
+        match &= header.instrument_group != get_instrument_group(DummyRecord)
+    end
+
+    return match
+end
+
+function _find_nth_record(file_pointer::IO, record_type::Type{<:Record}, n::Integer)
+    @assert n > 0
+    seekstart(file_pointer)
 
     while !eof(file_pointer)
         record_offset = position(file_pointer)
         header = native_read(file_pointer, RecordHeader)
 
-        match = header.record_class == record_class
-        match &= isnothing(instrument_group) ||
-                 (header.instrument_group == instrument_group)
-        match &= isnothing(instrument_subclass) ||
-                 (header.instrument_subclass == instrument_subclass)
-
-        if match
+        if header_match_record_type(header, record_type)
             n -= 1
             if n == 0
                 return record_offset, header.record_size

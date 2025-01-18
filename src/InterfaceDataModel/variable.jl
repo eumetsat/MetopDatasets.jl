@@ -2,7 +2,7 @@
 # License: MIT
 
 """
-    MetopVariable{T, N, R <: DataRecord, F} <: CommonDataModel.AbstractVariable{T, N}
+    MetopVariable{T, N, R <: DataRecord} <: CommonDataModel.AbstractVariable{T, N}
 
 `MetopVariable` wraps `AbstractMetopDiskArray` so it can be used with `MetopDataset`.
 """
@@ -37,6 +37,15 @@ function default_cf_attributes(
         end
     end
 
+    if !fixed_size(R, field)
+        fill_value = get_missing_value(R, field)
+
+        if auto_convert
+            T = _get_convert_type(F)
+            fill_value = _auto_convert(T, fill_value)
+        end
+        cf_attributes[:fillvalue] = fill_value
+    end
     #TODO consider adding _FillValue or missing_value, units, 
     return cf_attributes
 end
@@ -59,7 +68,7 @@ function CDM.variable(ds::MetopDataset, varname::CDM.SymbolOrString)
 end
 
 function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R}
-    disk_array = MetopDiskArray(ds.file_pointer, ds.data_record_layouts,
+    disk_array = construct_disk_array(ds.file_pointer, ds.data_record_layouts,
         Symbol(varname); auto_convert = ds.auto_convert)
     T = eltype(disk_array)
     N = ndims(disk_array)
@@ -84,7 +93,7 @@ function CDM.dimnames(disk_array::AbstractMetopDiskArray{T, N}) where {T, N}
         return [RECORD_DIM_NAME]
     end
 
-    dims = get_field_dimensions(disk_array.record_type, disk_array.field_name)
+    dims = get_field_dimensions(disk_array)
     push!(dims, RECORD_DIM_NAME)
     return dims
 end
@@ -118,8 +127,10 @@ end
 Base.size(v::MetopVariable) = size(v.disk_array)
 
 ### get index 
-Base.getindex(v::MetopVariable, indices...) = getindex(v.disk_array, indices...)
-
+function Base.getindex(v::MetopVariable, indices...)
+    checkbounds(v, indices...)
+    return getindex(v.disk_array, indices...)
+end
 # fix ambiguity
 Base.getindex(v::MetopVariable, n::CDM.CFStdName) = getindex(v::CDM.AbstractVariable, n)
 function Base.getindex(v::MetopVariable, name::CDM.SymbolOrString)

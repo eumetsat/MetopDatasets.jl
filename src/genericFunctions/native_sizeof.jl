@@ -48,3 +48,5 @@ function _get_array_size(T::Type, field_name::Symbol)
     total_dims = ndims(f_type)
     return get_raw_format_dim(T, field_name)[1:total_dims]
 end
+
+get_flexible_dims_file(file_pointer::IO, T::Type{<:BinaryRecord}) = Dict{Symbol, Int64}()

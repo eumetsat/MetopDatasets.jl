@@ -28,6 +28,14 @@ struct MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     record_offsets::Vector{Int64}
 end
 
+function construct_disk_array(file_pointer::IOStream,
+        record_layouts::Vector{FixedRecordLayout},
+        field_name::Symbol; auto_convert = true)
+    return MetopDiskArray(file_pointer,
+        record_layouts,
+        field_name::Symbol; auto_convert = auto_convert)
+end
+
 """
     MetopDiskArray(file_pointer::IOStream,
         record_layouts::Vector{FixedRecordLayout},
@@ -60,9 +68,10 @@ function MetopDiskArray(file_pointer::IOStream,
         offset_in_record = sum(native_sizeof.(record_type, fields_before))
 
         field_type = fieldtype(record_type, field_name)
-        if field_type <: Array
-            N = 1 + ndims(field_type)
-        end
+    end
+
+    if field_type <: Array
+        N = 1 + ndims(field_type)
     end
 
     record_count = record_layouts[end].record_range[end]
@@ -129,4 +138,8 @@ function DiskArrays.writeblock!(A::AbstractMetopDiskArray{T, N},
         ain,
         r::Vararg{AbstractUnitRange, N}) where {T, N}
     return error("MetopDiskArray is read-only")
+end
+
+function get_field_dimensions(disk_array::AbstractMetopDiskArray)
+    return get_field_dimensions(disk_array.record_type, disk_array.field_name)
 end

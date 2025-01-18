@@ -16,6 +16,7 @@ include("genericTypes/generic_types.jl")
 include("genericFunctions/generic_functions.jl")
 include("auto_generate_tools/auto_generate_tool.jl")
 include("MetopDiskArray/MetopDiskArray.jl")
+include("MetopDiskArray/FlexibleMetopDiskArray.jl")
 include("InterfaceDataModel/InterfaceDataModel.jl")
 
 # Instruments 
