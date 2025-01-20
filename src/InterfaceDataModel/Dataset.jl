@@ -8,6 +8,7 @@ struct MetopDataset{R <: DataRecord, L <: RecordLayout} <: CDM.AbstractDataset
     data_record_count::Int64
     auto_convert::Bool
     high_precision::Bool
+    maskingvalue::Any
 end
 
 """
@@ -54,16 +55,18 @@ julia> # close data set
 julia> close(ds);
 ``` 
 """
-MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool = false) = MetopDataset(
-    open(file_path, "r"); auto_convert = auto_convert, high_precision = high_precision)
+MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing) = MetopDataset(
+    open(file_path, "r"); auto_convert = auto_convert,
+    high_precision = high_precision, maskingvalue = maskingvalue)
 
 # method to enable `do` syntax.
 function MetopDataset(f::Function, file_path::AbstractString;
-        auto_convert::Bool = true, high_precision::Bool = false)
+        auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     file_pointer = open(file_path, "r")
     try
         ds = MetopDataset(
-            file_pointer; auto_convert = auto_convert, high_precision = high_precision)
+            file_pointer; auto_convert = auto_convert,
+            high_precision = high_precision, maskingvalue = maskingvalue)
         return f(ds)
     finally
         close(file_pointer)
@@ -71,7 +74,7 @@ function MetopDataset(f::Function, file_path::AbstractString;
 end
 
 function MetopDataset(
-        file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false)
+        file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
 
@@ -87,7 +90,8 @@ function MetopDataset(
         data_record_layouts,
         data_record_count,
         auto_convert,
-        high_precision)
+        high_precision,
+        maskingvalue)
 end
 
 ## Extend CommonDataModel.AbstractDataset interface
@@ -138,6 +142,8 @@ function CDM.attrib(ds::MetopDataset, name::CDM.SymbolOrString)
 
     return val
 end
+
+CDM.maskingvalue(ds::MetopDataset) = ds.maskingvalue
 
 Base.close(ds::MetopDataset) = close(ds.file_pointer)
 

@@ -56,6 +56,7 @@ function native_read(
     return native_read_array(io, T, array_size)
 end
 
+# Slow read function. #Should be optimised
 function native_read_array(io::IO, T::Type, array_size)::T
     A = [native_read(io, eltype(T)) for _ in 1:prod(array_size)]
     return reshape(A, array_size)
@@ -144,14 +145,24 @@ function _lookup_flexible_dim(
     end
 end
 
-function _get_array_size_flexible(parent_type::Type, field_name::Symbol,
-        flexible_dims_file::Dict, flexible_dims_record::Dict)
-    array_size_raw = _get_array_size(parent_type, field_name)
+function _get_array_size_flexible_raw(parent_type::Type, field_name::Symbol,
+        flexible_dims_file::Dict, flexible_dims_record::Dict)::NTuple{4, Int64}
+    array_size_raw = get_raw_format_dim(parent_type, field_name)
     array_size = Tuple((_lookup_flexible_dim(
                             dim_i, flexible_dims_file, flexible_dims_record)
     for dim_i in array_size_raw))
-
     return array_size
+end
+
+function _get_array_size_flexible(parent_type::Type, field_name::Symbol,
+        flexible_dims_file::Dict, flexible_dims_record::Dict)
+    array_size_full = _get_array_size_flexible_raw(parent_type, field_name,
+        flexible_dims_file, flexible_dims_record)
+
+    f_type = fieldtype(parent_type, field_name)
+    total_dims = ndims(f_type)
+
+    return array_size_full[1:total_dims]
 end
 
 function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_dims_file::Dict)

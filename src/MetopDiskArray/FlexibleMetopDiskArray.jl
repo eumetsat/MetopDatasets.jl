@@ -46,8 +46,7 @@ function FlexibleMetopDiskArray(file_pointer::IOStream,
         field_type = ShortCdsTime
     else
         field_type = fieldtype(record_type, field_name)
-        offset_in_records = _offset_in_record(record_type,
-            field_name, record_layout)
+        offset_in_records = _offset_in_record(record_layout, field_name)
         offsets_in_file = offsets_in_file .+ offset_in_records
     end
 
@@ -69,38 +68,11 @@ function FlexibleMetopDiskArray(file_pointer::IOStream,
         record_type)
 end
 
-function _offset_in_record(record_type::Type{<:DataRecord}, field_name::Symbol,
-        record_layout::FlexibleRecordLayout)
-    flexible_dims_records = record_layout.flexible_dims_records
-    flexible_dims_file = record_layout.flexible_dims_file
+function _offset_in_record(record_layout::FlexibleRecordLayout, field_name::Symbol)
+    field_index = findfirst(fieldnames(record_layout.record_type) .== field_name)
+    size_of_fields_before = record_layout.field_sizes[1:(field_index - 1), :]
 
-    field_index = findfirst(fieldnames(record_type) .== field_name)
-    fields_before = fieldnames(record_type)[1:(field_index - 1)]
-
-    offsets = zeros(Int64, length(flexible_dims_records))
-
-    for i in eachindex(offsets)
-        offset_i = 0
-        flexible_dims_i = flexible_dims_records[i]
-
-        for field_before in fields_before
-            field_before_type = fieldtype(record_type, field_before)
-
-            field_size = 0
-
-            if field_before_type <: Array
-                array_size = _get_array_size_flexible(record_type, field_before,
-                    flexible_dims_file, flexible_dims_i)
-                field_size = prod(array_size) * native_sizeof(eltype(field_before_type))
-            else
-                field_size = native_sizeof(field_before_type)
-            end
-
-            offset_i += field_size
-        end
-
-        offsets[i] = offset_i
-    end
+    offsets = dropdims(sum(size_of_fields_before, dims = 1), dims = 1)
 
     return offsets
 end

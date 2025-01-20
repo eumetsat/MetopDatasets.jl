@@ -73,6 +73,8 @@ function get_field_dimensions(T::Type{<:IASI_XXX_1C},
     end
 end
 
+############  IASI_SND_02  ################
+
 function get_dimensions(T::Type{<:IASI_SND_02},
         data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
     dimensions_dict = Dict{String, Integer}()
@@ -98,11 +100,10 @@ function get_dimensions(T::Type{<:IASI_SND_02},
     end
 
     # default others
-    dims_ints = filter(x -> x isa Integer, dims)
-    sort!(dims_ints)
-    for i in eachindex(dims_ints)
-        dimensions_dict["dim_$i"] = dims_ints[i]
-    end
+    dimensions_dict["lon_lat"] = 2 # is lat, lon the opposite order of L1C?
+    dimensions_dict["cloud_formations"] = 3
+    dimensions_dict["solar_sat_zenith_azimuth"] = 4
+    dimensions_dict["xtrack_sounder_pixels"] = 120
 
     return dimensions_dict
 end

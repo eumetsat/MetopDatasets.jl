@@ -81,7 +81,6 @@ function fixed_size(T::Type{<:BinaryRecord}, fieldname::Symbol)
         return true
     end
 end
-get_missing_value(T::Type{<:BinaryRecord}, field::Symbol) = nothing
 
 # add docs
 get_dim_fields(T::Type{<:BinaryRecord}) = error("Method missing for $T")
@@ -149,3 +148,14 @@ function get_field_dimensions(T::Type{<:BinaryRecord}, field::Symbol)::Vector{St
 
     return dimension_names
 end
+
+### default missing values
+function get_missing_value(T::Type{<:Record}, field::Symbol)
+    return get_missing_value(T, _get_field_eltype(T, field))
+end
+
+# default is nothing
+get_missing_value(T::Type{<:Record}, field_type::Type) = nothing
+
+get_missing_value(::Type{<:Record}, field_type::Type{<:Unsigned}) = typemax(field_type)
+get_missing_value(::Type{<:Record}, field_type::Type{<:Signed}) = typemin(field_type)

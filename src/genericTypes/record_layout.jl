@@ -97,10 +97,11 @@ struct FlexibleRecordLayout <: RecordLayout
     record_sizes::Vector{Int64}
     flexible_dims_file::Dict{Symbol, Int64}
     flexible_dims_records::Vector{Dict{Symbol, Int64}}
+    field_sizes::Matrix{Int64}
 end
 
 function _read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
-        fixed_size::Val{false})::Vector{FlexibleRecordLayout}
+        is_fixed_size::Val{false})::Vector{FlexibleRecordLayout}
     record_type = data_record_type(main_product_header)
 
     flexible_dims_file = get_flexible_dims_file(file_pointer, record_type)
@@ -127,13 +128,44 @@ function _read_record_layouts(file_pointer::IO, main_product_header::MainProduct
         end
     end
 
+    record_count = length(offsets)
+    fields = fieldnames(record_type)
+
+    field_sizes = zeros(Int64, length(fields), record_count)
+    for k in 1:length(fields)
+        field_name = fields[k]
+        f_type = fieldtype(record_type, field_name)
+
+        is_field_fixed = fixed_size(record_type, field_name)
+        if is_field_fixed
+            field_size = 0
+            if f_type <: Array
+                array_size = _get_array_size(record_type, field_name)
+                field_size = prod(array_size) * native_sizeof(eltype(f_type))
+            else
+                field_size = native_sizeof(f_type)
+            end
+            field_sizes[k, :] .= field_size
+        else
+            for i in 1:record_count
+                array_size = _get_array_size_flexible_raw(record_type, field_name,
+                    flexible_dims_file, flexible_dims_records[i])
+
+                field_size = prod(array_size) * native_sizeof(eltype(f_type))
+
+                field_sizes[k, i] = field_size
+            end
+        end
+    end
+
     record_layout = FlexibleRecordLayout(
         1:length(offsets),
         offsets,
         record_type,
         record_sizes,
         flexible_dims_file,
-        flexible_dims_records
+        flexible_dims_records,
+        field_sizes
     )
 
     return [record_layout]

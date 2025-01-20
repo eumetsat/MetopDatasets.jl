@@ -18,13 +18,17 @@ using MetopDatasets, NCDatasets, Test
     end
 
     ds_nc = NCDataset(netcdf_file)
+    sigma0_trip = Array(ds_nat["sigma0_trip"])
+    no_data = ismissing.(sigma0_trip)
 
-    @test all(Array(ds_nat["sigma0_trip"]) .== Array(ds_nc["sigma0_trip"]))
-    @test all(Array(ds_nat["utc_line_nodes"]) .== Array(ds_nc["utc_line_nodes"]))
-    @test all(Array(ds_nat["latitude"]) .== Array(ds_nc["latitude"]))
-    @test ds_nat.attrib["receive_time_end"] .== ds_nc.attrib["receive_time_end"]
-    @test ds_nat.attrib["semi_major_axis"] .== ds_nc.attrib["semi_major_axis"]
-    @test ds_nat.attrib["parent_product_name_1"] .== ds_nc.attrib["parent_product_name_1"]
+    println("missing ", sum(no_data), "out of ", length(sigma0_trip))
+
+    @test Array(ds_nat["sigma0_trip"])[.!no_data] == Array(ds_nc["sigma0_trip"])[.!no_data]
+    @test Array(ds_nat["utc_line_nodes"]) == Array(ds_nc["utc_line_nodes"])
+    @test Array(ds_nat["latitude"]) == Array(ds_nc["latitude"])
+    @test ds_nat.attrib["receive_time_end"] == ds_nc.attrib["receive_time_end"]
+    @test ds_nat.attrib["semi_major_axis"] == ds_nc.attrib["semi_major_axis"]
+    @test ds_nat.attrib["parent_product_name_1"] == ds_nc.attrib["parent_product_name_1"]
 
     close(ds_nat)
     close(ds_nc)
@@ -53,11 +57,11 @@ end
     ds_nat = MetopDataset(test_file)
     ds_nc = NCDataset(netcdf_file)
 
-    @test all(Array(ds_nat["ggeosondloc"]) .== Array(ds_nc["ggeosondloc"]))
-    @test all(Array(ds_nat["gs1cspect"]) .== Array(ds_nc["gs1cspect"]))
-    @test ds_nat.attrib["receive_time_end"] .== ds_nc.attrib["receive_time_end"]
-    @test ds_nat.attrib["semi_major_axis"] .== ds_nc.attrib["semi_major_axis"]
-    @test ds_nat.attrib["parent_product_name_1"] .== ds_nc.attrib["parent_product_name_1"]
+    @test Array(ds_nat["ggeosondloc"]) == Array(ds_nc["ggeosondloc"])
+    @test Array(ds_nat["gs1cspect"]) == Array(ds_nc["gs1cspect"])
+    @test ds_nat.attrib["receive_time_end"] == ds_nc.attrib["receive_time_end"]
+    @test ds_nat.attrib["semi_major_axis"] == ds_nc.attrib["semi_major_axis"]
+    @test ds_nat.attrib["parent_product_name_1"] == ds_nc.attrib["parent_product_name_1"]
 
     close(ds_nat)
     close(ds_nc)
@@ -74,7 +78,7 @@ end
     netcdf_file = tempname(; cleanup = true)
 
     # convert file to netCDF
-    # (Lupemba PC) Speed is roughly 24 Mb in 30s + 10s compilation, data rate ~1Mb/s
+    # (Lupemba PC) Speed is roughly 24 Mb in 2.5s + 13s compilation, data rate ~10Mb/s
     @info "convert IASI L2 file, size: $(round(filesize(test_file)/10^6, digits=2)) Mb"
     @time MetopDataset(test_file) do ds_nat
         NCDataset(netcdf_file, "c") do ds_temp

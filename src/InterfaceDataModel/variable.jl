@@ -37,16 +37,20 @@ function default_cf_attributes(
         end
     end
 
-    if !fixed_size(R, field)
-        fill_value = get_missing_value(R, field)
-
+    missing_value = get_missing_value(R, field)
+    if !isnothing(missing_value)
         if auto_convert
             T = _get_convert_type(F)
-            fill_value = _auto_convert(T, fill_value)
+            missing_value = _auto_convert(T, missing_value)
         end
-        cf_attributes[:fillvalue] = fill_value
+
+        cf_attributes[:missing_value] = [missing_value]
+
+        if !fixed_size(R, field)
+            cf_attributes[:_FillValue] = missing_value
+        end
     end
-    #TODO consider adding _FillValue or missing_value, units, 
+
     return cf_attributes
 end
 
@@ -76,9 +80,7 @@ function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) wher
 end
 
 function Base.getindex(ds::MetopDataset, varname::CDM.SymbolOrString)
-    cf_attributes = get_cf_attributes(ds, Symbol(varname), ds.auto_convert)
-
-    return CDM.cfvariable(ds, varname; cf_attributes...)
+    return CDM.cfvariable(ds, varname;)
 end
 
 function CDM.name(v::MetopVariable)

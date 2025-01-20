@@ -55,13 +55,13 @@ end
     latitude = ds["latitude"]
     @test latitude isa CDM.CFVariable
     lats = latitude[:, :]
-    @test lats isa Array{Float64, 2}
+    @test lats isa Array{Union{Missing, Float64}, 2}
     @test all(-90 .< lats .< 90)
 
     num_val_trip = ds["num_val_trip"]
     @test num_val_trip isa CDM.AbstractVariable
     num_vals = num_val_trip[1:4]
-    @test num_vals isa Vector{UInt32}
+    @test num_vals isa Vector{Union{Missing, UInt32}}
     @test all(num_vals .== [83, 96, 85, 75])
 
     times = ds["utc_line_nodes"][1:2:5]

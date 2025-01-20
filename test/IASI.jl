@@ -117,7 +117,7 @@ end
         @test log10(ds["gircimage"].attrib["scale_factor"]) ≈ -giadr.idefscaleiisscalefactor
 
         selected_spectra = ds["gs1cspect"][:, 1:2, 1:2, 1]
-        @test selected_spectra isa Array{Int16}
+        @test selected_spectra isa Array{Union{Missing, Int16}}
 
         #test manuel scaling of spectrum
         scaled_spectra = MetopDatasets.scale_iasi_spectrum(selected_spectra, giadr)
@@ -211,10 +211,43 @@ end
         @test all(isapprox.(ds["fg_qi_surface_temperature"][1:5, 3],
             [1.7000000000000002, 1.5, 1.8, 1.6, 2.6]))
 
+        # test that flexible fields are padded correctly
+        n_err = ds["nerr"][:]
+        vars = [ds["temperature_error"], ds["water_vapour_error"], ds["ozone_error"]]
+
+        for i in eachindex(n_err)
+            for v in vars
+                padded_array = v[:, :, i]
+                data = padded_array[:, 1:n_err[i]]
+                no_data = padded_array[:, (1 + n_err[i]):end]
+                if !isempty(no_data)
+                    @test all(ismissing, no_data)
+                end
+
+                @test !any(ismissing, data)
+            end
+        end
+
         # test that lazy load work for complex indexes with missing values
         weird_index = (4:2:10, 111:-2:3, 3:5)
         lazy_read = ds["hno3_cp_air"][weird_index...]
         eager_read = Array(ds["hno3_cp_air"])[weird_index...]
-        @test lazy_read[.!ismissing.(lazy_read)] == lazy_read[.!ismissing.(eager_read)]
+        no_data = ismissing.(lazy_read)
+
+        @test lazy_read[.!no_data] == lazy_read[.!no_data]
+
+        #test with NaNs instead of missing 
+        var_no_missing = cfvariable(ds, "hno3_cp_air", maskingvalue = NaN)
+        data_with_NaNs = var_no_missing[weird_index...]
+
+        @test isnan.(data_with_NaNs) == no_data
+        @test !any(ismissing, data_with_NaNs)
+        close(ds)
+
+        # set masking value for entire data set.
+        ds_no_missing = MetopDataset(test_file, maskingvalue = NaN)
+        @test ds_no_missing["hno3_cp_air"][weird_index...][.!no_data] ==
+              data_with_NaNs[.!no_data]
+        close(ds_no_missing)
     end
 end
