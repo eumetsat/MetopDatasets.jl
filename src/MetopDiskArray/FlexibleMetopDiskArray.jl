@@ -166,6 +166,11 @@ function _range_with_data(range, max_val)
     first_valid = findfirst(x -> 1 <= x <= max_val, range)
     last_valid = findlast(x -> 1 <= x <= max_val, range)
 
+    if isnothing(first_valid) || isnothing(last_valid)
+        # no valid data found. return empty range
+        return 1:0
+    end
+
     return first_valid:last_valid
 end
 
