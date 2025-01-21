@@ -24,6 +24,7 @@ native_sizeof(T::Type{<:BinaryRecord}, fixed_size::Val{true})::Integer = sum(nat
 function native_sizeof(T::Type, field_name::Symbol)
     return native_sizeof(T, field_name, Val(fixed_size(T)))
 end
+
 function native_sizeof(T::Type, field_name::Symbol, fixed_size::Val{true})::Integer
     f_type = fieldtype(T, field_name)
     if f_type <: AbstractArray
@@ -48,5 +49,3 @@ function _get_array_size(T::Type, field_name::Symbol)
     total_dims = ndims(f_type)
     return get_raw_format_dim(T, field_name)[1:total_dims]
 end
-
-get_flexible_dims_file(file_pointer::IO, T::Type{<:BinaryRecord}) = Dict{Symbol, Int64}()

@@ -17,7 +17,7 @@ The key variable is the "gs1cspect" which contains the radiance spectrum measure
 using MetopDatasets
 using CairoMakie, GeoMakie
 
-ds = MetopDataset("IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat");
+ds = MetopDataset("IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat", maskingvalue=NaN);
 
 # Select a single data record
 data_record_index = 670
@@ -99,7 +99,7 @@ This example will use Tyler to create an interactive background map similar to g
 ```julia
 using Tyler, GLMakie, MetopDatasets
 
-ds = MetopDataset("IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat");
+ds = MetopDataset("IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat", maskingvalue=NaN);
 
 # read geolocation points and data shape
 pts, pts_original_size = let
@@ -204,5 +204,89 @@ end
 ![Interactive IASI spectrum](interactive_IASI.png)
 It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context. 
 
-## Level 2 profiles
-MetopDatasets.jl does not support IASI level 2 products yet.
+## Level 2 Combined Sounding Products 
+The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gasses. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size is padded with a fill values (default to `missing`) to generate an array that fits with the `MetopDataset` interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses `maskingvalue = NaN` for selected variables to avoid `missing` values. 
+
+```julia
+using MetopDatasets
+using CairoMakie, GeoMakie
+
+ds = MetopDataset("IASI_SND_02_M03_20250120105357Z_20250120123253Z_N_O_20250120123416Z.nat");
+
+# Select a single data record
+data_record_index = 105
+
+# Select 1 points to plot temperature and humidity profile
+selected_point = 84
+selected_color = :red
+
+# check that the selected data has retrieval error
+error_data_index = ds["error_data_index"][selected_point, data_record_index]
+@assert !ismissing(error_data_index)
+
+# Read the geolocation of the data record
+longitude, latitude = let 
+    lat_lon_var = cfvariable(ds, "earth_location", maskingvalue = NaN)
+    lat_lon = ds["earth_location"][:,:,data_record_index]
+    lat_lon[2,:], lat_lon[1,:]
+end
+
+# Read the pressure levels 
+pressure_levels = let 
+    giard = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_SND_02_V11)
+    NLT = giard.num_pressure_levels_temp
+    scale_factor = MetopDatasets.get_scale_factor(MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_temp)
+    giard.pressure_levels_temp[1:NLT] /10^scale_factor
+end
+
+temperature, humidity  = let
+    temp_var = cfvariable(ds, "atmospheric_temperature", maskingvalue = NaN)
+    humidity_var = cfvariable(ds, "atmospheric_water_vapour", maskingvalue = NaN)
+    
+    temp_var[:, selected_point, data_record_index], humidity_var[:, selected_point, data_record_index]
+end
+
+
+fig = let
+
+    fig = Figure()
+
+    # axis to plot geolocation
+    ax = GeoAxis(fig[1, 1:2],
+        title = "Observations",
+        xlabel = "longitude",
+        ylabel = "latitude",
+        limits = (extrema(longitude), extrema(latitude)))
+
+    # plot all observations from data record in gray
+    scatter!(ax, longitude[:], latitude[:], color=:gray)
+    # plot selected observations in color
+    scatter!(ax, longitude[[selected_point]], latitude[[selected_point]], 
+        color=[selected_color], marker=:xcross, markersize = 15)
+
+    # Add coastlines
+    lines!(ax, GeoMakie.coastlines()) 
+
+    # Plot the temperature profile 
+       ax2 = Axis(fig[2, 1],
+        title = "Temperature profile",
+        ylabel = "Pressure (hPa)",
+        xlabel = "(K)", yreversed = true)
+
+    lines!(ax2,  temperature, pressure_levels/100, color = selected_color)
+    
+    
+    # Plot the temperature profile 
+    ax3 = Axis(fig[2, 2],
+        title = "Water vapour  profile",
+        ylabel = "Pressure (hPa)",
+        xlabel = "(kg/kg)", yreversed = true)
+
+    lines!(ax3,  humidity,pressure_levels/100, color = selected_color)
+    hideydecorations!(ax3)
+
+    fig
+end
+```
+![IASI L2 profile](IASI_L2_profile.png)
+The top plot shows a row of observations west of the west African coast. One observation have been marked with a colored X. The temperature and water vapour profile of the observation is shown below.

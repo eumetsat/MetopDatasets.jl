@@ -33,7 +33,8 @@ export read_single_record, read_first_record, scale_iasi_spectrum, max_giadr_cha
 
 # export cfvariable to enable maskingvalue 
 cfvariable = CDM.cfvariable
-export cfvariable
+dimnames = CDM.dimnames
+export cfvariable, dimnames
 
 # Function and types needed to extend the interface
 @compat public record_struct_expression, data_record_type

@@ -13,7 +13,7 @@ It is also possible to use MetopDatasets.jl from Python. See [Use with Python](@
 
 
 ## Quick start
-This section gives a very short overview of the core functionalities. More specific examples are given in the Example section e.g. [ASCAT](@ref). The [NCDatasets documentation](https://alexander-barth.github.io/NCDatasets.jl/stable/) is also a great resource for information on how to use the datasets. 
+This section gives a very short overview of the core functionalities. The [MetopDataset](@ref) page is recommend for more information and more specific examples are given in the Example section e.g. [ASCAT](@ref). The [NCDatasets documentation](https://alexander-barth.github.io/NCDatasets.jl/stable/) is also a great resource for information on how to use the datasets. 
 
 ### Installation
 MetopDatasets.jl can be installed via Pkg and the url to the GitHub repository.
@@ -32,7 +32,7 @@ ds = MetopDataset("ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_202303290
 ```
 REPL output:
 ```
-Dataset:
+Dataset: 
 Group: /
 
 Dimensions
@@ -45,27 +45,29 @@ Variables
     Datatype:    Dates.DateTime (Float64)
     Dimensions:  atrack
     Attributes:
-     description          = Record header start time    
+     description          = Record header start time
      units                = seconds since 2000-1-1 0:0:0
 
   record_stop_time   (48)
     Datatype:    Dates.DateTime (Float64)
     Dimensions:  atrack
     Attributes:
-     description          = Record header stop time     
+     description          = Record header stop time
      units                = seconds since 2000-1-1 0:0:0
 
-  degraded_inst_mdr   (48)    
-    Datatype:    UInt8 (UInt8)
+  degraded_inst_mdr   (48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
     Dimensions:  atrack
     Attributes:
      description          = Quality of MDR has been degraded from nominal due to an instrument degradation.
+     missing_value        = UInt8[0xff]
 
   degraded_proc_mdr   (48)
-    Datatype:    UInt8 (UInt8)
+    Datatype:    Union{Missing, UInt8} (UInt8)
     Dimensions:  atrack
     Attributes:
      description          = Quality of MDR has been degraded from nominal due to a processing degradation. 
+     missing_value        = UInt8[0xff]
 
   utc_line_nodes   (48)
     Datatype:    Dates.DateTime (Float64)
@@ -75,110 +77,125 @@ Variables
      units                = seconds since 2000-1-1 0:0:0
 
   abs_line_number   (48)
-    Datatype:    Int32 (Int32)
+    Datatype:    Union{Missing, Int32} (Int32)
     Dimensions:  atrack
     Attributes:
      description          = Absolute (unique) counter for the line of nodes (from format version 12.0 onwards only)
+     missing_value        = Int32[-2147483648]
 
   sat_track_azi   (48)
-    Datatype:    Float64 (UInt16)
+    Datatype:    Union{Missing, Float64} (UInt16)
     Dimensions:  atrack
     Attributes:
      description          = Azimuth angle bearing (range: 0 to 360) of nadir track velocity
+     missing_value        = UInt16[0xffff]
      scale_factor         = 0.010000000000000002
 
   as_des_pass   (48)
-    Datatype:    UInt8 (UInt8)
+    Datatype:    Union{Missing, UInt8} (UInt8)
     Dimensions:  atrack
     Attributes:
      description          = Ascending/descending pass indicator (0=DESC, 1=ASC)
+     missing_value        = UInt8[0xff]
 
   swath_indicator   (42 × 48)
-    Datatype:    UInt8 (UInt8)
+    Datatype:    Union{Missing, UInt8} (UInt8)
     Dimensions:  xtrack × atrack
     Attributes:
      description          = Swath (0=LEFT, 1=RIGHT)
+     missing_value        = UInt8[0xff]
 
   latitude   (42 × 48)
-    Datatype:    Float64 (Int32)
+    Datatype:    Union{Missing, Float64} (Int32)
     Dimensions:  xtrack × atrack
     Attributes:
      description          = Latitude (-90 to 90 deg)
+     missing_value        = Int32[-2147483648]
      scale_factor         = 1.0e-6
 
   longitude   (42 × 48)
-    Datatype:    Float64 (Int32)
+    Datatype:    Union{Missing, Float64} (Int32)
     Dimensions:  xtrack × atrack
     Attributes:
      description          = Longitude (0 to 360 deg)
+     missing_value        = Int32[-2147483648]
      scale_factor         = 1.0e-6
 
   sigma0_trip   (3 × 42 × 48)
-    Datatype:    Float64 (Int32)
+    Datatype:    Union{Missing, Float64} (Int32)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Sigma0 triplet, re-sampled to swath grid, for 3 beams (fore, mid, aft) 
+     missing_value        = Int32[-2147483648]
      scale_factor         = 1.0e-6
 
   kp   (3 × 42 × 48)
-    Datatype:    Float64 (UInt16)
+    Datatype:    Union{Missing, Float64} (UInt16)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Kp for re-sampled sigma0 triplet. Values between 0 and 1
+     missing_value        = UInt16[0xffff]
      scale_factor         = 0.0001
 
   inc_angle_trip   (3 × 42 × 48)
-    Datatype:    Float64 (UInt16)
+    Datatype:    Union{Missing, Float64} (UInt16)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Incidence angle for re-sampled sigma0 triplet.
+     missing_value        = UInt16[0xffff]
      scale_factor         = 0.010000000000000002
 
   azi_angle_trip   (3 × 42 × 48)
-    Datatype:    Float64 (Int16)
+    Datatype:    Union{Missing, Float64} (Int16)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Azimuth angle of the up-wind direction for a given measurement triplet (range: -180 to +180, where minus is west and plus is east with respect to North)
+     missing_value        = Int16[-32768]
      scale_factor         = 0.010000000000000002
 
   num_val_trip   (3 × 42 × 48)
-    Datatype:    UInt32 (UInt32)
+    Datatype:    Union{Missing, UInt32} (UInt32)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Number of full resolution sigma0 values contributing to the re-sampled sigma0 triplet.
+     missing_value        = UInt32[0xffffffff]
 
   f_kp   (3 × 42 × 48)
-    Datatype:    UInt8 (UInt8)
+    Datatype:    Union{Missing, UInt8} (UInt8)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Flag related to the quality of the Kp estimate (0=NOMINAL, 1=NON-NOMINAL)
+     missing_value        = UInt8[0xff]
 
   f_usable   (3 × 42 × 48)
-    Datatype:    UInt8 (UInt8)
+    Datatype:    Union{Missing, UInt8} (UInt8)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
-     description          = Flag related to the usability of the sigma0 triplet (0=GOOD, 1=USABLE, 2=NOT USABLE)
+     description          = Flag related to the usability of the sigma0 triplet (0=GOOD, 1=USABLE, 2=NOT USABLE)        
+     missing_value        = UInt8[0xff]
 
   f_land   (3 × 42 × 48)
-    Datatype:    Float64 (UInt16)
+    Datatype:    Union{Missing, Float64} (UInt16)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
-     description          = Flag related to presence of land in the re-sampled sigma0 triplet (based on land mask; value between 0 and 1 
-shows the fraction of original samples affected)
+     description          = Flag related to presence of land in the re-sampled sigma0 triplet (based on land mask; value between 0 and 1 shows the fraction of original samples affected)
+     missing_value        = UInt16[0xffff]
      scale_factor         = 0.001
 
   lcr   (3 × 42 × 48)
-    Datatype:    Float64 (UInt16)
+    Datatype:    Union{Missing, Float64} (UInt16)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Land Contamination Ratio estimate (based on SRF)
+     missing_value        = UInt16[0xffff]
      scale_factor         = 0.0001
 
   flagfield   (3 × 42 × 48)
-    Datatype:    UInt32 (UInt32)
+    Datatype:    Union{Missing, UInt32} (UInt32)
     Dimensions:  num_band × xtrack × atrack
     Attributes:
      description          = Flag field containing quality information
+     missing_value        = UInt32[0xffffffff]
 
 Global attributes
   product_name         = ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z
@@ -268,7 +285,7 @@ ds["latitude"][:,:]
 ```
 REPL output:
 ```
-42×48 Matrix{Float64}:
+42×48 Matrix{Union{Missing, Float64}}:
  -33.7308  -33.949   …  -43.7545  -43.9721
  -33.6969  -33.9152     -43.7252  -43.9429
  -33.6624  -33.8808     -43.695   -43.9127
@@ -325,13 +342,13 @@ end
 - ASCAT Level 1B
 - ASCAT Level 2 Soil Moisture
 - IASI Level 1C
+- IASI Level 2 Combined Sounding
 
 ### Formats not yet supported
 - AMSU-A Level 1B
 - AVHRR Level 1B
 - GOME-2 Level 1B
 - HIRS Level 1B 
-- IASI Level 2 Combined Sounding
 - MHS Level 1B 
 
 ### Reference documents 

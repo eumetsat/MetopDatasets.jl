@@ -10,7 +10,7 @@ eval(record_struct_expression(GIADR_IASI_SND_02_V11_format, GIADR_IASI_SND_02))
 
 get_instrument_subclass(::Type{<:GIADR_IASI_SND_02}) = 1
 
-function get_dim_fields(::Type{<:GIADR_IASI_SND_02})
+function get_flexible_dim_fields(::Type{<:GIADR_IASI_SND_02})
     return Dict(
         :num_temperature_pcs => :NPCT,
         :num_pressure_levels_temp => :NLT,
@@ -27,7 +27,7 @@ end
 
 function get_iasi_l2_flex_size(giard::GIADR_IASI_SND_02)
     flex_size_prod = Dict{Symbol, Int64}()
-    giard_size_fields = get_dim_fields(typeof(giard))
+    giard_size_fields = get_flexible_dim_fields(typeof(giard))
 
     for k in keys(giard_size_fields)
         value = getfield(giard, k)
@@ -35,6 +35,7 @@ function get_iasi_l2_flex_size(giard::GIADR_IASI_SND_02)
         flex_size_prod[dim_name] = value
     end
 
+    # computed dimensions
     flex_size_prod[:NEVA_CO] = ceil(Int64, flex_size_prod[:NL_CO] / 2)
     flex_size_prod[:NEVE_CO] = flex_size_prod[:NEVA_CO] * flex_size_prod[:NL_CO]
     flex_size_prod[:NEVA_HNO3] = ceil(Int64, flex_size_prod[:NL_HNO3] / 2)

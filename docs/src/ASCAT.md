@@ -75,8 +75,8 @@ This example plots the backscatter from and entire orbit. The backscatter is jus
 using MetopDatasets
 using CairoMakie, GeoMakie, Statistics
 
-# Open the dataset.
-ds = MetopDataset("ASCA_SZR_1B_M01_20241217081500Z_20241217095658Z_N_O_20241217090832Z.nat");
+# Open the dataset
+ds = MetopDataset("ASCA_SZR_1B_M01_20241217081500Z_20241217095658Z_N_O_20241217090832Z.nat", maskingvalue=NaN);
 
 # Select which beam to plot 
 beam_names = ["fore-beam", "mid-beam", "aft-beam"]
@@ -135,7 +135,7 @@ This example shows how to plot the backscatter for a small subset of the SZR pro
 using MetopDatasets
 using CairoMakie, GeoMakie, Statistics
 
-ds = MetopDataset("ASCA_SZR_1B_M01_20241217081500Z_20241217095658Z_N_O_20241217090832Z.nat");
+ds = MetopDataset("ASCA_SZR_1B_M01_20241217081500Z_20241217095658Z_N_O_20241217090832Z.nat", maskingvalue=NaN);
 
 # Select subset record subset to plot
 record_subset = 150:350
@@ -217,7 +217,7 @@ This example shows how to plot the soil moisture for from a SMR or SMO product.
 using MetopDatasets
 using CairoMakie, GeoMakie, Dates
 
-ds = MetopDataset("ASCA_SMR_02_M01_20241217081500Z_20241217095658Z_N_O_20241217090845Z.nat");
+ds = MetopDataset("ASCA_SMR_02_M01_20241217081500Z_20241217095658Z_N_O_20241217090845Z.nat", maskingvalue=NaN);
 
 # Select subset record subset to plot
 record_subset = 150:350
@@ -235,16 +235,9 @@ sensing_date = Date(DateTime(ds.attrib["sensing_start"]))
 latitude = ds["latitude"][right_swath, record_subset]
 longitude = ds["longitude"][right_swath, record_subset]
 soil_moisture = ds["soil_moisture"][right_swath, record_subset]
-flags = ds["aggregated_quality_flag"][ right_swath, record_subset]
 
 # change longitude to be -180 to 180
 longitude[longitude .> 180] .-= 360
-
-# The out of range soil moisture is flagged with 255
-usable = flags .!= 255
-
-# Set the unusable soil moisture to NaN
-soil_moisture[.!usable] .= NaN
 
 fig = let    
     fig = Figure()

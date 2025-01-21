@@ -11,7 +11,7 @@ function _layouts(file_pointer)
         MetopDatasets.MainProductHeader)
 
     MetopDatasets._skip_sphr(file_pointer, main_product_header.total_sphr)
-    record_layouts = MetopDatasets._read_record_layouts(file_pointer, main_product_header)
+    record_layouts = MetopDatasets.read_record_layouts(file_pointer, main_product_header)
     return record_layouts
 end
 

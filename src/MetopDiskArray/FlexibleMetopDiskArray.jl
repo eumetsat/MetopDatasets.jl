@@ -4,7 +4,7 @@
 """
     FlexibleMetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
 
-TODO
+Similar to `MetopDiskArray` but able to handle flexible record layout.
 """
 struct FlexibleMetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     file_pointer::IOStream
@@ -18,6 +18,13 @@ struct FlexibleMetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     record_type::Type{<:DataRecord}
 end
 
+"""
+    construct_disk_array(file_pointer::IOStream,
+        record_layouts::Vector{FlexibleRecordLayout},
+        field_name::Symbol; auto_convert = true)
+
+Construct a disk array for flexible record layout.
+"""
 function construct_disk_array(file_pointer::IOStream,
         record_layouts::Vector{FlexibleRecordLayout},
         field_name::Symbol; auto_convert = true)
@@ -80,6 +87,7 @@ end
 function Base.size(disk_array::FlexibleMetopDiskArray)
     if disk_array.field_type <: Array
         layout = disk_array.record_layout
+        # use max flexible dims for size
         flexible_dims_max = MetopDatasets.get_flex_dim_max(layout)
 
         field_array_size = _get_array_size_flexible(
@@ -90,10 +98,6 @@ function Base.size(disk_array::FlexibleMetopDiskArray)
     else
         return (disk_array.record_count,)
     end
-end
-
-function fixed_size(disk_array::FlexibleMetopDiskArray)
-    return fixed_size(disk_array.record_type, disk_array.field_name)
 end
 
 # Extend get index functions
@@ -117,31 +121,35 @@ function DiskArrays.readblock!(disk_array::FlexibleMetopDiskArray{T, N},
             aout_rec = selectdim(aout, N, k)
 
             if is_field_fixed
+                # similar to fixed size
                 array_size = _get_array_size(disk_array.record_type, disk_array.field_name)
                 full_field = native_read_array(
                     disk_array.file_pointer, disk_array.field_type, array_size)
                 aout_rec .= _auto_convert.(T, full_field[i_array...])
             else
+                # get size of flex field and read entire field.
                 flexible_dims_record = disk_array.record_layout.flexible_dims_records[record_index]
                 array_size = _get_array_size_flexible(
                     disk_array.record_type, disk_array.field_name,
                     disk_array.record_layout.flexible_dims_file, flexible_dims_record)
+                full_field = native_read_array(
+                    disk_array.file_pointer, disk_array.field_type, array_size)
 
+                # get the part of the range overlapping with the actual flex field
                 a_range_in_data = _range_with_data(i_array, array_size)
                 i_array_in_data = Tuple((i_array[l][a_range_in_data[l]]
                 for l in eachindex(i_array)))
 
-                full_field = native_read_array(
-                    disk_array.file_pointer, disk_array.field_type, array_size)
-
                 if i_array != i_array_in_data
-                    # pre fill with missing values
+                    # pad the aout_rec with missing values if the range exceeds the 
+                    # size of the flex field.
                     fill_value = get_missing_value(
                         disk_array.record_type, disk_array.field_name)
                     fill_value = _auto_convert(T, fill_value)
                     fill!(aout_rec, fill_value)
                 end
 
+                # extract the data in the range that overlap with the flex field
                 aout_rec[a_range_in_data...] .= _auto_convert.(
                     T, full_field[i_array_in_data...])
             end
@@ -153,6 +161,7 @@ function DiskArrays.readblock!(disk_array::FlexibleMetopDiskArray{T, N},
     return nothing
 end
 
+# helper functions to find data ranges
 function _range_with_data(range, max_val)
     first_valid = findfirst(x -> 1 <= x <= max_val, range)
     last_valid = findlast(x -> 1 <= x <= max_val, range)
@@ -162,6 +171,11 @@ end
 
 function _range_with_data(ranges::Tuple, max_vals::Tuple)
     return Tuple(_range_with_data(ranges[l], max_vals[l]) for l in eachindex(max_vals))
+end
+
+# forward method
+function fixed_size(disk_array::FlexibleMetopDiskArray)
+    return fixed_size(disk_array.record_type, disk_array.field_name)
 end
 
 function get_field_dimensions(disk_array::FlexibleMetopDiskArray)

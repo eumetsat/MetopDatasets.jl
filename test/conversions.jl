@@ -21,8 +21,6 @@ using MetopDatasets, NCDatasets, Test
     sigma0_trip = Array(ds_nat["sigma0_trip"])
     no_data = ismissing.(sigma0_trip)
 
-    println("missing ", sum(no_data), "out of ", length(sigma0_trip))
-
     @test Array(ds_nat["sigma0_trip"])[.!no_data] == Array(ds_nc["sigma0_trip"])[.!no_data]
     @test Array(ds_nat["utc_line_nodes"]) == Array(ds_nc["utc_line_nodes"])
     @test Array(ds_nat["latitude"]) == Array(ds_nc["latitude"])

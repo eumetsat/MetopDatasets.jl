@@ -100,7 +100,7 @@ function get_dimensions(T::Type{<:IASI_SND_02},
     end
 
     # default others
-    dimensions_dict["lon_lat"] = 2 # is lat, lon the opposite order of L1C?
+    dimensions_dict["lat_lon"] = 2 #The coordinates have opposite order of L1C!
     dimensions_dict["cloud_formations"] = 3
     dimensions_dict["solar_sat_zenith_azimuth"] = 4
     dimensions_dict["xtrack_sounder_pixels"] = 120

@@ -46,10 +46,11 @@ ds["latitude"]
 REPL output:
 ```
 latitude (42 × 48)
-  Datatype:    Float64 (Int32)
+  Datatype:    Union{Missing, Float64} (Int32)
   Dimensions:  xtrack × atrack
   Attributes:
    description          = Latitude (-90 to 90 deg)
+   missing_value        = Int32[-2147483648]
    scale_factor         = 1.0e-6
 ```
 Load the complete variable
@@ -58,7 +59,7 @@ ds["latitude"][:,:]
 ```
 REPL output:
 ```
-42×48 Matrix{Float64}:
+42×48 Matrix{Union{Missing, Float64}}:
  -33.7308  -33.949   …  -43.7545  -43.9721
  -33.6969  -33.9152     -43.7252  -43.9429
  -33.6624  -33.8808     -43.695   -43.9127

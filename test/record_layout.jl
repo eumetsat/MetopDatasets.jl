@@ -70,7 +70,7 @@ using MetopDatasets, Test
                     0x01,
                     0x00001d53)]
 
-    record_layouts = MetopDatasets.get_data_record_layouts(pointers,
+    record_layouts = MetopDatasets._get_data_record_layouts(pointers,
         total_size,
         data_record_type)
 
@@ -156,7 +156,7 @@ end
                     0x03,
                     0x08170ad7)]
 
-    record_layouts = MetopDatasets.get_data_record_layouts(pointers,
+    record_layouts = MetopDatasets._get_data_record_layouts(pointers,
         total_size,
         data_record_type)
 

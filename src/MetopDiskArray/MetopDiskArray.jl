@@ -28,6 +28,13 @@ struct MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     record_offsets::Vector{Int64}
 end
 
+"""
+    construct_disk_array(file_pointer::IOStream,
+        record_layouts::Vector{FixedRecordLayout},
+        field_name::Symbol; auto_convert = true)
+
+Construct a disk array for fixed record layout.
+"""
 function construct_disk_array(file_pointer::IOStream,
         record_layouts::Vector{FixedRecordLayout},
         field_name::Symbol; auto_convert = true)
@@ -133,13 +140,14 @@ function DiskArrays.readblock!(disk_array::MetopDiskArray{T, N},
     return nothing
 end
 
+# helper function
+function get_field_dimensions(disk_array::AbstractMetopDiskArray)
+    return get_field_dimensions(disk_array.record_type, disk_array.field_name)
+end
+
 # Set error for write function
 function DiskArrays.writeblock!(A::AbstractMetopDiskArray{T, N},
         ain,
         r::Vararg{AbstractUnitRange, N}) where {T, N}
     return error("MetopDiskArray is read-only")
-end
-
-function get_field_dimensions(disk_array::AbstractMetopDiskArray)
-    return get_field_dimensions(disk_array.record_type, disk_array.field_name)
 end

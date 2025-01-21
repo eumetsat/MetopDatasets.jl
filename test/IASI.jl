@@ -136,7 +136,7 @@ end
     # giard
     @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_SND_02_V11) == false
 
-    dims_in_giard = MetopDatasets.get_dim_fields(MetopDatasets.GIADR_IASI_SND_02_V11)
+    dims_in_giard = MetopDatasets.get_flexible_dim_fields(MetopDatasets.GIADR_IASI_SND_02_V11)
     giard_fields_with_dim = sort(collect(keys(dims_in_giard)))
     giard_flexible_dim_names = [dims_in_giard[k] for k in giard_fields_with_dim]
 
@@ -183,7 +183,7 @@ end
         flexible_record_layout, total_mdr = open(test_file) do file_pointer
             main_header = MetopDatasets.native_read(
                 file_pointer, MetopDatasets.MainProductHeader)
-            return only(MetopDatasets._read_record_layouts(file_pointer, main_header)),
+            return only(MetopDatasets.read_record_layouts(file_pointer, main_header)),
             main_header.total_mdr
         end
 

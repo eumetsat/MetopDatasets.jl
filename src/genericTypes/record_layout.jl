@@ -1,16 +1,21 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-function _read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader)
+"""
+    read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader)
+
+Read the appropriate record layout from IO.
+"""
+function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader)
     record_type = data_record_type(main_product_header)
-    return _read_record_layouts(
+    return read_record_layouts(
         file_pointer, main_product_header, Val(fixed_size(record_type)))
 end
 
 """
     FixedRecordLayout
 
-Used to store the locations of different layouts of records in Native metop files.
+Used to store the record layout of fixed size data records in a Native metop files.
 """
 struct FixedRecordLayout <: RecordLayout
     record_range::UnitRange{Int64}
@@ -18,7 +23,7 @@ struct FixedRecordLayout <: RecordLayout
     record_type::Type{<:Record}
 end
 
-function _read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
+function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
         fixed_size::Val{true})::Vector{FixedRecordLayout}
     record_type = data_record_type(main_product_header)
 
@@ -32,7 +37,7 @@ function _read_record_layouts(file_pointer::IO, main_product_header::MainProduct
     # get record layouts
     total_file_size = main_product_header.actual_product_size
 
-    record_layouts = get_data_record_layouts(internal_pointer_records,
+    record_layouts = _get_data_record_layouts(internal_pointer_records,
         total_file_size,
         record_type)
 
@@ -40,12 +45,12 @@ function _read_record_layouts(file_pointer::IO, main_product_header::MainProduct
 end
 
 """
-    get_data_record_layouts(internal_pointer_records::Vector{InternalPointerRecord},
+    _get_data_record_layouts(internal_pointer_records::Vector{InternalPointerRecord},
         total_file_size::Integer, record_type::Type{<:DataRecord})::Vector{FixedRecordLayout}
 
 Compute the `record_layouts`
 """
-function get_data_record_layouts(internal_pointer_records::Vector{InternalPointerRecord},
+function _get_data_record_layouts(internal_pointer_records::Vector{InternalPointerRecord},
         total_file_size::Integer, record_type::Type{<:DataRecord})::Vector{FixedRecordLayout}
     record_layouts = FixedRecordLayout[]
 
@@ -88,7 +93,7 @@ end
 """
     FlexibleRecordLayout
 
-Used to store the locations of different layouts of records in Native metop files.
+Used to store the record layout of flexible size data records in a Native metop files.
 """
 struct FlexibleRecordLayout <: RecordLayout
     record_range::UnitRange{Int64}
@@ -100,11 +105,11 @@ struct FlexibleRecordLayout <: RecordLayout
     field_sizes::Matrix{Int64}
 end
 
-function _read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
+function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
         is_fixed_size::Val{false})::Vector{FlexibleRecordLayout}
     record_type = data_record_type(main_product_header)
 
-    flexible_dims_file = get_flexible_dims_file(file_pointer, record_type)
+    flexible_dims_file = _get_flexible_dims_file(file_pointer, record_type)
 
     flexible_dims_records = Dict{Symbol, Int64}[]
     offsets = Int64[]
@@ -113,6 +118,7 @@ function _read_record_layouts(file_pointer::IO, main_product_header::MainProduct
     record_start_pos, _ = _find_nth_record(file_pointer, record_type, 1)
     seek(file_pointer, record_start_pos)
 
+    # read flexible dimensions and record offsets 
     while !eof(file_pointer)
         header = native_read(file_pointer, RecordHeader)
 
@@ -131,6 +137,8 @@ function _read_record_layouts(file_pointer::IO, main_product_header::MainProduct
     record_count = length(offsets)
     fields = fieldnames(record_type)
 
+    # compute offsets of all fields in all records.
+    # This avoid duplicate computations when reading the variables.
     field_sizes = zeros(Int64, length(fields), record_count)
     for k in 1:length(fields)
         field_name = fields[k]
@@ -171,6 +179,7 @@ function _read_record_layouts(file_pointer::IO, main_product_header::MainProduct
     return [record_layout]
 end
 
+# helper functions to get the max values of flexible dimensions
 function get_flex_dim_max(layout::FlexibleRecordLayout, dim_name::Symbol)
     if haskey(layout.flexible_dims_file, dim_name)
         return layout.flexible_dims_file[dim_name]
