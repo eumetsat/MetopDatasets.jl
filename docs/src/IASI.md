@@ -232,13 +232,19 @@ longitude, latitude = let
 end
 
 # Read the pressure levels 
-pressure_levels = let 
+temp_pressure_levels, hum_pressure_levels = let 
     giard = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_SND_02_V11)
-    NLT = giard.num_pressure_levels_temp
-    scale_factor = MetopDatasets.get_scale_factor(MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_temp)
-    giard.pressure_levels_temp[1:NLT] /10^scale_factor
+    
+    scale_factor_temp = MetopDatasets.get_scale_factor(MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_temp)
+    temp_level = giard.pressure_levels_temp/10^scale_factor_temp
+
+    scale_factor_humidity = MetopDatasets.get_scale_factor(MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_humidity)
+    humidity_level = giard.pressure_levels_humidity/10^scale_factor_humidity
+
+    temp_level, humidity_level
 end
 
+# Read temperature and humidity profiles
 temperature, humidity  = let
     temp_var = cfvariable(ds, "atmospheric_temperature", maskingvalue = NaN)
     humidity_var = cfvariable(ds, "atmospheric_water_vapour", maskingvalue = NaN)
@@ -246,7 +252,7 @@ temperature, humidity  = let
     temp_var[:, selected_point, data_record_index], humidity_var[:, selected_point, data_record_index]
 end
 
-
+# Plot figure
 fig = let
 
     fig = Figure()
@@ -268,21 +274,24 @@ fig = let
     lines!(ax, GeoMakie.coastlines()) 
 
     # Plot the temperature profile 
-       ax2 = Axis(fig[2, 1],
+    y_limits = (-50.,1050.0)
+
+    ax2 = Axis(fig[2, 1],
         title = "Temperature profile",
         ylabel = "Pressure (hPa)",
-        xlabel = "(K)", yreversed = true)
+        xlabel = "(K)", yreversed = true,
+        limits = (nothing, y_limits))
 
-    lines!(ax2,  temperature, pressure_levels/100, color = selected_color)
-    
+    lines!(ax2,  temperature, temp_pressure_levels/100, color = selected_color)
     
     # Plot the temperature profile 
     ax3 = Axis(fig[2, 2],
         title = "Water vapour  profile",
         ylabel = "Pressure (hPa)",
-        xlabel = "(kg/kg)", yreversed = true)
+        xlabel = "(kg/kg)", yreversed = true,
+        limits = (nothing, y_limits))
 
-    lines!(ax3,  humidity,pressure_levels/100, color = selected_color)
+    lines!(ax3,  humidity, hum_pressure_levels/100, color = selected_color)
     hideydecorations!(ax3)
 
     fig
