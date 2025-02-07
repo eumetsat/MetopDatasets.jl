@@ -5,7 +5,7 @@
 # julia --project=docs
 # import Pkg
 # Pkg.resolve()
-# include("docs/make.jl")'
+# include("docs/make.jl")
 
 using MetopDatasets
 using Documenter
@@ -23,6 +23,7 @@ makedocs(;
     ),
     pages = [
         "Introduction" => "index.md",
+        "MetopDataset" => "MetopDataset.md",
         "Use with Python" => "python.md",
         "Examples" => [
             "ASCAT" => "ASCAT.md",

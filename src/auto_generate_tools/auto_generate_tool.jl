@@ -64,13 +64,18 @@ function _convert_dim(dim)
     if dim isa Integer
         return dim
     elseif dim isa AbstractString
-        return parse(Int64, dim)
+        val_parse = tryparse(Int64, dim)
+        if isnothing(val_parse)
+            return Symbol(dim)
+        else
+            return val_parse
+        end
     else
         error("can't convert dimension of type $(typeof(dim))")
     end
 end
 
-function _get_raw_format_dim(row)::NTuple{4, Int64}
+function _get_raw_format_dim(row)
     @assert hasproperty(row, :DIM1)
     dim1 = _convert_dim(row.DIM1)
     dim2 = hasproperty(row, :DIM2) ? _convert_dim(row.DIM2) : 1
@@ -82,25 +87,28 @@ end
 
 function _get_type(row::CSV.Row)
     element_type = TYPE_NAMES[lowercase(row.TYPE)]
-
     field_dims = _get_raw_format_dim(row)
-    array_size = prod(field_dims)
 
-    expected_type_size = row.var"TYPE SIZE" isa AbstractString ?
-                         parse(Int64, row.var"TYPE SIZE") : Int64(row.var"TYPE SIZE")
-    expected_field_size = row.var"FIELD SIZE" isa AbstractString ?
-                          parse(Int64, row.var"FIELD SIZE") : Int64(row.var"FIELD SIZE")
+    if all(isa.(field_dims, Integer))
+        # check size for fixed size fields.
+        array_size = prod(field_dims)
 
-    if native_sizeof(element_type) != expected_type_size
-        error("Invalid type size. Returned $(native_sizeof(element_type)), expected $expected_type_size for row: $row")
-    end
+        expected_type_size = row.var"TYPE SIZE" isa AbstractString ?
+                             parse(Int64, row.var"TYPE SIZE") : Int64(row.var"TYPE SIZE")
+        expected_field_size = row.var"FIELD SIZE" isa AbstractString ?
+                              parse(Int64, row.var"FIELD SIZE") : Int64(row.var"FIELD SIZE")
 
-    if (native_sizeof(element_type) * array_size) != expected_field_size
-        error("Invalid field size. Returned $(native_sizeof(element_type) * array_size) , expected $expected_field_size for row: $row")
-    end
+        if native_sizeof(element_type) != expected_type_size
+            error("Invalid type size. Returned $(native_sizeof(element_type)), expected $expected_type_size for row: $row")
+        end
 
-    if array_size == 1
-        return element_type
+        if (native_sizeof(element_type) * array_size) != expected_field_size
+            error("Invalid field size. Returned $(native_sizeof(element_type) * array_size) , expected $expected_field_size for row: $row")
+        end
+
+        if array_size == 1
+            return element_type
+        end
     end
 
     n_field_dimension = findlast(x -> x != 1, field_dims)
@@ -166,6 +174,10 @@ function record_struct_expression(file_name, record_type)
 
         const $dimension_dict_name = MetopDatasets.raw_format_dim_dict($file_name)
         MetopDatasets.get_raw_format_dim(T::Type{$struct_name}) = $dimension_dict_name
+
+        function MetopDatasets.fixed_size(T::Type{$struct_name})
+            return valtype($dimension_dict_name) <: NTuple{4, <:Integer}
+        end
     end
 
     return auto_generated_code

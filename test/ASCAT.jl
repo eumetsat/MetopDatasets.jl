@@ -24,6 +24,7 @@ end
     ## ASCA_SZR_1B_V13
     @test MetopDatasets.ASCA_SZR_1B_V13 <: MetopDatasets.DataRecord
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZR_1B_V13) == 6677
+    @test MetopDatasets.fixed_size(MetopDatasets.ASCA_SZR_1B_V13) == true
     @test test_dimensions(MetopDatasets.ASCA_SZR_1B_V13)
 
     field_index = findfirst(fieldnames(MetopDatasets.ASCA_SZR_1B_V13) .== :sigma0_trip)

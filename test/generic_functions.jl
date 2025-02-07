@@ -20,6 +20,8 @@ function MetopDatasets.get_raw_format_dim(T::Type{TestRecord})
         :f3 => f3_array_size)
 end
 
+MetopDatasets.fixed_size(T::Type{TestRecord}) = true
+
 @testset "native_read" begin
     @test MetopDatasets.get_raw_format_dim(TestRecord)[:f1] == (100, 101, 102, 1)
     @test MetopDatasets._get_array_size(TestRecord, :f1) == f1_array_size

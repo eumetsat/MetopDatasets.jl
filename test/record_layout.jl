@@ -3,7 +3,7 @@
 
 using MetopDatasets, Test
 
-@testset "Data chunk without dummy" begin
+@testset "Data layout without dummy" begin
     # extracted from "test/testData/ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat";
     total_size = 26618899
     data_record_type = MetopDatasets.ASCA_SZR_1B_V12
@@ -70,26 +70,26 @@ using MetopDatasets, Test
                     0x01,
                     0x00001d53)]
 
-    record_chunks = MetopDatasets.get_data_record_chunks(pointers,
+    record_layouts = MetopDatasets._get_data_record_layouts(pointers,
         total_size,
         data_record_type)
 
-    datarecord_chunks = filter(
-        x -> x.record_type != MetopDatasets.DummyRecord, record_chunks)
-    dummyrecord_chunks = filter(x -> x.record_type == MetopDatasets.DummyRecord,
-        record_chunks)
+    datarecord_layouts = filter(
+        x -> x.record_type != MetopDatasets.DummyRecord, record_layouts)
+    dummyrecord_layouts = filter(x -> x.record_type == MetopDatasets.DummyRecord,
+        record_layouts)
 
-    @test length(datarecord_chunks) == 1
-    @test length(dummyrecord_chunks) == 0
+    @test length(datarecord_layouts) == 1
+    @test length(dummyrecord_layouts) == 0
 
-    @test length(datarecord_chunks[1].record_range) == 3264
-    @test datarecord_chunks[1].record_range[1] == 1
+    @test length(datarecord_layouts[1].record_range) == 3264
+    @test datarecord_layouts[1].record_range[1] == 1
 
-    size_of_records = data_record_size * length(datarecord_chunks[1].record_range)
-    @test total_size == datarecord_chunks[1].offset + size_of_records
+    size_of_records = data_record_size * length(datarecord_layouts[1].record_range)
+    @test total_size == datarecord_layouts[1].offset + size_of_records
 end
 
-@testset "Data chunk with dummy" begin
+@testset "Data layout with dummy" begin
     # extracted from "test/testData/ASCA_SZF_1B_M01_20221107123600Z_20221107141459Z_N_O_20221107132528Z.nat";
     total_size = 152637391
     data_record_type = MetopDatasets.ASCA_SZF_1B_V12
@@ -156,28 +156,28 @@ end
                     0x03,
                     0x08170ad7)]
 
-    record_chunks = MetopDatasets.get_data_record_chunks(pointers,
+    record_layouts = MetopDatasets._get_data_record_layouts(pointers,
         total_size,
         data_record_type)
 
-    datarecord_chunks = filter(
-        x -> x.record_type != MetopDatasets.DummyRecord, record_chunks)
-    dummyrecord_chunks = filter(x -> x.record_type == MetopDatasets.DummyRecord,
-        record_chunks)
+    datarecord_layouts = filter(
+        x -> x.record_type != MetopDatasets.DummyRecord, record_layouts)
+    dummyrecord_layouts = filter(x -> x.record_type == MetopDatasets.DummyRecord,
+        record_layouts)
 
-    @test length(datarecord_chunks) == 2
-    @test length(dummyrecord_chunks) == 1
+    @test length(datarecord_layouts) == 2
+    @test length(dummyrecord_layouts) == 1
 
-    @test datarecord_chunks[1].record_range[1] == 1
-    @test (datarecord_chunks[1].record_range[end] + 1) ==
-          datarecord_chunks[2].record_range[1]
+    @test datarecord_layouts[1].record_range[1] == 1
+    @test (datarecord_layouts[1].record_range[end] + 1) ==
+          datarecord_layouts[2].record_range[1]
 
-    size_chunk_1 = data_record_size * length(datarecord_chunks[1].record_range)
-    size_chunk_2 = MetopDatasets.native_sizeof(MetopDatasets.DummyRecord) *
-                   length(dummyrecord_chunks[1].record_range)
-    size_chunk_3 = data_record_size * length(datarecord_chunks[2].record_range)
+    size_layout_1 = data_record_size * length(datarecord_layouts[1].record_range)
+    size_layout_2 = MetopDatasets.native_sizeof(MetopDatasets.DummyRecord) *
+                    length(dummyrecord_layouts[1].record_range)
+    size_layout_3 = data_record_size * length(datarecord_layouts[2].record_range)
 
-    @test (size_chunk_1 + datarecord_chunks[1].offset) == dummyrecord_chunks[1].offset
-    @test (size_chunk_2 + dummyrecord_chunks[1].offset) == datarecord_chunks[2].offset
-    @test (size_chunk_3 + datarecord_chunks[2].offset) == total_size
+    @test (size_layout_1 + datarecord_layouts[1].offset) == dummyrecord_layouts[1].offset
+    @test (size_layout_2 + dummyrecord_layouts[1].offset) == datarecord_layouts[2].offset
+    @test (size_layout_3 + datarecord_layouts[2].offset) == total_size
 end

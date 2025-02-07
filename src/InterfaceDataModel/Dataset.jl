@@ -1,19 +1,20 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-struct MetopDataset{R <: DataRecord} <: CDM.AbstractDataset
+struct MetopDataset{R <: DataRecord, L <: RecordLayout} <: CDM.AbstractDataset
     file_pointer::IO
     main_product_header::MainProductHeader
-    data_record_chunks::Vector{RecordChunk}
+    data_record_layouts::Vector{L}
     data_record_count::Int64
     auto_convert::Bool
     high_precision::Bool
+    maskingvalue::Any
 end
 
 """
-    MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool=false)
-    MetopDataset(file_pointer::IO; auto_convert::Bool = true, high_precision::Bool=false)
-    MetopDataset(f::Function, file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool=false) 
+    MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool=false, maskingvalue = missing)
+    MetopDataset(file_pointer::IO; auto_convert::Bool = true, high_precision::Bool=false, maskingvalue = missing)
+    MetopDataset(f::Function, file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool=false, maskingvalue = missing) 
 
 Load a MetopDataset from a Metop Native binary file or from a `IO` to a Native binary file.
 Only the meta data is loaded upon creation and all variables are lazy loaded. 
@@ -28,6 +29,9 @@ the spectrum have different scaling factors.
 Selected fields are converted to `Float32` to save memory. Normally `Float32` is more than sufficient to represent the instrument accuracy. 
 Setting `high_precision=true` will in some case convert these variables to `Float64`. 
 
+`maskingvalue = NaN` will replace `missing` values with NaN. This normally floats but can create issues for integers. See documentation
+page for more information.
+
 ## Example
 ```julia-repl
 julia> file_path = "test/testData/ASCA_SZR_1B_M03_20230329063300Z_20230329063558Z_N_C_20230329081417Z"
@@ -36,14 +40,16 @@ julia>
 julia> # display metadata of a variable
 julia> ds["latitude"]
 latitude (82 × 96)
-    Datatype:    Float64 (Int32)
-    Dimensions:  xtrack × record
-    Attributes:
-    description          = Latitude (-90 to 90 deg)
+  Datatype:    Union{Missing, Float64} (Int32)
+  Dimensions:  xtrack × atrack
+  Attributes:
+   description          = Latitude (-90 to 90 deg)
+   missing_value        = Int32[-2147483648]
+   scale_factor         = 1.0e-6
 julia>
 julia> # load a subset of a variable  
 julia> lat_subset = ds["latitude"][1:2,1:3] # load a small subset of latitudes.
-2×3 Matrix{Float64}:
+2×3 Matrix{Union{Missing,Float64}}:
     -33.7308  -33.8399  -33.949
     -33.7139  -33.823   -33.9322
 julia>
@@ -54,16 +60,18 @@ julia> # close data set
 julia> close(ds);
 ``` 
 """
-MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool = false) = MetopDataset(
-    open(file_path, "r"); auto_convert = auto_convert, high_precision = high_precision)
+MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing) = MetopDataset(
+    open(file_path, "r"); auto_convert = auto_convert,
+    high_precision = high_precision, maskingvalue = maskingvalue)
 
 # method to enable `do` syntax.
 function MetopDataset(f::Function, file_path::AbstractString;
-        auto_convert::Bool = true, high_precision::Bool = false)
+        auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     file_pointer = open(file_path, "r")
     try
         ds = MetopDataset(
-            file_pointer; auto_convert = auto_convert, high_precision = high_precision)
+            file_pointer; auto_convert = auto_convert,
+            high_precision = high_precision, maskingvalue = maskingvalue)
         return f(ds)
     finally
         close(file_pointer)
@@ -71,23 +79,24 @@ function MetopDataset(f::Function, file_path::AbstractString;
 end
 
 function MetopDataset(
-        file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false)
+        file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
 
     # skip secondary header if present
     _skip_sphr(file_pointer, main_product_header.total_sphr)
 
-    record_chunks, _ = _read_record_chunks(file_pointer, main_product_header)
-    data_record_chunks = filter(x -> x.record_type == record_type, record_chunks)
-    data_record_count = data_record_chunks[end].record_range[end]
+    record_layouts = read_record_layouts(file_pointer, main_product_header)
+    data_record_layouts = filter(x -> x.record_type == record_type, record_layouts)
+    data_record_count = data_record_layouts[end].record_range[end]
 
-    return MetopDataset{record_type}(file_pointer,
+    return MetopDataset{record_type, eltype(data_record_layouts)}(file_pointer,
         main_product_header,
-        data_record_chunks,
+        data_record_layouts,
         data_record_count,
         auto_convert,
-        high_precision)
+        high_precision,
+        maskingvalue)
 end
 
 ## Extend CommonDataModel.AbstractDataset interface
@@ -98,15 +107,20 @@ function default_varnames(ds::MetopDataset{R}) where {R}
     return public_fields
 end
 
-function CDM.varnames(ds::MetopDataset{R}) where {R}
+function CDM.varnames(ds::MetopDataset)
     return default_varnames(ds)
 end
 
 # needed for CommonDataModel 0.3.6 and older
 Base.keys(ds::MetopDataset) = CDM.varnames(ds)
 
+function get_dimensions(R::Type{<:DataRecord},
+        data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
+    return get_dimensions(R)
+end
+
 function CDM.dimnames(ds::MetopDataset{R}) where {R}
-    names = collect(keys(get_dimensions(R)))
+    names = collect(keys(get_dimensions(R, ds.data_record_layouts)))
     push!(names, RECORD_DIM_NAME)
     return names
 end
@@ -117,7 +131,7 @@ function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R}
         return ds.data_record_count
     end
 
-    return get_dimensions(R)[name]
+    return get_dimensions(R, ds.data_record_layouts)[name]
 end
 
 CDM.attribnames(ds::MetopDataset) = string.(fieldnames(MainProductHeader))[2:end] ## Skip record_header
@@ -134,18 +148,20 @@ function CDM.attrib(ds::MetopDataset, name::CDM.SymbolOrString)
     return val
 end
 
+CDM.maskingvalue(ds::MetopDataset) = ds.maskingvalue
+
 Base.close(ds::MetopDataset) = close(ds.file_pointer)
 
 """
-    read_first_record(ds::MetopDataset, record_type::Type{<:Record})
-    read_first_record(file_pointer::IO, record_type::Type{<:Record})
-    read_first_record(file_path::AbstractString, record_type::Type{<:Record})
+    read_single_record(ds::MetopDataset, record_type::Type{<:Record})
+    read_single_record(file_pointer::IO, record_type::Type{<:Record})
+    read_single_record(file_path::AbstractString, record_type::Type{<:Record})
 
-Read the first record of type `record_type` from the dataset. This can be used to access records that are 
+Read the n'th record of type `record_type` from the dataset. This can be used to access records that are 
 not directly exposed through the `MetopDataset` interface.
 """
-read_first_record(ds::MetopDataset, record_type::Type{<:Record}) = read_first_record(
-    ds.file_pointer, record_type)
+read_single_record(ds::MetopDataset, record_type::Type{<:Record}, n::Integer) = read_single_record(
+    ds.file_pointer, record_type, n::Integer)
 
 # helper function to test and/or debug dimension
 function _valid_dimensions(ds::MetopDataset)
@@ -182,4 +198,15 @@ function _valid_dimensions(ds::MetopDataset)
     end
 
     return no_error_found
+end
+
+## helper function
+function _skip_sphr(file_pointer, n_headers)
+    for _ in 1:n_headers
+        record_header = native_read(file_pointer, RecordHeader)
+        @assert record_header.record_class == get_record_class(SecondaryProductHeader)
+        content_size = record_header.record_size - native_sizeof(RecordHeader)
+        skip(file_pointer, content_size)
+    end
+    return nothing
 end

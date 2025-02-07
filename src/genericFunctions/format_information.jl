@@ -34,7 +34,7 @@ julia> get_scale_factor(ASCA_SZR_1B_V13, :sigma0_trip)
 get_scale_factor(T::Type{<:BinaryRecord}, field::Symbol)::Union{Number, Nothing} = get_scale_factor(T)[field]
 
 """
-    get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol)::NTuple{4, Int64}
+    get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol)
     
 Get the dimensions of the field as defined in the record format specification.
 # Example
@@ -43,7 +43,7 @@ julia> get_raw_format_dim(ASCA_SZR_1B_V13, :sigma0_trip)
 (3, 82, 1, 1)
 ```
 """
-get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol)::NTuple{4, Int64} = get_raw_format_dim(T)[field]
+get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol) = get_raw_format_dim(T)[field]
 
 """
     data_record_type(header::MainProductHeader)::Type
@@ -60,15 +60,39 @@ ASCA_SZO_1B_V13
 data_record_type(header::MainProductHeader)::Type = data_record_type(header,
     Val(Symbol(header.product_name[1:11])))
 
+"""
+    fixed_size(T::Type{<:BinaryRecord})::Bool
+    fixed_size(T::Type{<:BinaryRecord}, fieldname::Symbol)::Bool
+
+Get if the data record has a binary fixed size. This is often used as a trait via the "julia Holy Traits Pattern"
+`fieldname` is used to check if a specific field has a fixed binary size.
+"""
+function fixed_size(T::Type{<:BinaryRecord}, fieldname::Symbol)
+    if fixed_size(T) || (fieldname == :record_start_time) ||
+       (fieldname == :record_stop_time)
+        return true
+    end
+
+    if fieldtype(T, fieldname) <: AbstractArray
+        return !any(x -> x isa Symbol, get_raw_format_dim(T, fieldname))
+    else
+        return true
+    end
+end
+
 ### Interface must be implemented for each BinaryRecord type
 
-# get_description and get_scale_factor are automatically defined by record_struct_expression
+# get_description, get_scale_factor, get_raw_format_dim and fixed_size are automatically defined by record_struct_expression
 get_description(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 get_scale_factor(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 get_raw_format_dim(T::Type{<:BinaryRecord}) = error("Method missing for $T")
 
+# add fixed_size fall back methods for records
+fixed_size(T::Type{<:RecordSubType}) = !any(x -> x <: AbstractArray, fieldtypes(T))
+fixed_size(T::Type{<:BinaryRecord}) = !any(x -> x <: AbstractArray, fieldtypes(T))
+
 # data_record_type must be defined manually
-function data_record_type(header::MainProductHeader, ::Val{T}) where {T}
+function data_record_type(header::MainProductHeader, product_type::Val{T}) where {T}
     return error("Method missing for $T")
 end
 
@@ -103,7 +127,6 @@ function get_dimensions(T::Type{<:BinaryRecord})::Dict{String, <:Integer}
     return dims_dict
 end
 
-# fall back method
 """
     get_field_dimensions(T::Type{<:BinaryRecord}, field::Symbol)::Vector{<:AbstractString}
 
@@ -130,3 +153,52 @@ function get_field_dimensions(T::Type{<:BinaryRecord}, field::Symbol)::Vector{St
 
     return dimension_names
 end
+
+"""
+    get_missing_value(T::Type{<:Record}, field::Symbol)
+
+Get the value representing `missing` for the field. Default values are implemented for `Integers` but 
+they can be overwritten for specific record types to account for different conventions.
+"""
+function get_missing_value(T::Type{<:Record}, field::Symbol)
+    return get_missing_value(T, _get_field_eltype(T, field), field)
+end
+
+# default is nothing
+get_missing_value(T::Type{<:Record}, field_type::Type, field::Symbol) = nothing
+# default values based on ASCAT
+function get_missing_value(::Type{<:Record}, field_type::Type{<:Unsigned}, field::Symbol)
+    return typemax(field_type)
+end
+function get_missing_value(::Type{<:Record}, field_type::Type{<:Signed}, field::Symbol)
+    return typemin(field_type)
+end
+
+### Methods needed for flexible record types  ####
+
+"""
+    get_flexible_dim_fields(T::Type{<:BinaryRecord})::Dict{Symbol,Symbol}
+
+Get a dictionary with field names as key and the corresponding flexible dim as value. 
+Only fields representing a flexible dim is included. Must be implemented for Records containing 
+flexible dim values.
+
+# Example
+```julia-repl
+julia> get_flexible_dim_fields(IASI_SND_02)
+Dict{Symbol, Symbol} with 4 entries:
+  :co_nbr   => :CO_NBR
+  :o3_nbr   => :O3_NBR
+  :nerr     => :NERR
+  :hno3_nbr => :HNO3_NBR
+```
+"""
+get_flexible_dim_fields(T::Type{<:BinaryRecord}) = error("Method missing for $T")
+
+"""
+    _get_flexible_dims_file(file_pointer::IO, T::Type{<:BinaryRecord}) 
+
+Read the flexible types from a product. Note that the `IO` position is not changed by
+calling the function
+"""
+_get_flexible_dims_file(file_pointer::IO, T::Type{<:BinaryRecord}) = Dict{Symbol, Int64}()

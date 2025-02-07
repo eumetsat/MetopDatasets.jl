@@ -21,13 +21,13 @@ function Base.getproperty(iasi_disk_array::IasiSpectrumDiskArray, sym::Symbol)
 end
 
 function IasiSpectrumDiskArray(file_pointer::IOStream,
-        record_chunks::Vector{RecordChunk},
+        record_layouts::Vector{FixedRecordLayout},
         field_name::Symbol; high_precision = false)
     @assert field_name == :gs1cspect
     giadr = read_first_record(file_pointer, GIADR_IASI_XXX_1C_V11)
 
     disk_array = MetopDiskArray(file_pointer,
-        record_chunks,
+        record_layouts,
         field_name; auto_convert = false)
 
     T = high_precision ? Float64 : Float32
@@ -73,8 +73,8 @@ function IasiWaveNumberDiskArray(
     @assert field_name == IASI_WAVENUMBER_NAME
 
     number_of_first_sample = MetopDiskArray(
-        ds.file_pointer, ds.data_record_chunks, :idefnsfirst1b)
-    sample_width = MetopDiskArray(ds.file_pointer, ds.data_record_chunks, :idefspectdwn1b)
+        ds.file_pointer, ds.data_record_layouts, :idefnsfirst1b)
+    sample_width = MetopDiskArray(ds.file_pointer, ds.data_record_layouts, :idefspectdwn1b)
 
     spectrum_size = _get_array_size(R, :gs1cspect)[1]
     record_count = ds.data_record_count

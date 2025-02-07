@@ -5,14 +5,14 @@ using MetopDatasets, Test
 using Dates
 
 # Helper function to create MetopDiskArray.
-function _chunks(file_pointer)
+function _layouts(file_pointer)
     seekstart(file_pointer)
     main_product_header = MetopDatasets.native_read(file_pointer,
         MetopDatasets.MainProductHeader)
 
     MetopDatasets._skip_sphr(file_pointer, main_product_header.total_sphr)
-    record_chunks, _ = MetopDatasets._read_record_chunks(file_pointer, main_product_header)
-    return record_chunks
+    record_layouts = MetopDatasets.read_record_layouts(file_pointer, main_product_header)
+    return record_layouts
 end
 
 @testset "Disk array constructor" begin
@@ -20,25 +20,25 @@ end
 
     #expected number of records 3264
     file_pointer = open(test_file, "r")
-    record_chunks = _chunks(file_pointer)
+    record_layouts = _layouts(file_pointer)
     number_of_records = 3264
 
     utc_time = MetopDatasets.MetopDiskArray(
-        file_pointer, record_chunks, :utc_line_nodes; auto_convert = false)
+        file_pointer, record_layouts, :utc_line_nodes; auto_convert = false)
     @test utc_time isa MetopDatasets.MetopDiskArray{MetopDatasets.ShortCdsTime, 1}
     @test utc_time.field_type <: MetopDatasets.ShortCdsTime
     @test utc_time.record_count == number_of_records
     @test utc_time.offset_in_record == 22
     @test size(utc_time) == (number_of_records,)
 
-    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :sigma0_trip)
+    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_layouts, :sigma0_trip)
     @test sigma0 isa MetopDatasets.MetopDiskArray{Int32, 3}
     @test sigma0.field_type <: Matrix{Int32}
     @test sigma0.record_count == number_of_records
     @test sigma0.offset_in_record == 773
     @test size(sigma0) == (3, 82, number_of_records)
 
-    latitude = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :latitude)
+    latitude = MetopDatasets.MetopDiskArray(file_pointer, record_layouts, :latitude)
     @test latitude isa MetopDatasets.MetopDiskArray{Int32, 2}
     @test latitude.field_type <: Vector{Int32}
     @test latitude.record_count == number_of_records
@@ -53,13 +53,13 @@ end
 
     #expected number of records 3264
     file_pointer = open(test_file, "r")
-    record_chunks = _chunks(file_pointer)
+    record_layouts = _layouts(file_pointer)
 
-    utc_time = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :utc_line_nodes;
+    utc_time = MetopDatasets.MetopDiskArray(file_pointer, record_layouts, :utc_line_nodes;
         auto_convert = false)
-    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_chunks, :sigma0_trip)
+    sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_layouts, :sigma0_trip)
     record_start_time = MetopDatasets.MetopDiskArray(
-        file_pointer, record_chunks, :record_start_time)
+        file_pointer, record_layouts, :record_start_time)
 
     @test !isnothing(utc_time[7])
     @test !isnothing(utc_time[1:60])

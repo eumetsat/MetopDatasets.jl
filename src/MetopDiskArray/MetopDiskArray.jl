@@ -17,7 +17,7 @@ scaling. Auto conversion can be enabled for `RecordSubType` e.g. converting `VIn
 """
 struct MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     file_pointer::IOStream
-    record_chunks::Vector{RecordChunk}
+    record_layouts::Vector{FixedRecordLayout}
     field_name::Symbol
 
     # computed
@@ -29,19 +29,34 @@ struct MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
 end
 
 """
+    construct_disk_array(file_pointer::IOStream,
+        record_layouts::Vector{FixedRecordLayout},
+        field_name::Symbol; auto_convert = true)
+
+Construct a disk array for fixed record layout.
+"""
+function construct_disk_array(file_pointer::IOStream,
+        record_layouts::Vector{FixedRecordLayout},
+        field_name::Symbol; auto_convert = true)
+    return MetopDiskArray(file_pointer,
+        record_layouts,
+        field_name::Symbol; auto_convert = auto_convert)
+end
+
+"""
     MetopDiskArray(file_pointer::IOStream,
-        record_chunks::Vector{RecordChunk},
+        record_layouts::Vector{FixedRecordLayout},
         field_name::Symbol; auto_convert = true) -> MetopDiskArray
 
 Constructor for MetopDiskArray that compute additional fields. `auto_convert = true` will
 automatically convert custom `RecordSubType` to commonly used data types e.g. converting `VInteger` to `Float64`.
 """
 function MetopDiskArray(file_pointer::IOStream,
-        record_chunks::Vector{RecordChunk},
+        record_layouts::Vector{FixedRecordLayout},
         field_name::Symbol; auto_convert = true)
-    record_chunks = filter(x -> x.record_type != DummyRecord, record_chunks)
-    @assert allequal([c.record_type for c in record_chunks])
-    record_type = record_chunks[1].record_type
+    record_layouts = filter(x -> x.record_type != DummyRecord, record_layouts)
+    @assert allequal([c.record_type for c in record_layouts])
+    record_type = record_layouts[1].record_type
 
     T = _get_field_eltype(record_type, field_name)
     N = 1
@@ -60,18 +75,19 @@ function MetopDiskArray(file_pointer::IOStream,
         offset_in_record = sum(native_sizeof.(record_type, fields_before))
 
         field_type = fieldtype(record_type, field_name)
-        if field_type <: Array
-            N = 1 + ndims(field_type)
-        end
     end
 
-    record_count = record_chunks[end].record_range[end]
-    record_offsets = _chunks_to_offsets(record_chunks)
+    if field_type <: Array
+        N = 1 + ndims(field_type)
+    end
+
+    record_count = record_layouts[end].record_range[end]
+    record_offsets = _layouts_to_offsets(record_layouts)
 
     T = auto_convert ? _get_convert_type(T) : T
 
     return MetopDiskArray{T, N}(file_pointer,
-        record_chunks, field_name,
+        record_layouts, field_name,
         field_type, record_count,
         offset_in_record,
         record_type,
@@ -122,6 +138,11 @@ function DiskArrays.readblock!(disk_array::MetopDiskArray{T, N},
         end
     end
     return nothing
+end
+
+# helper function
+function get_field_dimensions(disk_array::AbstractMetopDiskArray)
+    return get_field_dimensions(disk_array.record_type, disk_array.field_name)
 end
 
 # Set error for write function

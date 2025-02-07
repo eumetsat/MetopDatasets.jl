@@ -21,8 +21,8 @@ end
         include("generic_types.jl")
     end
 
-    @safetestset "Record chunks" begin
-        include("record_chunks.jl")
+    @safetestset "Record layouts" begin
+        include("record_layout.jl")
     end
 
     @safetestset "ASCAT" begin
@@ -57,9 +57,5 @@ end
         end
     end
 
-    Aqua.test_all(MetopDatasets, ambiguities = false)
-
-    # test ambiguities separately to avoid ambiguities from dependencies
-    # for more info see https://github.com/JuliaTesting/Aqua.jl/issues/77
-    Aqua.test_ambiguities(MetopDatasets)
+    Aqua.test_all(MetopDatasets)
 end
