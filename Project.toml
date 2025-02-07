@@ -11,7 +11,7 @@ Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DiskArrays = "3c3547ce-8d99-4f5e-a174-61eb10b00ae3"
 
 [compat]
-Aqua = "0.8"
+Aqua = "0.8.9"
 CSV = "0.10"
 CommonDataModel = "0.3"
 Compat = "4.10"

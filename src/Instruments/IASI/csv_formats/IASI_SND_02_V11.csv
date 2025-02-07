@@ -44,7 +44,7 @@ FLG_CLDFRM,Origin of characterisation of the cloud formations,NA,NA,120,1,1,bits
 FLG_CLDNES,Cloudiness assessment summary,NA,NA,120,1,1,enumerated,1,120,205347
 FLG_CLDTST,Details of cloud tests exectued and their results,NA,NA,120,1,1,bitst(16),2,240,205467
 FLG_DAYNIT,Discrimination between day and night,NA,NA,120,1,1,enumerated,1,120,205707
-FLG_DUSTCLD,Indicates presence of dust clouds in the IFOV,1,NA,120,1,1,u-byte,1,120,205827
+FLG_DUSTCLD,Indicates presence of dust clouds in the IFOV,NA,NA,120,1,1,u-byte,1,120,205827
 FLG_FGCHECK,Check that geophysical parameters from the first guess are within bounds,NA,NA,120,1,1,bitst(16),2,240,205947
 FLG_IASIBAD,Availability and quality of IASI L1 measurements,NA,NA,120,1,1,enumerated,1,120,206187
 FLG_INITIA,Indicates the measurements used in the first guess retrieval,NA,NA,120,1,1,bitst(8),1,120,206307
