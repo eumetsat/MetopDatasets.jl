@@ -227,11 +227,12 @@ temperature, humidity, selected_point  = let
     humidity_var = cfvariable(ds, "fg_atmospheric_water_vapour", maskingvalue = NaN)
     qi_humidity_var = cfvariable(ds, "fg_qi_atmospheric_water_vapour", maskingvalue = NaN)
     # keep only soundings where the quality indicators are low
+    # thresholds can be relaxed to increase data yield
     # only look at selected data_record_index to save time
-    good_retrievals = findall(qi_temp_var[:,data_record_index] .< 1 
-                               .&& qi_humidity_var[:,data_record_index] .< 2)
-    # we select the first retrieval for plotting
-    selected_point = good_retrievals[1]
+    good_retrievals = findall(qi_temp_var[:,data_record_index] .< 2 
+                               .&& qi_humidity_var[:,data_record_index] .< 4)
+    # we select the 60th retrieval for plotting
+    selected_point = good_retrievals[60]
     
     temp_var[:, selected_point, data_record_index], 
     humidity_var[:, selected_point, data_record_index], selected_point
