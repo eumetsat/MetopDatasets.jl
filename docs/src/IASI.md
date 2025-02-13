@@ -280,7 +280,7 @@ fig = let
     lines!(ax, GeoMakie.coastlines()) 
 
     # Plot the temperature profile 
-    y_limits = (0.001,1100.0)
+    y_limits = (0.001,1900.0)
 
     ax2 = Axis(fig[2, 1],
         title = "Temperature profile",
@@ -300,7 +300,7 @@ fig = let
 	yscale = log10)
 
     lines!(ax3,  humidity, hum_pressure_levels/100, color = selected_color)
-    hideydecorations!(ax3)
+    hideydecorations!(ax3, grid=false)
 
     fig
 end
