@@ -93,8 +93,3 @@ function DiskArrays.readblock!(disk_array::IasiWaveNumberDiskArray, aout,
     aout .= sample_width .* (number_of_first_sample .+ i_channel .- 2)
     return nothing
 end
-
-function CDM.dimnames(disk_array::IasiWaveNumberDiskArray)
-    spectrum_dim = get_field_dimensions(disk_array.record_type, :gs1cspect)[1]
-    return [spectrum_dim, RECORD_DIM_NAME]
-end

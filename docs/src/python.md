@@ -14,9 +14,9 @@ julia --version
 pip --version
 ```
 This guide is tested with the following versions 
-- Python 3.9.12
+- Python 3.12.8
 - julia version 1.11.1
-- pip 21.2.4
+- pip 24.2
 ### Installing python packages
 We use pip to install `juliacall` and `numpy`. We need `juliacall` to interface with julia and `numpy` is just needed to demonstrate compatibility with numpy arrays.
 
@@ -48,7 +48,7 @@ jl.seval("using MetopDatasets")
 The dataset is simply read with `MetopDataset`. Only the metadata is read straight away. The variables can be read on demand.
 ```python
 test_file = "/tcenas/home/lupemba/Documents/data/IASI_xxx_1C_M01_20240819103856Z_20240819104152Z_N_C_20240819112911Z"
-ds = jl.MetopDataset(test_file)
+ds = jl.MetopDataset(test_file, maskingvalue=float('nan'))
 ```
 The dataset has a method equivalent to `__repr__` so the structure of the dataset can be shown easily. The julia `keys` function can be used to only list variable names.
 ```python

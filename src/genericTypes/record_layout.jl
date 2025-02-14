@@ -123,11 +123,13 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
         header = native_read(file_pointer, RecordHeader)
 
         if header_match_record_type(header, record_type)
-            push!(offsets, position(file_pointer) - native_sizeof(RecordHeader))
+            start_pos = position(file_pointer) - native_sizeof(RecordHeader)
+            push!(offsets, start_pos)
             dims_record = _read_flex_dims_from_record_no_header(
                 file_pointer, record_type, flexible_dims_file)
             push!(record_sizes, header.record_size)
             push!(flexible_dims_records, dims_record)
+            seek(file_pointer, start_pos + header.record_size)
         else
             # Skip dummy records and similar.
             skip(file_pointer, header.record_size - native_sizeof(RecordHeader))

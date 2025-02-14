@@ -75,6 +75,29 @@ end
 
 ############  IASI_SND_02  ################
 
+function _get_fixed_dimensions(T::Type{IASI_SND_02_V11})
+    dimensions_dict = Dict(
+        "lat_lon" => 2,
+        "cloud_formations" => 3,
+        "solar_sat_zenith_azimuth" => 4,
+        "xtrack_sounder_pixels" => 120
+    )
+    return dimensions_dict
+end
+
+function _get_fixed_dimensions(T::Type{IASI_SND_02_V10})
+    dimensions_dict = Dict(
+        "lat_lon" => 2,
+        "cloud_formations" => 3,
+        "solar_sat_zenith_azimuth" => 4,
+        "xtrack_sounder_pixels" => 120,
+        IASI_L2_V10_03_PRESSURE_DIM => 2,
+        "n_surface_temperatures" => 2,
+        "error_data_dims" => 2
+    )
+    return dimensions_dict
+end
+
 function get_dimensions(T::Type{<:IASI_SND_02},
         data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
     dimensions_dict = Dict{String, Integer}()
@@ -99,29 +122,35 @@ function get_dimensions(T::Type{<:IASI_SND_02},
         end
     end
 
-    # default others
-    dimensions_dict["lat_lon"] = 2 #The coordinates have opposite order of L1C!
-    dimensions_dict["cloud_formations"] = 3
-    dimensions_dict["solar_sat_zenith_azimuth"] = 4
-    dimensions_dict["xtrack_sounder_pixels"] = 120
+    merge!(dimensions_dict, _get_fixed_dimensions(T))
 
     return dimensions_dict
 end
 
 function get_field_dimensions(
-        T::Type{<:IASI_SND_02}, layout::FlexibleRecordLayout, field_name::Symbol)
+        T::Type{<:IASI_SND_02}, field_name::Symbol)
     res = String[]
 
     if !(fieldtype(T, field_name) <: Array)
         return res
     end
 
-    dimension_dict = get_dimensions(T, [layout])
+    dimension_dict = _get_fixed_dimensions(T)
     array_size = _get_array_size(T, field_name)
 
     for d in array_size
         if d isa Symbol
             push!(res, string(d))
+        elseif T <: IASI_SND_02_V10 && d == 2
+            if field_name == :pressure_levels_ozone
+                push!(res, IASI_L2_V10_03_PRESSURE_DIM)
+            elseif field_name == :surface_temperature
+                push!(res, "n_surface_temperatures")
+            elseif field_name == :data_sizes
+                push!(res, "error_data_dims")
+            else
+                push!(res, "lat_lon")
+            end
         else
             names = [dim_name for (dim_name, dim_val) in dimension_dict if dim_val == d]
             push!(res, string(first(names)))
