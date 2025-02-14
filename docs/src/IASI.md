@@ -1,6 +1,6 @@
 ## IASI
 
-The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral sensor measuring the radiation from the atmosphere and earth in 8461 spectral channels. These measurements are used to derive used to derive a plethora of geophysical variables (e.g. temperature and humidity profiles). This makes IASI a key data source for numerical weather prediction (NWP) and applications in atmospheric chemistry and monitoring of essential climate variables.
+The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral infrared sensor measuring upwelling radiation from a sun-synchronous orbit in 8461 spectral channels (645.0 - 2760.0 cm-1). These measurements are used to derive a plethora of geophysical variables (e.g. temperature and humidity profiles). This makes IASI a key data source for numerical weather prediction (NWP) and applications in atmospheric chemistry and monitoring of essential climate variables.
 See [IASI Level 1: Product Guide](https://user.eumetsat.int/s3/eup-strapi-media/pdf_iasi_pg_487c765315.pdf) and [IASI Level 2: Product Guide](https://user.eumetsat.int/s3/eup-strapi-media/IASI_Level_2_Product_Guide_8f61a2369f.pdf) for more information.
 
 
@@ -11,7 +11,7 @@ This example is made using the following packages.
 [db073c08] GeoMakie v0.7.9
 ```
 
-The key variable is the "gs1cspect" which contains the radiance spectrum measured by the IASI instrument. The spectrum from a full orbit is almost 2 GB of data. In this example we will just load one data record with observation locations and plot the spectrum of two observations. The spectra are converted from radiances to brightness temperature since this is often most convenient when interpreting the IASI spectra. The cloud cover is also read from the file and included as legends on the plot of the spectra. Cloud cover is essential to understanding the spectra and normally only cloud free observations are assimilated in NWP.  
+The key variable is "gs1cspect" which contains the radiance spectra measured by IASI. The spectra from a full orbit are almost 2 GB of data. In this example we will just load one data record with observation locations and plot the spectra of two observations. The spectra are converted from radiances to brightness temperature since this is often convenient when interpreting the IASI spectra. The cloud cover in each individual field of view (from AVHRR) is also read from the file and included as legends on the plot of the spectra.  
 
 ```julia
 using MetopDatasets
@@ -205,7 +205,7 @@ end
 It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context. 
 
 ## Level 2 Combined Sounding Products 
-The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gasses. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size is padded with a fill values (default to `missing`) to generate an array that fits with the `MetopDataset` interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses `maskingvalue = NaN` for selected variables to avoid `missing` values. 
+The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gases. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size are padded with fill values (default to `missing`) to generate an array that fits with the `MetopDataset` interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses `maskingvalue = NaN` for selected variables to avoid `missing` values. We read the "first guess" variables (fg\_atmospheric\_water\_vapour, fg\_atmospheric\_temperature), because they contain the data from the statistical all-sky retrieval. The 1DVar algorithm that generates the "non-first guess" profiles will be phased out in favor of the statistical retrieval in the future.
 
 ```julia
 using MetopDatasets
@@ -213,16 +213,30 @@ using CairoMakie, GeoMakie
 
 ds = MetopDataset("IASI_SND_02_M03_20250120105357Z_20250120123253Z_N_O_20250120123416Z.nat");
 
+# Select color to plot temperature and humidity profile
+selected_color = :red
+
 # Select a single data record
 data_record_index = 105
 
-# Select 1 points to plot temperature and humidity profile
-selected_point = 84
-selected_color = :red
-
-# check that the selected data has retrieval error
-error_data_index = ds["error_data_index"][selected_point, data_record_index]
-@assert !ismissing(error_data_index)
+# Read temperature and humidity profiles;
+# we read the profiles from the statistical retrieval with associated quality indicators
+temperature, humidity, selected_point  = let
+    temp_var = cfvariable(ds, "fg_atmospheric_temperature", maskingvalue = NaN)
+    qi_temp_var = cfvariable(ds, "fg_qi_atmospheric_temperature", maskingvalue = NaN)
+    humidity_var = cfvariable(ds, "fg_atmospheric_water_vapour", maskingvalue = NaN)
+    qi_humidity_var = cfvariable(ds, "fg_qi_atmospheric_water_vapour", maskingvalue = NaN)
+    # keep only soundings where the quality indicators are low
+    # thresholds can be relaxed to increase data yield
+    # only look at selected data_record_index to save time
+    good_retrievals = findall(qi_temp_var[:,data_record_index] .< 2 
+                               .&& qi_humidity_var[:,data_record_index] .< 4)
+    # we select the 60th retrieval for plotting
+    selected_point = good_retrievals[60]
+    
+    temp_var[:, selected_point, data_record_index], 
+    humidity_var[:, selected_point, data_record_index], selected_point
+end
 
 # Read the geolocation of the data record
 longitude, latitude = let 
@@ -242,14 +256,6 @@ temp_pressure_levels, hum_pressure_levels = let
     humidity_level = giard.pressure_levels_humidity/10^scale_factor_humidity
 
     temp_level, humidity_level
-end
-
-# Read temperature and humidity profiles
-temperature, humidity  = let
-    temp_var = cfvariable(ds, "atmospheric_temperature", maskingvalue = NaN)
-    humidity_var = cfvariable(ds, "atmospheric_water_vapour", maskingvalue = NaN)
-    
-    temp_var[:, selected_point, data_record_index], humidity_var[:, selected_point, data_record_index]
 end
 
 # Plot figure
@@ -274,13 +280,14 @@ fig = let
     lines!(ax, GeoMakie.coastlines()) 
 
     # Plot the temperature profile 
-    y_limits = (-50.,1050.0)
+    y_limits = (0.001,1900.0)
 
     ax2 = Axis(fig[2, 1],
         title = "Temperature profile",
         ylabel = "Pressure (hPa)",
         xlabel = "(K)", yreversed = true,
-        limits = (nothing, y_limits))
+        limits = (nothing, y_limits),
+	yscale= log10)
 
     lines!(ax2,  temperature, temp_pressure_levels/100, color = selected_color)
     
@@ -289,13 +296,14 @@ fig = let
         title = "Water vapour  profile",
         ylabel = "Pressure (hPa)",
         xlabel = "(kg/kg)", yreversed = true,
-        limits = (nothing, y_limits))
+        limits = (nothing, y_limits),
+	yscale = log10)
 
     lines!(ax3,  humidity, hum_pressure_levels/100, color = selected_color)
-    hideydecorations!(ax3)
+    hideydecorations!(ax3, grid=false)
 
     fig
 end
 ```
 ![IASI L2 profile](IASI_L2_profile.png)
-The top plot shows a row of observations west of the west African coast. One observation have been marked with a colored X. The temperature and water vapour profile of the observation is shown below.
+The top plot shows a row of observations west of the west African coast. One observation has been marked with a colored X. The corresponding temperature and water vapour profile of the observation are shown below.
