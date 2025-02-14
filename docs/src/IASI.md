@@ -205,7 +205,7 @@ end
 It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context. 
 
 ## Level 2 Combined Sounding Products 
-The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gases. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size are padded with fill values (default to `missing`) to generate an array that fits with the `MetopDataset` interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses `maskingvalue = NaN` for selected variables to avoid `missing` values.
+The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gases. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size are padded with fill values (default to `missing`) to generate an array that fits with the `MetopDataset` interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses `maskingvalue = NaN` for selected variables to avoid `missing` values. We read the "first guess" variables (fg\_atmospheric\_water\_vapour, fg\_atmospheric\_temperature), because they contain the data from the statistical all-sky retrieval. The 1DVar algorithm that generates the "non-first guess" profiles will be phased out in favor of the statistical retrieval in the future.
 
 ```julia
 using MetopDatasets
