@@ -246,17 +246,8 @@ longitude, latitude = let
 end
 
 # Read the pressure levels 
-temp_pressure_levels, hum_pressure_levels = let 
-    giard = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_SND_02_V11)
-    
-    scale_factor_temp = MetopDatasets.get_scale_factor(MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_temp)
-    temp_level = giard.pressure_levels_temp/10^scale_factor_temp
-
-    scale_factor_humidity = MetopDatasets.get_scale_factor(MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_humidity)
-    humidity_level = giard.pressure_levels_humidity/10^scale_factor_humidity
-
-    temp_level, humidity_level
-end
+temp_pressure_levels = cfvariable(ds, "pressure_levels_temp", maskingvalue = NaN)[:]
+hum_pressure_levels  = cfvariable(ds, "pressure_levels_humidity", maskingvalue = NaN)[:]
 
 # Plot figure
 fig = let
