@@ -32,7 +32,7 @@ import juliacall
 # make separate module
 jl = juliacall.newmodule("MetopDatasetsPy") 
 jl.seval("import Pkg")
-jl.Pkg.add(url="https://github.com/eumetsat/MetopDatasets.jl")
+jl.Pkg.add("MetopDatasets")
 ```
 
 ### Example
