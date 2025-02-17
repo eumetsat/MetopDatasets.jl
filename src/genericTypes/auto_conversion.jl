@@ -13,7 +13,6 @@ function _get_convert_type(T::Type{<:RecordSubType})
     return T
 end
 
-_auto_convert(::Type{T}, val::T) where {T} = val
 _auto_convert(T::Type, val) = convert(T, val)
 _auto_convert(::Type{Float64}, val::CdsTime)::Float64 = seconds_since_epoch(val)
 _auto_convert(::Type{Float64}, val::VInteger)::Float64 = float(val)

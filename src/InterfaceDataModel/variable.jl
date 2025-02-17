@@ -4,11 +4,13 @@
 """
     MetopVariable{T, N, R <: DataRecord} <: CommonDataModel.AbstractVariable{T, N}
 
-`MetopVariable` wraps `AbstractMetopDiskArray` so it can be used with `MetopDataset`.
+`MetopVariable` wraps an `AbstractArray` so it can be used with `MetopDataset`. 
+The data array is normally `AbstractMetopDiskArray`.
 """
 struct MetopVariable{T, N, R} <: CDM.AbstractVariable{T, N}
     parent::MetopDataset{R}
-    disk_array::AbstractMetopDiskArray{T, N}
+    data_array::AbstractArray{T, N}
+    field_name::Symbol
 end
 
 ### helper functions to get_cf_attributes.
@@ -18,7 +20,7 @@ function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
 end
 
 function default_cf_attributes(
-        R::Type{<:DataRecord}, field::Symbol, auto_convert::Bool)::Dict{Symbol, Any}
+        R::Type{<:BinaryRecord}, field::Symbol, auto_convert::Bool)::Dict{Symbol, Any}
     cf_attributes = Dict{Symbol, Any}()
 
     F = _get_field_eltype(R, field)
@@ -54,7 +56,7 @@ function default_cf_attributes(
     return cf_attributes
 end
 
-function _get_field_eltype(R::Type{<:DataRecord}, field::Symbol)
+function _get_field_eltype(R::Type{<:BinaryRecord}, field::Symbol)
     if (field == :record_start_time) || (field == :record_stop_time)
         return ShortCdsTime
     end
@@ -72,53 +74,54 @@ function CDM.variable(ds::MetopDataset, varname::CDM.SymbolOrString)
 end
 
 function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R}
+    varname = Symbol(varname)
     disk_array = construct_disk_array(ds.file_pointer, ds.data_record_layouts,
-        Symbol(varname); auto_convert = ds.auto_convert)
+        varname; auto_convert = ds.auto_convert)
     T = eltype(disk_array)
     N = ndims(disk_array)
-    return MetopVariable{T, N, R}(ds, disk_array)
+
+    return MetopVariable{T, N, R}(ds, disk_array, varname)
+end
+
+function default_dimnames(v::MetopVariable{T, N, R}) where {T, N, R}
+    if v.field_name in (:record_start_time, :record_stop_time)
+        return [RECORD_DIM_NAME]
+    else
+        names = get_field_dimensions(R, v.field_name)
+        push!(names, RECORD_DIM_NAME)
+        return names
+    end
 end
 
 function Base.getindex(ds::MetopDataset, varname::CDM.SymbolOrString)
-    return CDM.cfvariable(ds, varname;)
+    return CDM.cfvariable(ds, varname)
 end
 
 function CDM.name(v::MetopVariable)
-    return string(v.disk_array.field_name)
+    return string(v.field_name)
 end
 
-CDM.dimnames(v::MetopVariable) = CDM.dimnames(v.disk_array)
-
-function CDM.dimnames(disk_array::AbstractMetopDiskArray{T, N}) where {T, N}
-    if (disk_array.field_name == :record_start_time) ||
-       (disk_array.field_name == :record_stop_time)
-        return [RECORD_DIM_NAME]
-    end
-
-    dims = get_field_dimensions(disk_array)
-    push!(dims, RECORD_DIM_NAME)
-    return dims
-end
+CDM.dimnames(v::MetopVariable) = default_dimnames(v)
 
 CDM.dataset(v::MetopVariable) = v.parent
 
 function CDM.attribnames(v::MetopVariable)
     cf_attributes = keys(get_cf_attributes(
-        v.parent, v.disk_array.field_name, v.parent.auto_convert))
+        v.parent, v.field_name, v.parent.auto_convert))
     return ("description", string.(cf_attributes)...)
 end
 
-function default_attrib(v::MetopVariable, name::CDM.SymbolOrString)
+function default_attrib(v::MetopVariable{T, N, R}, name::CDM.SymbolOrString) where {T, N, R}
     if !(string(name) in CDM.attribnames(v))
         error("$name not found")
     end
 
     if string(name) == "description"
-        return get_description(v.disk_array.record_type, v.disk_array.field_name)
+        return get_description(R, v.field_name)
     end
 
     cf_attributes = get_cf_attributes(
-        v.parent, v.disk_array.field_name, v.parent.auto_convert)
+        v.parent, v.field_name, v.parent.auto_convert)
     return cf_attributes[Symbol(name)]
 end
 
@@ -126,12 +129,12 @@ function CDM.attrib(v::MetopVariable, name::CDM.SymbolOrString)
     return default_attrib(v, name)
 end
 
-Base.size(v::MetopVariable) = size(v.disk_array)
+Base.size(v::MetopVariable) = size(v.data_array)
 
 ### get index 
 function Base.getindex(v::MetopVariable, indices...)
     checkbounds(v, indices...)
-    return getindex(v.disk_array, indices...)
+    return getindex(v.data_array, indices...)
 end
 # fix ambiguity
 Base.getindex(v::MetopVariable, n::CDM.CFStdName) = getindex(v::CDM.AbstractVariable, n)

@@ -130,7 +130,7 @@ end
     end
 end
 
-@testset "IASI L02 data records" begin
+@testset "IASI L02 V11 data records" begin
     @test MetopDatasets.fixed_size(MetopDatasets.IASI_SND_02_V11) == false
 
     # giard
@@ -242,6 +242,28 @@ end
 
         @test isnan.(data_with_NaNs) == no_data
         @test !any(ismissing, data_with_NaNs)
+
+        # check variables from giard
+        @test "pressure_levels_temp" in MetopDatasets.CDM.varnames(ds)
+        @test MetopDatasets.CDM.dimnames(ds["pressure_levels_humidity"]) ==
+              ["NLQ", "atrack"]
+
+        # manuel read levels from giadr
+        temp_pressure_levels, hum_pressure_levels = let
+            giard = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_SND_02_V11)
+
+            scale_factor_temp = MetopDatasets.get_scale_factor(
+                MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_temp)
+            temp_level = giard.pressure_levels_temp / 10^scale_factor_temp
+            scale_factor_humidity = MetopDatasets.get_scale_factor(
+                MetopDatasets.GIADR_IASI_SND_02_V11, :pressure_levels_humidity)
+            humidity_level = giard.pressure_levels_humidity / 10^scale_factor_humidity
+            temp_level, humidity_level
+        end
+
+        @test isapprox(ds["pressure_levels_temp"][:], temp_pressure_levels)
+        @test isapprox(ds["pressure_levels_humidity"][:], hum_pressure_levels)
+
         close(ds)
 
         # set masking value for entire data set.
@@ -249,5 +271,42 @@ end
         @test ds_no_missing["hno3_cp_air"][weird_index...][.!no_data] ==
               data_with_NaNs[.!no_data]
         close(ds_no_missing)
+    end
+end
+
+@testset "IASI L02 V10 data records" begin
+    @test MetopDatasets.fixed_size(MetopDatasets.IASI_SND_02_V10) == false
+
+    # giard
+    @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_SND_02_V10) == false
+
+    ## testData
+    if isdir("testData")
+        test_file = "testData/IASI_SND_02_M02_20100202135952Z_20100202153856Z_N_O_20100202154539Z.nat"
+
+        ds = MetopDataset(test_file)
+
+        # test size
+        @test ds.dim[MetopDatasets.RECORD_DIM_NAME] == parse(Int, ds.attrib["total_mdr"])
+
+        @test Array(ds["pressure_levels_temp"]) isa Vector{Union{Missing, Float64}}
+        @test MetopDatasets.CDM.dimnames(ds["pressure_levels_ozone"]) ==
+              ["n_o3_profiles", "NLO", "atrack"]
+
+        @test all(lat -> -90 < lat < 90, ds["earth_location"][1, :, :])
+        @test all(lon -> -180 < lon < 180, ds["earth_location"][2, :, :])
+
+        # test error field
+        error_field_dims = Int.(ds["data_sizes"][:, :, :])
+        elem_size = 5
+        error_field_size_computed = [sum(error_field_dims[1, :, i] * elem_size)
+                                     for i in 1:ds.dim["atrack"]]
+        error_field = ds["error_data"][49]
+
+        @test error_field isa Vector{UInt8}
+        @test length(error_field) == error_field_size_computed[49]
+        @test length.(ds["error_data"][1:2]) == error_field_size_computed[1:2]
+
+        close(ds)
     end
 end

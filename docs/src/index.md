@@ -16,11 +16,11 @@ It is also possible to use MetopDatasets.jl from Python. See [Use with Python](@
 This section gives a very short overview of the core functionalities. The [MetopDataset](@ref) page is recommend for more information and more specific examples are given in the Example section e.g. [ASCAT](@ref). The [NCDatasets documentation](https://alexander-barth.github.io/NCDatasets.jl/stable/) is also a great resource for information on how to use the datasets. 
 
 ### Installation
-MetopDatasets.jl can be installed via Pkg and the url to the GitHub repository.
+MetopDatasets.jl can be installed via Pkg.
 
 ```julia
 import Pkg
-Pkg.add(url="https://github.com/eumetsat/MetopDatasets.jl#main") 
+Pkg.add("MetopDatasets")
 ```
 
 ### Read data from a Metop Native binary file
@@ -361,6 +361,4 @@ end
 ## Development status and versioning
 The package was previously named **MetopNative.jl** and was hosted on the [EUMETSAT GitLab](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl).
 
-This package is still in the early development phase and is not yet registered. The plan is to register the package once it is complete for ASCAT and IASI products. The package will not follow any specific version system before it is registered.
-
-After registration, the aim will be to follow the [semantic versioning](https://semver.org/) system. Note that the package will start as 0.x.y to signal that breaking changes are to be expected. This is done to allow for more rapid development and because major dependencies like the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) are not at the version 1.0 milestone yet. It is therefore recommended to use [Pkg environments](https://pkgdocs.julialang.org/v1/compatibility/) for projects with MetopDatasets.jl to handle comparability and ensure reproducibility. Please note that many of the "breaking changes" will be small and only affect specific use cases. This could for example be the correction of a single variable name. Any breaking change will be listed in the [release description](https://github.com/eumetsat/MetopDatasets.jl/releases).
+The aim is to follow the [semantic versioning](https://semver.org/) system. Note that the package is still 0.x.y to signal that breaking changes are to be expected. This is done to allow for more rapid development and because major dependencies like the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) are not at the version 1.0 milestone yet. It is therefore recommended to use [Pkg environments](https://pkgdocs.julialang.org/v1/compatibility/) for projects with MetopDatasets.jl to handle comparability and ensure reproducibility. Please note that many of the "breaking changes" will be small and only affect specific use cases. This could for example be the correction of a single variable name. All breaking changes are marked in the [changelog](https://github.com/eumetsat/MetopDatasets.jl/blob/main/CHANGELOG.md).
