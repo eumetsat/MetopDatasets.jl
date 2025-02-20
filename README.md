@@ -23,7 +23,7 @@ MetopDatasets.jl can be installed via Pkg and the url to the GitHub repository.
 
 ```julia
 import Pkg
-Pkg.add(url="https://github.com/eumetsat/MetopDatasets.jl") 
+Pkg.add("MetopDatasets") 
 ```
 
 ## Examples
