@@ -104,6 +104,15 @@ native_sizeof(T::Type{MainProductHeader}) = 3307
 function native_read(io::IO, T::Type{MainProductHeader})::MainProductHeader
     record_header = native_read(io, RecordHeader)
 
+    correct_header = record_header.record_size == native_sizeof(MainProductHeader) &&
+                     record_header.record_class == get_record_class(MainProductHeader)
+
+    if !correct_header
+        msg = "Invalid file: The file is not a Metop native binary product."
+        msg *= "\n Note that if the file is a zip archive containing a product file then the product file must be extracted before reading it."
+        error(msg)
+    end
+
     # read the content
     content_size = native_sizeof(MainProductHeader) - native_sizeof(RecordHeader)
     main_header_content = Array{UInt8}(undef, content_size)
