@@ -3,7 +3,7 @@
 The Advanced Scatterometer (ASCAT) is an instrument on the METOP satellites. It is a fixed beam C-band scatterometer with 6 antenna beams used to retrieve wind vectors over the ocean and soil moisture over the land. The level 1 products are normalised backscatter coefficients (sigma0) that the instrument measures directly. The level 2 products are soil moisture and wind vectors derived from the backscatter. The wind vector product does not use the native binary format so they are not described further here. It should be noted that the winds are available as NetCDF.
 For more information see [ASCAT User Guide](https://user.eumetsat.int/s3/eup-strapi-media/ASCAT_User_Guide_1618a3d741.pdf)
 
-All data used in examples are available from [EUMETSAT data store](https://data.eumetsat.int/extended?query=&filter=instrument__ASCAT&filter=availableFormats__Native)
+All data used in examples are available from [EUMETSAT data store](https://data.eumetsat.int/extended?query=&filter=instrument__ASCAT&filter=availableFormats__EPS%20Native)
 
 ## SZF beam statistics
 The level 1B SZF files contain full resolution backscatter from the 6 antenna beams. See the [ASCAT level 1B SZF product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZF1B) for more information.  

@@ -137,7 +137,7 @@ Output
     missing     missing     missing  missing     
     missing     missing  …  missing  missing  
 ```
-Here the output variable is `Union{Missing, Float64}` which can be difficult to work with. Sometimes it can be and advatange to replace the `missing` values with `NaN` values. This can be done on the variable level.
+Here the output variable is `Union{Missing, Float64}` which can be difficult to work with. Sometimes it can be and advantage to replace the `missing` values with `NaN` values. This can be done on the variable level.
 
 ```julia
 var_no_missing = cfvariable(ds, "atmospheric_temperature", maskingvalue = NaN)

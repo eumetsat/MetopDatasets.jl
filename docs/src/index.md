@@ -5,15 +5,15 @@ CurrentModule = MetopDatasets
 
 MetopDatasets.jl is a package for reading products from the [METOP satellites](https://www.eumetsat.int/our-satellites/metop-series) using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and have produced near real-time, global weather and climate observation since 2007. Learn more and access the products on [EUMETSATs user-portal](https://user.eumetsat.int/dashboard).
 
-MetopDatasets.jl exports the `MetopDataset` API which is an implementation of the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl).
+MetopDatasets.jl exports the `MetopDataset` API which is an implementation of the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/JuliaGeo/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl).
 
-Only a subset of the METOP native formats are supported currently, but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__Native). See [Supported formats](@ref) for more information.
+Only a subset of the METOP native formats are supported currently, but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__EPS%20Native). See [Supported formats](@ref) for more information.
 
 It is also possible to use MetopDatasets.jl from Python. See [Use with Python](@ref) for more information.
 
 
 ## Quick start
-This section gives a very short overview of the core functionalities. The [MetopDataset](@ref) page is recommend for more information and more specific examples are given in the Example section e.g. [ASCAT](@ref). The [NCDatasets documentation](https://alexander-barth.github.io/NCDatasets.jl/stable/) is also a great resource for information on how to use the datasets. 
+This section gives a very short overview of the core functionalities. The [MetopDataset](@ref) page is recommend for more information and more specific examples are given in the Example section e.g. [ASCAT](@ref). The [NCDatasets documentation](https://juliageo.org/NCDatasets.jl/stable/) is also a great resource for information on how to use the datasets. 
 
 ### Installation
 MetopDatasets.jl can be installed via Pkg.
@@ -305,7 +305,7 @@ REPL output:
 ```
 ### Convert a Metop Native binary file to netCDF
 
-A Metop Native binary file can be converted to netCDF using the [NCDatasets.jl](https://github.com/Alexander-Barth/NCDatasets.jl) package. This 
+A Metop Native binary file can be converted to netCDF using the [NCDatasets.jl](https://github.com/JuliaGeo/NCDatasets.jl) package. This 
 is possible because both MetopDatasets.jl and NCDatasets.jl implement the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface.
 
 ```julia
