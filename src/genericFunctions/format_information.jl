@@ -80,6 +80,22 @@ function fixed_size(T::Type{<:BinaryRecord}, fieldname::Symbol)
     end
 end
 
+"""
+    fixed_size_in_file(T::Type{<:BinaryRecord}, fieldname::Symbol)::Bool
+
+Check if the field have a constant size in a product. Return false if the field size
+can vary within a single file.
+"""
+function fixed_size_in_file(T::Type{<:BinaryRecord}, fieldname::Symbol)
+    if fixed_size(T, fieldname)
+        return true
+    end
+
+    field_dims = get_raw_format_dim(T, fieldname)
+    flexible_dims_in_record = values(get_flexible_dim_fields(T))
+    return !any(dim in flexible_dims_in_record for dim in field_dims)
+end
+
 ### Interface must be implemented for each BinaryRecord type
 
 # get_description, get_scale_factor, get_raw_format_dim and fixed_size are automatically defined by record_struct_expression

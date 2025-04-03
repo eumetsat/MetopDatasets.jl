@@ -28,21 +28,21 @@ end
     @test utc_time isa MetopDatasets.MetopDiskArray{MetopDatasets.ShortCdsTime, 1}
     @test utc_time.field_type <: MetopDatasets.ShortCdsTime
     @test utc_time.record_count == number_of_records
-    @test utc_time.offset_in_record == 22
+    @test utc_time.offsets_in_file[1] - record_layouts[1].offset == 22
     @test size(utc_time) == (number_of_records,)
 
     sigma0 = MetopDatasets.MetopDiskArray(file_pointer, record_layouts, :sigma0_trip)
     @test sigma0 isa MetopDatasets.MetopDiskArray{Int32, 3}
     @test sigma0.field_type <: Matrix{Int32}
     @test sigma0.record_count == number_of_records
-    @test sigma0.offset_in_record == 773
+    @test sigma0.offsets_in_file[1] - record_layouts[1].offset == 773
     @test size(sigma0) == (3, 82, number_of_records)
 
     latitude = MetopDatasets.MetopDiskArray(file_pointer, record_layouts, :latitude)
     @test latitude isa MetopDatasets.MetopDiskArray{Int32, 2}
     @test latitude.field_type <: Vector{Int32}
     @test latitude.record_count == number_of_records
-    @test latitude.offset_in_record == 117
+    @test latitude.offsets_in_file[1] - record_layouts[1].offset == 117
     @test size(latitude) == (82, number_of_records)
 
     close(file_pointer)
