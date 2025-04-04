@@ -45,6 +45,15 @@ function get_flexible_dim_fields(::Type{IASI_SND_02_V11})
     )
 end
 
+function flexible_dim_data_location(::Type{IASI_SND_02_V11})
+    return Dict(
+        :NERR => :error_data_index,
+        :CO_NBR => :co_nfitlayers,
+        :HNO3_NBR => :hno3_nfitlayers,
+        :O3_NBR => :o3_nfitlayers
+    )
+end
+
 function get_flexible_dim_fields(::Type{IASI_SND_02_V10})
     return Dict{Symbol, Symbol}(
     )

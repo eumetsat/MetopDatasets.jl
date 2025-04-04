@@ -143,7 +143,6 @@ struct FlexibleRecordLayout <: RecordLayout
     record_type::Type{<:Record}
     record_sizes::Vector{Int64}
     flexible_dims_file::Dict{Symbol, Int64}
-    flexible_dims_records::Vector{Dict{Symbol, Int64}}
     field_sizes::Matrix{Int64}
 end
 
@@ -216,7 +215,6 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
         record_type,
         record_sizes,
         flexible_dims_file,
-        flexible_dims_records,
         field_sizes
     )
 
@@ -242,28 +240,10 @@ end
 function _get_field_array_size(
         record_layouts::Vector{FlexibleRecordLayout}, record_type::Type, field_name::Symbol)
     layout = only(record_layouts)
-    # use max flexible dims for size
-    flexible_dims_max = MetopDatasets.get_flex_dim_max(layout)
 
     field_array_size = _get_array_size_flexible(
         record_type, field_name,
-        layout.flexible_dims_file, flexible_dims_max)
+        layout.flexible_dims_file, Dict{Symbol, Int64}())
 
     return field_array_size
-end
-
-# helper functions to get the max values of flexible dimensions
-function get_flex_dim_max(layout::FlexibleRecordLayout, dim_name::Symbol)
-    if haskey(layout.flexible_dims_file, dim_name)
-        return layout.flexible_dims_file[dim_name]
-    end
-
-    dim_max = max([dims_record[dim_name] for dims_record in layout.flexible_dims_records]...)
-    return dim_max
-end
-
-function get_flex_dim_max(layout::FlexibleRecordLayout)
-    all_keys = keys(first(layout.flexible_dims_records))
-    max_flex_dims = Dict(all_keys .=> (get_flex_dim_max(layout, k) for k in all_keys))
-    return max_flex_dims
 end

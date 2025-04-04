@@ -21,7 +21,6 @@ struct MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
 
     # computed
     field_type::Type
-    record_count::Int64
     offsets_in_file::Vector{Int64}
     record_type::Type{<:DataRecord}
     size::NTuple{N, Int64}
@@ -56,7 +55,6 @@ function MetopDiskArray(file_pointer::IOStream,
 
         # computed
         field_type,
-        record_count,
         offsets_in_file,
         record_type,
         size)

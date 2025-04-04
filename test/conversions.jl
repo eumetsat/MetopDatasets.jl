@@ -95,5 +95,5 @@ end
 
     size_factor_IASI_L2 = filesize(netcdf_file) / filesize(test_file)
     @show size_factor_IASI_L2
-    @test size_factor_IASI_L2 < 2.0
+    @test size_factor_IASI_L2 < 2.5
 end

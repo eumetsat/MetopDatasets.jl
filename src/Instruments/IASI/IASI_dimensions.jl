@@ -103,23 +103,8 @@ function get_dimensions(T::Type{<:IASI_SND_02},
     dimensions_dict = Dict{String, Integer}()
     layout = only(data_record_layouts)
 
-    flexible_dims_max = MetopDatasets.get_flex_dim_max(layout)
-
-    array_sizes = [MetopDatasets._get_array_size(T, n)
-                   for n in fieldnames(T) if fieldtype(T, n) <: Array]
-
-    # get all unique dimensions
-    dims = reduce(vcat, [[t...] for t in array_sizes])
-    unique!(dims)
-
-    # default symbols
-    dims_sym = filter(x -> x isa Symbol, dims)
-    for d in dims_sym
-        if haskey(layout.flexible_dims_file, d)
-            dimensions_dict[string(d)] = layout.flexible_dims_file[d]
-        else
-            dimensions_dict[string(d)] = flexible_dims_max[d]
-        end
+    for d in keys(layout.flexible_dims_file)
+        dimensions_dict[string(d)] = layout.flexible_dims_file[d]
     end
 
     merge!(dimensions_dict, _get_fixed_dimensions(T))
@@ -137,10 +122,16 @@ function get_field_dimensions(
 
     dimension_dict = _get_fixed_dimensions(T)
     array_size = _get_array_size(T, field_name)
+    flexible_dims_names = values(get_flexible_dim_fields(T))
 
     for d in array_size
         if d isa Symbol
-            push!(res, string(d))
+            if d in flexible_dims_names
+                # replace flexible dims with "xtrack_sounder_pixels"
+                push!(res, "xtrack_sounder_pixels")
+            else
+                push!(res, string(d))
+            end
         elseif T <: IASI_SND_02_V10 && d == 2
             if field_name == :pressure_levels_ozone
                 push!(res, IASI_L2_V10_03_PRESSURE_DIM)
