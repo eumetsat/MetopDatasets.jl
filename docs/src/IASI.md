@@ -241,7 +241,7 @@ end
 # Read the geolocation of the data record
 longitude, latitude = let 
     lat_lon_var = cfvariable(ds, "earth_location", maskingvalue = NaN)
-    lat_lon = ds["earth_location"][:,:,data_record_index]
+    lat_lon = lat_lon_var[:,:,data_record_index]
     lat_lon[2,:], lat_lon[1,:]
 end
 
@@ -298,3 +298,70 @@ end
 ```
 ![IASI L2 profile](IASI_L2_profile.png)
 The top plot shows a row of observations west of the west African coast. One observation has been marked with a colored X. The corresponding temperature and water vapour profile of the observation are shown below.
+
+
+## Level 2 Carbon monoxide
+This example shows how to plot retrieved carbon monoxide for the IASI L2 products. 
+
+```julia
+using MetopDatasets
+using CairoMakie, GeoMakie, Statistics
+
+iasi_file = "IASI_SND_02_M03_20250120105357Z_20250120123253Z_N_O_20250120123416Z.nat"
+ds = MetopDataset(iasi_file , maskingvalue=NaN);
+
+# select the layer for the carbon monoxide
+layer_index = 15
+height_in_km = Int.(ds["forli_layer_heights_co"][layer_index])/1000
+
+# get locations
+longitude, latitude = let 
+    lat_lon = ds["earth_location"][:,:,:]
+    lat_lon[2,:,:], lat_lon[1,:,:]
+end
+
+# read carbon monoxide data
+co_integrated = ds["integrated_co"][:,:].*1000 # convert to g/m2
+co_at_height = ds["co_cp_co_a"][layer_index,:,:] .* ds["co_x_co"][layer_index,:,:]
+
+# get color range for plotting
+get_quantiles(a) = quantile(a,0.02), quantile(a,0.98)
+co_range = get_quantiles(co_at_height[.!isnan.(co_at_height)])
+co_integrated_range = get_quantiles(co_integrated[.!isnan.(co_integrated)])
+
+# plot the data
+fig = let
+
+    # Create figure and axis
+    fig = Figure()
+    ax1 = GeoAxis(fig[1, 1],
+        title = "Carbon monoxide at $height_in_km km",
+        xlabel = "longitude",
+        ylabel = "latitude")
+    ax2 = GeoAxis(fig[2, 1],
+        title = "Carbon monoxide integrated",
+        xlabel = "longitude",
+        ylabel = "latitude")
+
+    # Add coastlines
+    lines!(ax1, GeoMakie.coastlines(), color=:black)
+    lines!(ax2, GeoMakie.coastlines(), color=:black) 
+
+    # plot observations
+    scatter!(ax1, longitude[:], latitude[:],
+        color = co_at_height[:], colorrange = co_range, markersize = 2)
+    scatter!(ax2, longitude[:], latitude[:],
+        color = co_integrated[:], colorrange = co_integrated_range, markersize = 2)
+
+    # Add colorbar
+    c1 = Colorbar(fig[1,2],colorrange = co_range .*10^-16, label="molecules/cm2 x 10^16")
+    c2 = Colorbar(fig[2,2],colorrange = co_integrated_range, label="g/m2")
+
+    # hide ticks
+    hidedecorations!(ax1, grid = false)
+    hidedecorations!(ax2, grid = false)
+
+    fig
+end
+```
+![IASI Carbon monoxide](IASI_L2_Carbon_monoxide.png)

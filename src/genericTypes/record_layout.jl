@@ -13,6 +13,34 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
 end
 
 """
+    layout_info_for_disk_array(record_layouts::Vector{<:RecordLayout}, field_name::Symbol)
+
+Extract information need in `MetopDiskArray`
+"""
+function layout_info_for_disk_array(
+        record_layouts::Vector{<:RecordLayout}, field_name::Symbol)
+    record_type = first(record_layouts).record_type
+    offsets_in_file = _layouts_to_offsets(record_layouts)
+    record_count = length(offsets_in_file)
+
+    local field_type::Type
+    if field_name == :record_start_time
+        offsets_in_file .+= 8
+        field_type = ShortCdsTime
+    elseif field_name == :record_stop_time
+        offsets_in_file .+= 14
+        field_type = ShortCdsTime
+    else
+        offset_in_record = _get_offset_in_record(
+            record_type, field_name, first(record_layouts))
+        offsets_in_file .+= offset_in_record
+        field_type = fieldtype(record_type, field_name)
+    end
+
+    return field_type, record_count, offsets_in_file, record_type
+end
+
+"""
     FixedRecordLayout
 
 Used to store the record layout of fixed size data records in a Native metop files.
@@ -90,6 +118,20 @@ function _layouts_to_offsets(record_layouts::Vector{FixedRecordLayout})::Vector{
     return vcat(record_offsets...)
 end
 
+@inline function _get_offset_in_record(
+        record_type::Type, field_name::Symbol, record_layout::FixedRecordLayout)
+    field_index = findfirst(fieldnames(record_type) .== field_name)
+    fields_before = fieldnames(record_type)[1:(field_index - 1)]
+    offset_in_record = sum(native_sizeof.(record_type, fields_before))
+    return offset_in_record
+end
+
+function _get_field_array_size(
+        record_layouts::Vector{FixedRecordLayout}, record_type::Type, field_name::Symbol)
+    field_array_size = _get_array_size(record_type, field_name)
+    return field_array_size
+end
+
 """
     FlexibleRecordLayout
 
@@ -101,7 +143,6 @@ struct FlexibleRecordLayout <: RecordLayout
     record_type::Type{<:Record}
     record_sizes::Vector{Int64}
     flexible_dims_file::Dict{Symbol, Int64}
-    flexible_dims_records::Vector{Dict{Symbol, Int64}}
     field_sizes::Matrix{Int64}
 end
 
@@ -174,25 +215,35 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
         record_type,
         record_sizes,
         flexible_dims_file,
-        flexible_dims_records,
         field_sizes
     )
 
     return [record_layout]
 end
 
-# helper functions to get the max values of flexible dimensions
-function get_flex_dim_max(layout::FlexibleRecordLayout, dim_name::Symbol)
-    if haskey(layout.flexible_dims_file, dim_name)
-        return layout.flexible_dims_file[dim_name]
-    end
+function _offset_in_record(record_layout::FlexibleRecordLayout, field_name::Symbol)
+    field_index = findfirst(fieldnames(record_layout.record_type) .== field_name)
+    size_of_fields_before = record_layout.field_sizes[1:(field_index - 1), :]
 
-    dim_max = max([dims_record[dim_name] for dims_record in layout.flexible_dims_records]...)
-    return dim_max
+    offsets = dropdims(sum(size_of_fields_before, dims = 1), dims = 1)
+
+    return offsets
 end
 
-function get_flex_dim_max(layout::FlexibleRecordLayout)
-    all_keys = keys(first(layout.flexible_dims_records))
-    max_flex_dims = Dict(all_keys .=> (get_flex_dim_max(layout, k) for k in all_keys))
-    return max_flex_dims
+@inline _layouts_to_offsets(record_layouts::Vector{FlexibleRecordLayout}) = copy(only(record_layouts).offsets)
+
+@inline function _get_offset_in_record(
+        record_type::Type, field_name::Symbol, record_layout::FlexibleRecordLayout)
+    return _offset_in_record(record_layout, field_name)
+end
+
+function _get_field_array_size(
+        record_layouts::Vector{FlexibleRecordLayout}, record_type::Type, field_name::Symbol)
+    layout = only(record_layouts)
+
+    field_array_size = _get_array_size_flexible(
+        record_type, field_name,
+        layout.flexible_dims_file, Dict{Symbol, Int64}())
+
+    return field_array_size
 end

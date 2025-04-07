@@ -192,44 +192,21 @@ end
         @test length(flexible_record_layout.record_sizes) == total_mdr
         @test flexible_record_layout.flexible_dims_file == flex_sizes
 
-        # get dim from giard 
-        @test MetopDatasets.get_flex_dim_max(flexible_record_layout, :NLQ) == 101
-
-        # get max dim from records
-        @test MetopDatasets.get_flex_dim_max(flexible_record_layout, :HNO3_NBR) == 111
-        @test MetopDatasets.get_flex_dim_max(flexible_record_layout, :CO_NBR) == 113
-
         ### test dataset
         ds = MetopDataset(test_file)
 
         # test dims and size
         @test !isnothing(ds.dim)
-        @test CDM.dimnames(ds["co_h_eigenvalues"]) == ["NEVA_CO", "CO_NBR", "atrack"]
-        @test size(ds["co_h_eigenvalues"]) == (10, 113, 22)
+        @test CDM.dimnames(ds["co_h_eigenvalues"]) ==
+              ["NEVA_CO", "xtrack_sounder_pixels", "atrack"]
+        @test size(ds["co_h_eigenvalues"]) == (10, 120, 22)
 
         # test read 
         @test all(isapprox.(ds["fg_qi_surface_temperature"][1:5, 3],
             [1.7000000000000002, 1.5, 1.8, 1.6, 2.6]))
 
-        # test that flexible fields are padded correctly
-        n_err = ds["nerr"][:]
-        vars = [ds["temperature_error"], ds["water_vapour_error"], ds["ozone_error"]]
-
-        for i in eachindex(n_err)
-            for v in vars
-                padded_array = v[:, :, i]
-                data = padded_array[:, 1:n_err[i]]
-                no_data = padded_array[:, (1 + n_err[i]):end]
-                if !isempty(no_data)
-                    @test all(ismissing, no_data)
-                end
-
-                @test !any(ismissing, data)
-            end
-        end
-
         # test that lazy load work for complex indexes with missing values
-        weird_index = (4:2:10, 111:-2:3, 3:5)
+        weird_index = (4:2:10, 119:-2:3, 3:5)
         lazy_read = ds["hno3_cp_air"][weird_index...]
         eager_read = Array(ds["hno3_cp_air"])[weird_index...]
         no_data = ismissing.(lazy_read)
@@ -246,7 +223,7 @@ end
         # check variables from giard
         @test "pressure_levels_temp" in MetopDatasets.CDM.varnames(ds)
         @test MetopDatasets.CDM.dimnames(ds["pressure_levels_humidity"]) ==
-              ["NLQ", "atrack"]
+              ["NLQ"]
 
         # manuel read levels from giadr
         temp_pressure_levels, hum_pressure_levels = let
@@ -263,6 +240,9 @@ end
 
         @test isapprox(ds["pressure_levels_temp"][:], temp_pressure_levels)
         @test isapprox(ds["pressure_levels_humidity"][:], hum_pressure_levels)
+
+        @test MetopDatasets.dimnames(ds["pressure_levels_temp"]) == ["NLT"]
+        @test MetopDatasets.dimnames(ds["pressure_levels_humidity"]) == ["NLQ"]
 
         close(ds)
 
@@ -291,7 +271,7 @@ end
 
         @test Array(ds["pressure_levels_temp"]) isa Vector{Union{Missing, Float64}}
         @test MetopDatasets.CDM.dimnames(ds["pressure_levels_ozone"]) ==
-              ["n_o3_profiles", "NLO", "atrack"]
+              ["n_o3_profiles", "NLO"]
 
         @test all(lat -> -90 < lat < 90, ds["earth_location"][1, :, :])
         @test all(lon -> -180 < lon < 180, ds["earth_location"][2, :, :])
@@ -306,6 +286,96 @@ end
         @test error_field isa Vector{UInt8}
         @test length(error_field) == error_field_size_computed[49]
         @test length.(ds["error_data"][1:2]) == error_field_size_computed[1:2]
+
+        close(ds)
+    end
+end
+
+@testset "IASI L02 improved ordering" begin
+    ## testData
+    if isdir("testData")
+        ds = MetopDataset("testData/IASI_SND_02_M01_20241215173256Z_20241215173552Z_N_C_20241215182326Z")
+
+        @test size(ds["co_cp_air"]) ==
+              (ds.dim["NL_CO"], ds.dim["xtrack_sounder_pixels"], ds.dim["atrack"])
+        @test size(ds["co_cp_co_a"]) ==
+              (ds.dim["NL_CO"], ds.dim["xtrack_sounder_pixels"], ds.dim["atrack"])
+        @test size(ds["co_h_eigenvectors"]) ==
+              (ds.dim["NEVE_CO"], ds.dim["xtrack_sounder_pixels"], ds.dim["atrack"])
+        @test size(ds["temperature_error"]) ==
+              (ds.dim["NERRT"], ds.dim["xtrack_sounder_pixels"], ds.dim["atrack"])
+
+        @test MetopDatasets.dimnames(ds["co_cp_air"]) ==
+              ["NL_CO", "xtrack_sounder_pixels", "atrack"]
+        @test MetopDatasets.dimnames(ds["co_cp_co_a"]) ==
+              ["NL_CO", "xtrack_sounder_pixels", "atrack"]
+        @test MetopDatasets.dimnames(ds["co_h_eigenvectors"]) ==
+              ["NEVE_CO", "xtrack_sounder_pixels", "atrack"]
+        @test MetopDatasets.dimnames(ds["temperature_error"]) ==
+              ["NERRT", "xtrack_sounder_pixels", "atrack"]
+
+        expected_out_co = Union{Missing, Float64}[
+            missing, 1.4418e24, 1.456e24, 1.4531e24, 1.4321e24, 1.4257e24,
+            1.4271e24, missing, 1.4425e24, 1.4295e24, 1.4225e24,
+            1.4351e24, 1.4498e24, 1.4304e24, 1.4387e24,
+            1.4497e24, 1.4254e24, 1.4249e24, 1.4247e24, 1.425e24,
+            1.4405e24, 1.44e24, 1.4399e24, 1.4404e24,
+            1.4408e24, 1.456e24, 1.4265e24, 1.4326e24, 1.5042e24,
+            1.4039e24, 1.4704e24, 1.3856e24, 1.4287e24,
+            1.4185e24, 1.4446e24, 1.4619e24, 1.4363e24, 1.4401e24,
+            1.4363e24, 1.4324e24, 1.4352e24, 1.4353e24,
+            1.4352e24, 1.4352e24, 1.4241e24, 1.4244e24, 1.4242e24,
+            1.424e24, 1.4289e24, 1.4288e24, 1.4285e24,
+            1.4287e24, 1.4302e24, 1.4301e24, 1.4297e24, 1.4299e24,
+            1.4312e24, 1.4311e24, 1.4307e24, 1.431e24, 1.4301e24,
+            1.4303e24, 1.4301e24, 1.4299e24, 1.4417e24, 1.4418e24,
+            1.4416e24, 1.4416e24, 1.4368e24, 1.4373e24, 1.4371e24,
+            1.4367e24, 1.4437e24, 1.444e24, 1.4439e24, 1.4437e24, 1.4469e24,
+            1.4469e24, 1.4469e24, 1.4469e24, 1.4443e24,
+            1.4442e24, 1.4443e24, 1.4444e24, 1.4434e24, 1.444e24,
+            1.4441e24, 1.4435e24, 1.445e24, 1.4456e24, 1.4457e24,
+            1.4452e24, 1.4483e24, 1.4482e24, 1.4488e24, 1.4489e24,
+            1.4526e24, 1.4523e24, 1.4527e24, 1.4531e24, 1.4487e24,
+            1.4484e24, 1.4489e24, 1.4492e24, missing, missing, missing,
+            missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, 1.4219e24, 1.4217e24, missing]
+
+        actual_out_co = ds["co_cp_air"][6, :, 3]
+
+        @test ismissing.(expected_out_co) == ismissing.(actual_out_co) #check locations of missing
+
+        ## double check this test. Maybe the test is wrong???
+        @test all(isapprox.(
+            skipmissing(expected_out_co), skipmissing(actual_out_co), rtol = 0.01)) # check values
+
+        expected_out_error = [missing, missing, missing, 0x3f1cabf0, missing, missing,
+            missing, 0x3f2c95f2, 0x3f47461b, 0x3f3db0e1, 0x3f38dabb,
+            missing, missing, missing, missing, 0x3f67aa78, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing,
+            0x3f61a3f8, 0x3f6265c5, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing, missing,
+            missing, missing, missing, missing, missing, missing, missing, missing]
+
+        actual_out_error = ds["temperature_error"][12, :, 8]
+
+        @test ismissing.(expected_out_error) == ismissing.(actual_out_error) #check locations of missing
+        @test all(isapprox.(skipmissing(expected_out_error), skipmissing(actual_out_error))) # check values
+
+        # test that the reader support complex indexes into the flexible dimension.
+        weird_index = 120:-2:8
+        temp_e_array_index = Array(ds["temperature_error"])[:, weird_index, :]
+        temp_e_disk_array_index = ds["temperature_error"][:, weird_index, :]
+
+        @test all(skipmissing(temp_e_array_index) .== skipmissing(temp_e_disk_array_index))
+        @test ismissing.(temp_e_array_index) == ismissing.(temp_e_disk_array_index)
 
         close(ds)
     end

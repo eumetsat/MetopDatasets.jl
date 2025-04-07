@@ -4,100 +4,70 @@
 """
     FlexibleMetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
 
-Similar to `MetopDiskArray` but able to handle flexible record layout.
+Similar to `MetopDiskArray` but able to handle flexible record layout and 
+fields where the size varies within a single product file. E.g. IASI L2 fields like "temperature_error".
 """
 struct FlexibleMetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     file_pointer::IOStream
-    record_layout::FlexibleRecordLayout
     field_name::Symbol
 
     # computed
     field_type::Type
-    record_count::Int64
     offsets_in_file::Vector{Int64}
     record_type::Type{<:DataRecord}
-end
-
-"""
-    construct_disk_array(file_pointer::IOStream,
-        record_layouts::Vector{FlexibleRecordLayout},
-        field_name::Symbol; auto_convert = true)
-
-Construct a disk array for flexible record layout.
-"""
-function construct_disk_array(file_pointer::IOStream,
-        record_layouts::Vector{FlexibleRecordLayout},
-        field_name::Symbol; auto_convert = true)
-    return FlexibleMetopDiskArray(file_pointer,
-        only(record_layouts),
-        field_name::Symbol; auto_convert = auto_convert)
+    size::NTuple{N, Int64}
+    flexible_dim::Int64
+    data_location::DiskArrays.AbstractDiskArray{Bool}
 end
 
 function FlexibleMetopDiskArray(file_pointer::IOStream,
-        record_layout::FlexibleRecordLayout,
+        record_layouts::Vector{FlexibleRecordLayout},
         field_name::Symbol; auto_convert = true)
-    record_type = record_layout.record_type
+    field_type, record_count, offsets_in_file, record_type = layout_info_for_disk_array(
+        record_layouts, field_name)
 
-    T = _get_field_eltype(record_type, field_name)
-    N = 1
-    offsets_in_file = record_layout.offsets
-    record_count = length(record_layout.offsets)
+    T, N = _get_T_and_N(field_type, auto_convert)
 
-    local field_type::Type
+    array_size_raw = _get_array_size(record_type, field_name)
+    data_location_dict = flexible_dim_data_location(record_type)
 
-    if field_name == :record_start_time
-        offsets_in_file = offsets_in_file .+ 8
-        field_type = ShortCdsTime
-    elseif field_name == :record_stop_time
-        offsets_in_file = offsets_in_file .+ 14
-        field_type = ShortCdsTime
-    else
-        field_type = fieldtype(record_type, field_name)
-        offset_in_records = _offset_in_record(record_layout, field_name)
-        offsets_in_file = offsets_in_file .+ offset_in_records
+    array_size = zeros(Int64, N - 1)
+    local data_location_var::Symbol
+    flexible_dim = 0
+
+    for i in eachindex(array_size)
+        d = array_size_raw[i]
+        if d isa Symbol
+            if haskey(data_location_dict, d)
+                @assert flexible_dim == 0
+                flexible_dim = i
+                data_location_var = data_location_dict[d]
+                array_size[i] = only(_get_array_size(record_type, data_location_var))
+            else
+                array_size[i] = only(record_layouts).flexible_dims_file[d]
+            end
+        else
+            array_size[i] = d
+        end
     end
 
-    if field_type <: Array
-        N = 1 + ndims(field_type)
-    end
-
-    T = auto_convert ? _get_convert_type(T) : T
+    data_location_array = construct_disk_array(
+        file_pointer, record_layouts, data_location_var; auto_convert = false)
+    data_location = data_location_array .!=
+                    get_missing_value(record_type, data_location_var)
 
     return FlexibleMetopDiskArray{T, N}(
         file_pointer,
-        record_layout,
         field_name,
 
         # computed
         field_type,
-        record_count,
         offsets_in_file,
-        record_type)
-end
-
-function _offset_in_record(record_layout::FlexibleRecordLayout, field_name::Symbol)
-    field_index = findfirst(fieldnames(record_layout.record_type) .== field_name)
-    size_of_fields_before = record_layout.field_sizes[1:(field_index - 1), :]
-
-    offsets = dropdims(sum(size_of_fields_before, dims = 1), dims = 1)
-
-    return offsets
-end
-
-function Base.size(disk_array::FlexibleMetopDiskArray)
-    if disk_array.field_type <: Array
-        layout = disk_array.record_layout
-        # use max flexible dims for size
-        flexible_dims_max = MetopDatasets.get_flex_dim_max(layout)
-
-        field_array_size = _get_array_size_flexible(
-            disk_array.record_type, disk_array.field_name,
-            layout.flexible_dims_file, flexible_dims_max)
-
-        return (field_array_size..., disk_array.record_count)
-    else
-        return (disk_array.record_count,)
-    end
+        record_type,
+        (array_size..., record_count),
+        flexible_dim,
+        data_location
+    )
 end
 
 # Extend get index functions
@@ -109,81 +79,54 @@ function DiskArrays.readblock!(disk_array::FlexibleMetopDiskArray{T, N},
     i_record = i[end]
     i_array = i[1:(end - 1)]
 
-    is_field_fixed = fixed_size(disk_array)
-    offsets_in_file = disk_array.offsets_in_file
+    fill_value = get_missing_value(disk_array.record_type, disk_array.field_name)
+    fill_value = _auto_convert(T, fill_value)
+    fill!(aout, fill_value)
 
     for k in eachindex(i_record)
         record_index = i_record[k]
-        field_start_position = offsets_in_file[record_index]
-        seek(disk_array.file_pointer, field_start_position)
+        aout_record = selectdim(aout, N, k)
 
-        if N > 1 # array field
-            aout_rec = selectdim(aout, N, k)
+        # Note that accessing the disk_array.data_location will move the file_pointer
+        # the file pointer is shared.
+        data_location = disk_array.data_location[:, record_index]
 
-            if is_field_fixed
-                # similar to fixed size
-                array_size = _get_array_size(disk_array.record_type, disk_array.field_name)
-                full_field = native_read_array(
-                    disk_array.file_pointer, disk_array.field_type, array_size)
-                aout_rec .= _auto_convert.(T, full_field[i_array...])
-            else
-                # get size of flex field and read entire field.
-                flexible_dims_record = disk_array.record_layout.flexible_dims_records[record_index]
-                array_size = _get_array_size_flexible(
-                    disk_array.record_type, disk_array.field_name,
-                    disk_array.record_layout.flexible_dims_file, flexible_dims_record)
-                full_field = native_read_array(
-                    disk_array.file_pointer, disk_array.field_type, array_size)
+        full_field = _read_full_field(disk_array, sum(data_location), record_index)
 
-                # get the part of the range overlapping with the actual flex field
-                a_range_in_data = _range_with_data(i_array, array_size)
-                i_array_in_data = Tuple((i_array[l][a_range_in_data[l]]
-                for l in eachindex(i_array)))
+        i_array_in_data = _index_in_raw_data(
+            data_location, i_array, disk_array.flexible_dim)
 
-                if i_array != i_array_in_data
-                    # pad the aout_rec with missing values if the range exceeds the 
-                    # size of the flex field.
-                    fill_value = get_missing_value(
-                        disk_array.record_type, disk_array.field_name)
-                    fill_value = _auto_convert(T, fill_value)
-                    fill!(aout_rec, fill_value)
-                end
+        # view the flexible dimension in the output array
+        selected = data_location[i_array[disk_array.flexible_dim]]
+        aout_record_data = selectdim(aout_record, disk_array.flexible_dim, selected)
 
-                # extract the data in the range that overlap with the flex field
-                aout_rec[a_range_in_data...] .= _auto_convert.(
-                    T, full_field[i_array_in_data...])
-            end
-        else # Scalar field 
-            scalar_value = native_read(disk_array.file_pointer, disk_array.field_type)
-            aout[k] = _auto_convert(T, scalar_value)
-        end
+        aout_record_data .= _auto_convert.(T, full_field[i_array_in_data...])
     end
     return nothing
 end
 
-# helper functions to find data ranges
-function _range_with_data(range, max_val)
-    first_valid = findfirst(x -> 1 <= x <= max_val, range)
-    last_valid = findlast(x -> 1 <= x <= max_val, range)
+function _read_full_field(
+        disk_array::FlexibleMetopDiskArray, flex_dim_length::Integer, record_index::Integer)
+    full_size = disk_array.size[1:(end - 1)]
 
-    if isnothing(first_valid) || isnothing(last_valid)
-        # no valid data found. return empty range
-        return 1:0
-    end
+    array_size = (full_size[1:(disk_array.flexible_dim - 1)]..., flex_dim_length,
+        full_size[(disk_array.flexible_dim + 1):end]...)
 
-    return first_valid:last_valid
+    # Set the file pointer to the correct location right before reading the field
+    field_start_position = disk_array.offsets_in_file[record_index]
+    seek(disk_array.file_pointer, field_start_position)
+    full_field = native_read_array(
+        disk_array.file_pointer, disk_array.field_type, array_size)
+
+    return full_field
 end
 
-function _range_with_data(ranges::Tuple, max_vals::Tuple)
-    return Tuple(_range_with_data(ranges[l], max_vals[l]) for l in eachindex(max_vals))
-end
-
-# forward method
-function fixed_size(disk_array::FlexibleMetopDiskArray)
-    return fixed_size(disk_array.record_type, disk_array.field_name)
-end
-
-function get_field_dimensions(disk_array::FlexibleMetopDiskArray)
-    return get_field_dimensions(
-        disk_array.record_type, disk_array.record_layout, disk_array.field_name)
+function _index_in_raw_data(
+        data_location::AbstractVector{Bool}, i_array, flexible_dim::Integer)
+    position_in_data_field = zeros(Int64, length(data_location))
+    position_in_data_field[data_location] .= cumsum(data_location)[data_location]
+    data_index = filter!(x -> 0 < x, position_in_data_field[i_array[flexible_dim]])
+    i_array_in_data = (i_array[1:(flexible_dim - 1)]..., data_index,
+        i_array[(flexible_dim + 1):end]...)
+    return i_array_in_data
 end
