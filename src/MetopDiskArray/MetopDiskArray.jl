@@ -9,6 +9,24 @@ DiskArray types to handle special corner cases.
 """
 abstract type AbstractMetopDiskArray{T, N} <: DiskArrays.AbstractDiskArray{T, N} end
 
+## generic methods
+# Set error for write function
+function DiskArrays.writeblock!(A::AbstractMetopDiskArray{T, N},
+        ain,
+        r::Vararg{AbstractUnitRange, N}) where {T, N}
+    return error("MetopDiskArray is read-only")
+end
+
+Base.size(disk_array::AbstractMetopDiskArray) = disk_array.size
+
+# Define chunk structure
+DiskArrays.haschunks(::AbstractMetopDiskArray) = DiskArrays.Chunked();
+
+function DiskArrays.eachchunk(disk_array::AbstractMetopDiskArray)
+    # the chunk is equivalent to reading the variable from a single record.
+    return DiskArrays.GridChunks(disk_array, (size(disk_array)[1:(end - 1)]..., 1))
+end;
+
 """
     MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
 
@@ -60,16 +78,6 @@ function MetopDiskArray(file_pointer::IOStream,
         size)
 end
 
-Base.size(disk_array::AbstractMetopDiskArray) = disk_array.size
-
-# Define chunk structure
-DiskArrays.haschunks(::AbstractMetopDiskArray) = DiskArrays.Chunked();
-
-function DiskArrays.eachchunk(disk_array::AbstractMetopDiskArray)
-    # the chunk is equivalent to reading the variable from a single record.
-    return DiskArrays.GridChunks(disk_array, (size(disk_array)[1:(end - 1)]..., 1))
-end;
-
 # Extend get index functions
 function DiskArrays.readblock!(disk_array::MetopDiskArray{T, N},
         aout,
@@ -97,16 +105,4 @@ function DiskArrays.readblock!(disk_array::MetopDiskArray{T, N},
         end
     end
     return nothing
-end
-
-# helper function
-function get_field_dimensions(disk_array::AbstractMetopDiskArray)
-    return get_field_dimensions(disk_array.record_type, disk_array.field_name)
-end
-
-# Set error for write function
-function DiskArrays.writeblock!(A::AbstractMetopDiskArray{T, N},
-        ain,
-        r::Vararg{AbstractUnitRange, N}) where {T, N}
-    return error("MetopDiskArray is read-only")
 end

@@ -70,8 +70,6 @@ function FlexibleMetopDiskArray(file_pointer::IOStream,
     )
 end
 
-Base.size(disk_array::FlexibleMetopDiskArray) = disk_array.size
-
 # Extend get index functions
 function DiskArrays.readblock!(disk_array::FlexibleMetopDiskArray{T, N},
         aout,
@@ -80,12 +78,6 @@ function DiskArrays.readblock!(disk_array::FlexibleMetopDiskArray{T, N},
     # separate record range.
     i_record = i[end]
     i_array = i[1:(end - 1)]
-
-    full_size = disk_array.size[1:(end - 1)]
-    flexible_dim = disk_array.flexible_dim
-    i_flexible_dim = i_array[flexible_dim]
-
-    offsets_in_file = disk_array.offsets_in_file
 
     fill_value = get_missing_value(disk_array.record_type, disk_array.field_name)
     fill_value = _auto_convert(T, fill_value)
@@ -98,39 +90,43 @@ function DiskArrays.readblock!(disk_array::FlexibleMetopDiskArray{T, N},
         # Note that accessing the disk_array.data_location will move the file_pointer
         # the file pointer is shared.
         data_location = disk_array.data_location[:, record_index]
-        n_size = sum(data_location)
-        array_size = (full_size[1:(flexible_dim - 1)]..., n_size,
-            full_size[(flexible_dim + 1):end]...)
 
-        field_start_position = offsets_in_file[record_index]
+        full_field = _read_full_field(disk_array, sum(data_location), record_index)
 
-        # Set the file pointer to the correct location right before reading the field 
-        seek(disk_array.file_pointer, field_start_position)
-        full_field = native_read_array(
-            disk_array.file_pointer, disk_array.field_type, array_size)
-
-        # find the index of the selected data in the "full_field"
-        position_in_data_field = zeros(Int64, length(data_location))
-        position_in_data_field[data_location] .= cumsum(data_location)[data_location]
-        data_index = filter!(x -> 0 < x, position_in_data_field[i_flexible_dim])
-        i_array_in_data = (i_array[1:(flexible_dim - 1)]..., data_index,
-            i_array[(flexible_dim + 1):end]...)
+        i_array_in_data = _index_in_raw_data(
+            data_location, i_array, disk_array.flexible_dim)
 
         # view the flexible dimension in the output array
-        selected = data_location[i_flexible_dim]
-        aout_record_data = selectdim(aout_record, flexible_dim, selected)
+        selected = data_location[i_array[disk_array.flexible_dim]]
+        aout_record_data = selectdim(aout_record, disk_array.flexible_dim, selected)
 
         aout_record_data .= _auto_convert.(T, full_field[i_array_in_data...])
     end
     return nothing
 end
 
-# forward method
-function fixed_size(disk_array::FlexibleMetopDiskArray)
-    return fixed_size(disk_array.record_type, disk_array.field_name)
+function _read_full_field(
+        disk_array::FlexibleMetopDiskArray, flex_dim_length::Integer, record_index::Integer)
+    full_size = disk_array.size[1:(end - 1)]
+
+    array_size = (full_size[1:(disk_array.flexible_dim - 1)]..., flex_dim_length,
+        full_size[(disk_array.flexible_dim + 1):end]...)
+
+    # Set the file pointer to the correct location right before reading the field
+    field_start_position = disk_array.offsets_in_file[record_index]
+    seek(disk_array.file_pointer, field_start_position)
+    full_field = native_read_array(
+        disk_array.file_pointer, disk_array.field_type, array_size)
+
+    return full_field
 end
 
-function get_field_dimensions(disk_array::FlexibleMetopDiskArray)
-    return get_field_dimensions(
-        disk_array.record_type, disk_array.record_layout, disk_array.field_name)
+function _index_in_raw_data(
+        data_location::AbstractVector{Bool}, i_array, flexible_dim::Integer)
+    position_in_data_field = zeros(Int64, length(data_location))
+    position_in_data_field[data_location] .= cumsum(data_location)[data_location]
+    data_index = filter!(x -> 0 < x, position_in_data_field[i_array[flexible_dim]])
+    i_array_in_data = (i_array[1:(flexible_dim - 1)]..., data_index,
+        i_array[(flexible_dim + 1):end]...)
+    return i_array_in_data
 end

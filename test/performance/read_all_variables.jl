@@ -22,25 +22,29 @@ function read_all(file_path)
 end
 
 # first calls 
-# 13.727169 seconds (49.09 M allocations: 1.931 GiB, 4.18% gc time, 87.52% compilation time)
+#  17.111785 seconds (32.62 M allocations: 1.784 GiB, 2.08% gc time, 93.07% compilation time)
 @time read_all(ASCAT_SZR);
 
-# 10.402657 seconds (33.70 M allocations: 1.342 GiB, 4.22% gc time, 78.76% compilation time)
+# 14.128396 seconds (26.23 M allocations: 1.485 GiB, 3.81% gc time, 83.40% compilation time)
 @time read_all(IASI_L2);
 
-# 25.318861 seconds (57.84 M allocations: 3.162 GiB, 3.00% gc time, 95.64% compilation time)
+# 18.414896 seconds (35.12 M allocations: 2.186 GiB, 2.76% gc time, 91.33% compilation time)
 @time read_all(IASI_L1);
 
 BenchmarkTools.DEFAULT_PARAMETERS.seconds = 20.0
 
-# Range (min … max):  1.238 s …   1.426 s  ┊ GC (min … max): 2.50% … 3.18%
-# Range (min … max):  1.477 s …   1.685 s  ┊ GC (min … max):  4.19% … 13.03%
+# Range (min … max):  862.515 ms …    1.170 s  ┊ GC (min … max):  1.72% … 19.98%
+# Time  (mean ± σ):   997.275 ms ± 111.882 ms  ┊ GC (mean ± σ):  10.25% ±  9.42%
 @benchmark read_all(ASCAT_SZR)
 
-# Range (min … max):  2.120 s …    2.433 s  ┊ GC (min … max): 1.46% … 14.77%
+# Range (min … max):  2.140 s …    2.804 s  ┊ GC (min … max): 1.06% … 9.41%
+# Time  (median):     2.372 s               ┊ GC (median):    9.79%
+# Time  (mean ± σ):   2.421 s ± 204.805 ms  ┊ GC (mean ± σ):  7.29% ± 4.06%
 @benchmark read_all(IASI_L2)
 
-# Range (min … max):  833.567 ms …    1.480 s  ┊ GC (min … max):  0.86% … 17.55%
+# Range (min … max):  1.061 s …    1.866 s  ┊ GC (min … max):  1.75% … 19.29%
+# Time  (median):     1.310 s               ┊ GC (median):    17.09%
+# Time  (mean ± σ):   1.346 s ± 217.894 ms  ┊ GC (mean ± σ):  12.50% ±  7.92%
 @benchmark read_all(IASI_L1)
 
 @profview read_all(ASCAT_SZR)

@@ -223,7 +223,7 @@ end
         # check variables from giard
         @test "pressure_levels_temp" in MetopDatasets.CDM.varnames(ds)
         @test MetopDatasets.CDM.dimnames(ds["pressure_levels_humidity"]) ==
-              ["NLQ", "atrack"]
+              ["NLQ"]
 
         # manuel read levels from giadr
         temp_pressure_levels, hum_pressure_levels = let
@@ -240,6 +240,9 @@ end
 
         @test isapprox(ds["pressure_levels_temp"][:], temp_pressure_levels)
         @test isapprox(ds["pressure_levels_humidity"][:], hum_pressure_levels)
+
+        @test MetopDatasets.dimnames(ds["pressure_levels_temp"]) == ["NLT"]
+        @test MetopDatasets.dimnames(ds["pressure_levels_humidity"]) == ["NLQ"]
 
         close(ds)
 
@@ -268,7 +271,7 @@ end
 
         @test Array(ds["pressure_levels_temp"]) isa Vector{Union{Missing, Float64}}
         @test MetopDatasets.CDM.dimnames(ds["pressure_levels_ozone"]) ==
-              ["n_o3_profiles", "NLO", "atrack"]
+              ["n_o3_profiles", "NLO"]
 
         @test all(lat -> -90 < lat < 90, ds["earth_location"][1, :, :])
         @test all(lon -> -180 < lon < 180, ds["earth_location"][2, :, :])

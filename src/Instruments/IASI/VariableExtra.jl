@@ -154,7 +154,6 @@ function CDM.dimnames(v::MetopVariable{T, N, R}) where {T, N, R <: IASI_SND_02}
 
     if v.field_name in giard_varnames
         names = get_field_dimensions(gaird_type, v.field_name)
-        push!(names, RECORD_DIM_NAME)
         return names
     end
 

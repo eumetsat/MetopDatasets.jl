@@ -241,7 +241,7 @@ end
 # Read the geolocation of the data record
 longitude, latitude = let 
     lat_lon_var = cfvariable(ds, "earth_location", maskingvalue = NaN)
-    lat_lon = ds["earth_location"][:,:,data_record_index]
+    lat_lon = lat_lon_var[:,:,data_record_index]
     lat_lon[2,:], lat_lon[1,:]
 end
 
@@ -298,3 +298,70 @@ end
 ```
 ![IASI L2 profile](IASI_L2_profile.png)
 The top plot shows a row of observations west of the west African coast. One observation has been marked with a colored X. The corresponding temperature and water vapour profile of the observation are shown below.
+
+
+## Level 2 ozone
+This example shows how to plot retrieved ozone for the IASI L2 products. The variable "integrated_ozone" is retrieved for most observations but the ozone profiles can only be retrieved for selected observations.
+
+```julia
+using MetopDatasets
+using CairoMakie, GeoMakie, Statistics
+
+iasi_file = "IASI_SND_02_M03_20250120105357Z_20250120123253Z_N_O_20250120123416Z.nat"
+ds = MetopDataset(iasi_file , maskingvalue=NaN);
+
+# select the layer for the ozone
+layer_index = 4
+height_in_km = Int.(ds["forli_layer_heights_o3"][layer_index])/1000
+
+# get locations
+longitude, latitude = let 
+    lat_lon = ds["earth_location"][:,:,:]
+    lat_lon[2,:,:], lat_lon[1,:,:]
+end
+
+# read ozone data
+o3_at_height = ds["o3_cp_air"][layer_index,:,:]
+o3_integrated = ds["integrated_ozone"][:,:].*1000 # convert to g/m2
+
+# get color range for plotting
+get_quantiles(a) = quantile(a,0.02), quantile(a,0.98)
+o3_range = get_quantiles(o3_at_height[.!isnan.(o3_at_height)])
+o3_integrated_range = get_quantiles(o3_integrated[.!isnan.(o3_integrated)])
+
+# plot the data
+fig = let
+
+    # Create figure and axis
+    fig = Figure()
+    ax1 = GeoAxis(fig[1, 1],
+        title = "Ozone Air partial at $layer_index km",
+        xlabel = "longitude",
+        ylabel = "latitude")
+    ax2 = GeoAxis(fig[2, 1],
+        title = "Ozone integrated",
+        xlabel = "longitude",
+        ylabel = "latitude")
+
+    # Add coastlines
+    lines!(ax1, GeoMakie.coastlines(), color=:black)
+    lines!(ax2, GeoMakie.coastlines(), color=:black) 
+
+    # plot observations
+    scatter!(ax1, longitude[:], latitude[:],
+        color = o3_at_height[:], colorrange = o3_range, markersize = 2)
+    scatter!(ax2, longitude[:], latitude[:],
+        color = o3_integrated[:], colorrange = o3_integrated_range, markersize = 2)
+
+    # Add colorbar
+    c1 = Colorbar(fig[1,2],colorrange = o3_range .*10^-24, label="molecules/cm2 x 10^24")
+    c2 = Colorbar(fig[2,2],colorrange = o3_integrated_range, label="g/m2")
+
+    # hide ticks
+    hidedecorations!(ax1, grid = false)
+    hidedecorations!(ax2, grid = false)
+
+    fig
+end
+```
+![IASI ozone](IASI_L2_ozone.png)
