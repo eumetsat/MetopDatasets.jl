@@ -3,8 +3,11 @@
 
 using MetopDatasets, Test, Dates
 
+test_data_artifact = joinpath("../reduced_data", "reduced_data")
+
 @testset "Read header" begin
-    test_files = "testData/ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z"
+    test_files = joinpath(
+        test_data_artifact, "ASCA_SZO_1B_M03_20250504214500Z_cropped_10.nat")
 
     main_header, bytes_read = open(test_files, "r") do file_pointer
         main_header = MetopDatasets.native_read(
@@ -20,14 +23,14 @@ using MetopDatasets, Test, Dates
           MetopDatasets.get_record_class(MetopDatasets.MainProductHeader)
     @test record_header.record_size == 3307
     years_since_2000 = floor(Int64, record_header.record_start_time.day / 365.25)
-    @test years_since_2000 == 23
+    @test years_since_2000 == 25
 
     # test main product header
     @test main_header isa MetopDatasets.MainProductHeader
-    @test main_header.processing_centre == "CGS2"
+    @test main_header.processing_centre == "CGS1"
     @test main_header.format_major_version == 13
     @test main_header.subsetted_product == "F"
-    @test main_header.sensing_start == DateTime("2023-03-29T06:33:00")
+    @test main_header.sensing_start == DateTime("2025-05-04T21:45:00")
 
     # test data_record_type 
     @test MetopDatasets.data_record_type(main_header) == MetopDatasets.ASCA_SZO_1B_V13

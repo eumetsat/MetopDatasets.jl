@@ -15,13 +15,15 @@ function _layouts(file_pointer)
     return record_layouts
 end
 
-@testset "Disk array constructor" begin
-    test_file = "testData/ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat"
+test_data_artifact = joinpath("../reduced_data", "reduced_data")
 
-    #expected number of records 3264
+@testset "Disk array constructor" begin
+    test_file = joinpath(
+        test_data_artifact, "ASCA_SZR_1B_M01_20241217081500Z_cropped_10.nat")
+
     file_pointer = open(test_file, "r")
     record_layouts = _layouts(file_pointer)
-    number_of_records = 3264
+    number_of_records = 10
 
     utc_time = MetopDatasets.MetopDiskArray(
         file_pointer, record_layouts, :utc_line_nodes; auto_convert = false)
@@ -49,7 +51,8 @@ end
 end
 
 @testset "Disk array get index" begin
-    test_file = "testData/ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat"
+    test_file = joinpath(
+        test_data_artifact, "ASCA_SZR_1B_M01_20241217081500Z_cropped_10.nat")
 
     #expected number of records 3264
     file_pointer = open(test_file, "r")
@@ -61,22 +64,22 @@ end
     record_start_time = MetopDatasets.MetopDiskArray(
         file_pointer, record_layouts, :record_start_time)
 
-    @test !isnothing(utc_time[7])
-    @test !isnothing(utc_time[1:60])
-    @test !isnothing(utc_time[1:4:60])
+    @test !isnothing(utc_time[2])
+    @test !isnothing(utc_time[2:9])
+    @test !isnothing(utc_time[2:2:10])
     @test !isnothing(utc_time[:])
-    @test utc_time[1:60] isa Vector{MetopDatasets.ShortCdsTime}
+    @test utc_time[1:10] isa Vector{MetopDatasets.ShortCdsTime}
     compare_times = DateTime.(utc_time[1:2:5]) .== [
-        DateTime("2019-01-09T12:56:59.999"),
-        DateTime("2019-01-09T12:57:03.750"),
-        DateTime("2019-01-09T12:57:07.500")
+        DateTime("2024-12-17T08:15:00"),
+        DateTime("2024-12-17T08:15:03.750"),
+        DateTime("2024-12-17T08:15:07.500")
     ]
     @test all(compare_times)
 
-    @test !isnothing(sigma0[1:60])
-    @test !isnothing(sigma0[1:4:60])
+    @test !isnothing(sigma0[1:10])
+    @test !isnothing(sigma0[1:4:10])
     @test !isnothing(sigma0[1, 2, 4])
-    @test !isnothing(sigma0[1, 1:8, 30:2:(end - 1)])
+    @test !isnothing(sigma0[1, 1:8, 2:2:(end - 1)])
 
     @test !isnothing(record_start_time[4:9])
 
