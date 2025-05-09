@@ -10,6 +10,7 @@ import Dates: DateTime
 import Base: size, keys, close, getindex
 import DiskArrays
 using Compat: @compat
+using PrecompileTools: @setup_workload, @compile_workload
 
 include("abstractTypes/abstract_types.jl")
 include("genericTypes/generic_types.jl")
@@ -42,5 +43,33 @@ export cfvariable, dimnames
 @compat public get_cf_attributes, default_cf_attributes, default_variable
 @compat public AbstractMetopDiskArray, MetopDiskArray, MetopVariable
 @compat public MainProductHeader, FixedRecordLayout, DataRecord
+
+# Precompile
+@setup_workload begin
+    test_data_artifact = joinpath("reduced_data", "reduced_data")
+    test_files = readdir(test_data_artifact, join = true)
+
+    @compile_workload begin
+        # Store some output.
+        io_list = []
+        var_size = []
+
+        for file in test_files
+            MetopDataset(file) do ds
+                # Precompile display
+                io = IOBuffer()
+                show(io, ds)
+                push!(io_list, String(take!(io)))
+                # Precompile readers
+                for k in keys(ds)
+                    var_out = Array(ds[k])
+                    push!(var_size, sizeof(var_out))
+                end
+            end
+        end
+
+        io_list, var_size
+    end
+end
 
 end
