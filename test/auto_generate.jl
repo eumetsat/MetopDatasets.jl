@@ -3,10 +3,13 @@
 
 using MetopDatasets, Test
 
+
+const TEST_FORMAT_PATH = MetopDatasets.@path joinpath(@__DIR__, "TEST_FORmaT.csv")
+const TEST_FORMAT_PATH2 = MetopDatasets.@path joinpath(@__DIR__, "TEST_FORMAT2.csv")
 eval(MetopDatasets.record_struct_expression(
-    joinpath(@__DIR__, "TEST_FORmaT.csv"), MetopDatasets.DataRecord))
+    TEST_FORMAT_PATH, MetopDatasets.DataRecord))
 eval(MetopDatasets.record_struct_expression(
-    joinpath(@__DIR__, "TEST_FORMAT2.csv"), MetopDatasets.DataRecord))
+    TEST_FORMAT_PATH2, MetopDatasets.DataRecord))
 
 @testset "generate structs" begin
     @test TEST_FORMAT <: MetopDatasets.DataRecord

@@ -1,7 +1,7 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-IASI_xxx_1C_V11_format = joinpath(@__DIR__, "csv_formats/IASI_xxx_1C_V11.csv")
+const IASI_xxx_1C_V11_format = @path joinpath(@__DIR__, "csv_formats/IASI_xxx_1C_V11.csv")
 
 abstract type IASI_XXX_1C <: DataRecord end
 # create data structure, add description and scale factors
@@ -19,8 +19,8 @@ end
 
 abstract type IASI_SND_02 <: DataRecord end
 
-IASI_SND_02_V11_format = joinpath(@__DIR__, "csv_formats/IASI_SND_02_V11.csv")
-IASI_SND_02_V10_format = joinpath(@__DIR__, "csv_formats/IASI_SND_02_V10.csv")
+const IASI_SND_02_V11_format = @path joinpath(@__DIR__, "csv_formats/IASI_SND_02_V11.csv")
+const IASI_SND_02_V10_format = @path joinpath(@__DIR__, "csv_formats/IASI_SND_02_V10.csv")
 
 # create data structure, add description and scale factors
 eval(record_struct_expression(IASI_SND_02_V11_format, IASI_SND_02))

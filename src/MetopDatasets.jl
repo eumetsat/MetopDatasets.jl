@@ -10,6 +10,7 @@ import Dates: DateTime
 import Base: size, keys, close, getindex
 import DiskArrays
 using Compat: @compat
+using RelocatableFolders: @path
 
 include("abstractTypes/abstract_types.jl")
 include("genericTypes/generic_types.jl")
