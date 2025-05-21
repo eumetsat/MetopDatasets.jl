@@ -15,7 +15,7 @@ function _layouts(file_pointer)
     return record_layouts
 end
 
-test_data_artifact = joinpath("../reduced_data", "reduced_data")
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
 @testset "Disk array constructor" begin
     test_file = joinpath(

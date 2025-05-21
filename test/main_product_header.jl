@@ -3,7 +3,7 @@
 
 using MetopDatasets, Test, Dates
 
-test_data_artifact = joinpath("../reduced_data", "reduced_data")
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
 @testset "Read header" begin
     test_files = joinpath(

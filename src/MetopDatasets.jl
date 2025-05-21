@@ -11,6 +11,9 @@ import Base: size, keys, close, getindex
 import DiskArrays
 using Compat: @compat
 using PrecompileTools: @setup_workload, @compile_workload
+import Pkg
+
+const RECORD_DIM_NAME = "atrack"
 
 include("abstractTypes/abstract_types.jl")
 include("genericTypes/generic_types.jl")
@@ -25,7 +28,14 @@ include("InterfaceDataModel/InterfaceDataModel.jl")
 include("Instruments/ASCAT/ASCAT.jl")
 include("Instruments/IASI/IASI.jl")
 
-const RECORD_DIM_NAME = "atrack"
+"""
+    get_test_data_artifact()
+
+Returns path to folder storing reduced test data. Note that the test data is downloaded from https://github.com/eumetsat/test-data-MetopDatasets
+the first time the function it called.
+"""
+get_test_data_artifact() = joinpath(
+    Pkg.Artifacts.artifact"test_data_MetopDatasets", "reduced_data")
 
 export MetopDataset
 
@@ -43,10 +53,11 @@ export cfvariable, dimnames
 @compat public get_cf_attributes, default_cf_attributes, default_variable
 @compat public AbstractMetopDiskArray, MetopDiskArray, MetopVariable
 @compat public MainProductHeader, FixedRecordLayout, DataRecord
+@compat public get_test_data_artifact
 
 # Precompile
 @setup_workload begin
-    test_data_artifact = joinpath("reduced_data", "reduced_data")
+    test_data_artifact = get_test_data_artifact()
     test_files = readdir(test_data_artifact, join = true)
 
     @compile_workload begin

@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## v0.2
 - Error message for invalid file types
 - (**BREAKING**) Improved padding of flexible IASI L2 variables e.g. "o3_cp_air". The variable dimensions now matches the variable storing the location. See [issue 15](https://github.com/eumetsat/MetopDatasets.jl/issues/15) for more information.
 - Internal changes to only use `FlexibleMetopDiskArray` for the IASI L2 flexible variables that varies in size between each record.

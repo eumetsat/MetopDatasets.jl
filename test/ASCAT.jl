@@ -4,7 +4,7 @@
 using MetopDatasets, Test
 using Dates
 
-test_data_artifact = joinpath("../reduced_data", "reduced_data")
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
 SZO_V13_test_file = joinpath(
     test_data_artifact, "ASCA_SZO_1B_M03_20250504214500Z_cropped_10.nat")

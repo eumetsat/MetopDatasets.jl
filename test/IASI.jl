@@ -4,7 +4,7 @@
 using MetopDatasets, Test
 import CommonDataModel as CDM
 
-test_data_artifact = joinpath("../reduced_data", "reduced_data")
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
 @testset "IASI L1C data records" begin
     @test MetopDatasets.IASI_XXX_1C_V11 <: MetopDatasets.DataRecord

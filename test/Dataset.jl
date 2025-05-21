@@ -5,7 +5,7 @@ using MetopDatasets, Test
 import CommonDataModel as CDM
 using Dates
 
-test_data_artifact = joinpath("../reduced_data", "reduced_data")
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
 @testset "MetopDataset basics" begin
     test_file = joinpath(

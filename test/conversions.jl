@@ -3,7 +3,7 @@
 
 using MetopDatasets, NCDatasets, Test
 
-test_data_artifact = joinpath("../reduced_data", "reduced_data")
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
 @testset "ASCAT SZR to netCDF" begin
     test_file = joinpath(
