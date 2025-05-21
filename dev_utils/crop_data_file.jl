@@ -100,6 +100,13 @@ function update_mphr!(mphr_bytes, last_header, cropped_size, n_data_records)
     return mphr_bytes
 end
 
+
+"""
+    crop_product(file, destination_folder, n_data_records)
+
+Crops a product to reduce the size of the file. This function is used to generate the test data
+in https://github.com/eumetsat/test-data-MetopDatasets
+"""
 function crop_product(file, destination_folder, n_data_records)
 
     # get destination path
@@ -128,22 +135,3 @@ function crop_product(file, destination_folder, n_data_records)
 
     return dest
 end
-
-full_data = raw"C:\Users\Kok\Documents\Git repos\test-data-metopdatasets\full_data"
-full_files = readdir(full_data, join = true)
-destination_folder = raw"C:\Users\Kok\Documents\Git repos\test-data-metopdatasets\reduced_data"
-full_files
-
-for f in full_files
-    crop_product(f, destination_folder, 10)
-end
-
-crop_product(full_files[3], destination_folder, 5)
-full_files[end]
-
-Base.format_bytes(sum(filesize.(readdir(destination_folder, join = true))))
-
-reduced_dir = raw"C:\Users\Kok\Documents\Git repos\test-data-metopdatasets\reduced_data"
-out = raw"C:\Users\Kok\Documents\Git repos\test-data-metopdatasets\reduced_data"
-
-using MetopDatasets
