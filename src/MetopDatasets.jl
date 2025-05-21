@@ -11,7 +11,7 @@ import Base: size, keys, close, getindex
 import DiskArrays
 using Compat: @compat
 using PrecompileTools: @setup_workload, @compile_workload
-import Pkg
+import LazyArtifacts
 
 const RECORD_DIM_NAME = "atrack"
 
@@ -35,7 +35,7 @@ Returns path to folder storing reduced test data. Note that the test data is dow
 the first time the function it called.
 """
 get_test_data_artifact() = joinpath(
-    Pkg.Artifacts.artifact"test_data_MetopDatasets", "reduced_data")
+    LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
 
 export MetopDataset
 

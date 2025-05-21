@@ -23,7 +23,9 @@ test_data_artifact = MetopDatasets.get_test_data_artifact()
         "swath_indicator", "latitude", "longitude", "sigma0_trip", "kp", "inc_angle_trip",
         "azi_angle_trip", "num_val_trip", "f_kp", "f_usable", "f_land", "lcr", "flagfield")
 
-    @test CDM.dimnames(ds) == ["num_band", "xtrack", "atrack"]
+    # the sort is added because ordering of dimensions is not stable.
+    # see https://github.com/eumetsat/MetopDatasets.jl/issues/21  
+    @test sort(CDM.dimnames(ds)) == sort(["num_band", "xtrack", "atrack"])
     @test CDM.dim(ds, :xtrack) == 82
     @test CDM.dim(ds, "atrack") == ds.main_product_header.total_mdr
     @test !isnothing(CDM.attribnames(ds))
