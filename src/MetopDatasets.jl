@@ -11,6 +11,7 @@ import Base: size, keys, close, getindex
 import DiskArrays
 using Compat: @compat
 using PrecompileTools: @setup_workload, @compile_workload
+using RelocatableFolders: @path
 import LazyArtifacts
 
 const RECORD_DIM_NAME = "atrack"

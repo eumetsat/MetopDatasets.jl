@@ -6,8 +6,10 @@ const IASI_L2_V10_03_PRESSURE_DIM = "n_o3_profiles"
 
 abstract type GIADR_IASI_SND_02 <: GlobalInternalAuxillary end
 
-GIADR_IASI_SND_02_V11_format = joinpath(@__DIR__, "csv_formats/GIADR_IASI_SND_02_V11.csv")
-GIADR_IASI_SND_02_V10_format = joinpath(@__DIR__, "csv_formats/GIADR_IASI_SND_02_V10.csv")
+const GIADR_IASI_SND_02_V11_format = @path joinpath(
+    @__DIR__, "csv_formats/GIADR_IASI_SND_02_V11.csv")
+const GIADR_IASI_SND_02_V10_format = @path joinpath(
+    @__DIR__, "csv_formats/GIADR_IASI_SND_02_V10.csv")
 
 eval(record_struct_expression(GIADR_IASI_SND_02_V11_format, GIADR_IASI_SND_02))
 eval(record_struct_expression(GIADR_IASI_SND_02_V10_format, GIADR_IASI_SND_02))

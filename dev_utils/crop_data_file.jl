@@ -100,7 +100,6 @@ function update_mphr!(mphr_bytes, last_header, cropped_size, n_data_records)
     return mphr_bytes
 end
 
-
 """
     crop_product(file, destination_folder, n_data_records)
 

@@ -9,6 +9,7 @@
 - (Fix) Remove "atrack" dimension from the IASI L2 GIARD variables e.g. "pressure_levels_temp".
 - Add a lazy artifact with reduced test data which is used for CI testing.
 - Precompilation using the lazy artifact with test data to reduce "time to first x".
+- Use [RelocatableFolders.jl](https://github.com/JuliaPackaging/RelocatableFolders.jl) to make the installation of MetopDatasets.jl relocatable so it becomes more robust.
 
 ## v0.1
 - (**BREAKING**) Initial release with support for IASI and ASCAT formats.
