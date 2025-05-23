@@ -70,3 +70,23 @@ REPL output:
  -30.0206  -30.2344     -39.7726  -39.9823
 ```
 See documentation page for more information.
+
+## SW Bill of Materials (SBoM)
+ 
+### Dependencies
+The following dependencies are not included in the package but they are required and will be downloaded at installation:
+| dependency | version| license | copyright | home_url | comments |
+|-----------|--------|---------|-----------|----------|----------|
+| CSV.jl | 0.10 | MIT | 2015: Jacob Quinn, JuliaData contributors, Julia Computing| https://github.com/JuliaData/CSV.jl| CSV utilities |
+| CommonDataModel.jl | 0.3 | MIT | 2023 JuliaGeo | https://github.com/JuliaGeo/CommonDataModel.jl | Exports the Dataset interface used by MetopDatasets |
+| Compat.jl | 4.10| MIT | 2014, 2015, 2016, 2017: Stefan Karpinski and other contributors | https://github.com/JuliaLang/Compat.jl | Handle comparability with different julia versions |
+| DiskArrays.jl | 0.3, 0.4| MIT | 2019: Fabian Gans| https://github.com/JuliaIO/DiskArrays.jl | Interface to read arrays from files |
+| RelocatableFolders.jl | 1| MIT | 2021: Michael Hatherly| https://github.com/JuliaPackaging/RelocatableFolders.jl | Make installation relocatable |
+ 
+### Test dependencies
+The following dependencies are only required for testing the software:
+| dependency | version| license | copyright | home_url | comments |
+|-----------|--------|---------|-----------|----------|----------|
+| Aqua.jl | 0.8.9| MIT| 2019 Takafumi Arakaki | https://github.com/JuliaTesting/Aqua.jl | Auto quality assurance  |
+| NCDatasets.jl | 0.14| MIT | 2017-2025: Alexander Barth and contributors | https://github.com/JuliaGeo/NCDatasets.jl | Test conversion to netCDF files |
+| SafeTestsets.jl | 0.1| MIT | 2018: Yingbo Ma | https://github.com/YingboMa/SafeTestsets.jl | Run test sets with individual scope |

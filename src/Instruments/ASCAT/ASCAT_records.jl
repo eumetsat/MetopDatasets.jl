@@ -4,9 +4,9 @@
 ########### SZR ###########
 # Note, there is probably a better way to handle the path. @__DIR__ is a bit of a hack
 #  @__DIR__ ensure that the path is relative to the location of this file.
-ASCA_SZR_1B_V13_format = joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V13.csv")
-ASCA_SZR_1B_V12_format = joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V12.csv")
-ASCA_SZR_1B_V11_format = joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V11.csv")
+const ASCA_SZR_1B_V13_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V13.csv")
+const ASCA_SZR_1B_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V12.csv")
+const ASCA_SZR_1B_V11_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V11.csv")
 
 abstract type ASCA_SZR_1B <: DataRecord end
 # create data structure, add description and scale factors
@@ -45,9 +45,9 @@ end
 ########### SZO ###########
 abstract type ASCA_SZO_1B <: DataRecord end
 
-ASCA_SZO_1B_V13_format = joinpath(@__DIR__, "csv_formats/ASCA_SZO_1B_V13.csv")
-ASCA_SZO_1B_V12_format = joinpath(@__DIR__, "csv_formats/ASCA_SZO_1B_V12.csv")
-ASCA_SZO_1B_V11_format = joinpath(@__DIR__, "csv_formats/ASCA_SZO_1B_V11.csv")
+const ASCA_SZO_1B_V13_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZO_1B_V13.csv")
+const ASCA_SZO_1B_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZO_1B_V12.csv")
+const ASCA_SZO_1B_V11_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZO_1B_V11.csv")
 
 eval(record_struct_expression(ASCA_SZO_1B_V13_format, ASCA_SZO_1B))
 eval(record_struct_expression(ASCA_SZO_1B_V12_format, ASCA_SZO_1B))
@@ -82,9 +82,9 @@ end
 ########### SZO ###########
 abstract type ASCA_SZF_1B <: DataRecord end
 
-ASCA_SZF_1B_V13_format = joinpath(@__DIR__, "csv_formats/ASCA_SZF_1B_V13.csv")
-ASCA_SZF_1B_V12_format = joinpath(@__DIR__, "csv_formats/ASCA_SZF_1B_V12.csv")
-ASCA_SZF_1B_V11_format = joinpath(@__DIR__, "csv_formats/ASCA_SZF_1B_V11.csv")
+const ASCA_SZF_1B_V13_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZF_1B_V13.csv")
+const ASCA_SZF_1B_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZF_1B_V12.csv")
+const ASCA_SZF_1B_V11_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZF_1B_V11.csv")
 
 eval(record_struct_expression(ASCA_SZF_1B_V13_format, ASCA_SZF_1B))
 eval(record_struct_expression(ASCA_SZF_1B_V12_format, ASCA_SZF_1B))
@@ -134,7 +134,7 @@ end
 ########### SMR ###########
 abstract type ASCA_SMR_02 <: DataRecord end
 
-ASCA_SMR_02_V12_format = joinpath(@__DIR__, "csv_formats/ASCA_SMR_02_V12.csv")
+const ASCA_SMR_02_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMR_02_V12.csv")
 
 eval(record_struct_expression(ASCA_SMR_02_V12_format, ASCA_SMR_02))
 
@@ -163,7 +163,7 @@ end
 ########### SMO ###########
 abstract type ASCA_SMO_02 <: DataRecord end
 
-ASCA_SMO_02_V12_format = joinpath(@__DIR__, "csv_formats/ASCA_SMO_02_V12.csv")
+const ASCA_SMO_02_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMO_02_V12.csv")
 
 eval(record_struct_expression(ASCA_SMO_02_V12_format, ASCA_SMO_02))
 
