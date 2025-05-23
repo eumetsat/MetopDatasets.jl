@@ -4,7 +4,7 @@
 using MetopDatasets, Test
 
 @testset "Data layout without dummy" begin
-    # extracted from "test/testData/ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat";
+    # extracted from "ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat";
     total_size = 26618899
     data_record_type = MetopDatasets.ASCA_SZR_1B_V12
     data_record_size = MetopDatasets.native_sizeof(data_record_type)

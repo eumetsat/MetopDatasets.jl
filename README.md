@@ -69,7 +69,7 @@ REPL output:
  -30.0909  -30.3049  …  -39.8538  -40.0638
  -30.0206  -30.2344     -39.7726  -39.9823
 ```
-See documentation page for more information.
+See [documentation page ](https://eumetsat.github.io/MetopDatasets.jl/dev/) for more information.
 
 ## SW Bill of Materials (SBoM)
  
@@ -81,6 +81,8 @@ The following dependencies are not included in the package but they are required
 | CommonDataModel.jl | 0.3 | MIT | 2023 JuliaGeo | https://github.com/JuliaGeo/CommonDataModel.jl | Exports the Dataset interface used by MetopDatasets |
 | Compat.jl | 4.10| MIT | 2014, 2015, 2016, 2017: Stefan Karpinski and other contributors | https://github.com/JuliaLang/Compat.jl | Handle comparability with different julia versions |
 | DiskArrays.jl | 0.3, 0.4| MIT | 2019: Fabian Gans| https://github.com/JuliaIO/DiskArrays.jl | Interface to read arrays from files |
+| LazyArtifacts.jl | 1| MIT | 2009-2023: Jeff Bezanson, Stefan Karpinski, Viral B. Shah, and other contributors| https://github.com/JuliaPackaging/LazyArtifacts.jl | Handles test data as lazy artifact |
+| PrecompileTools.jl | 1| MIT | 2023 Tim Holy and contributors | https://github.com/JuliaLang/PrecompileTools.jl | Precompile key methods |
 | RelocatableFolders.jl | 1| MIT | 2021: Michael Hatherly| https://github.com/JuliaPackaging/RelocatableFolders.jl | Make installation relocatable |
  
 ### Test dependencies

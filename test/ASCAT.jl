@@ -4,16 +4,18 @@
 using MetopDatasets, Test
 using Dates
 
-SZO_V13_test_file = "testData/ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z"
-SZR_V13_test_file = "testData/ASCA_SZR_1B_M03_20230329063300Z_20230329063558Z_N_C_20230329081417Z"
-SZR_V12_test_file = "testData/ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat"
-SZF_V11_test_file = "testData/ASCA_SZF_1B_M02_20111207032400Z_20111207050859Z_N_O_20111207041515Z.nat"
+test_data_artifact = MetopDatasets.get_test_data_artifact()
 
-SMO_V12_test_file = "testData/ASCA_SMO_02_M03_20231218101200Z_20231218101456Z_N_C_20231218115643Z"
-SMR_V12_test_file = "testData/ASCA_SMR_02_M03_20231218101200Z_20231218101458Z_N_C_20231218115649Z"
-
-# Product with dummy record and missing receive date. 
-SZF_with_dummy_in_mid = "testData/ASCA_SZF_1B_M01_20221107123600Z_20221107141459Z_N_O_20221107132528Z.nat";
+SZO_V13_test_file = joinpath(
+    test_data_artifact, "ASCA_SZO_1B_M03_20250504214500Z_cropped_10.nat")
+SZR_V13_test_file = joinpath(
+    test_data_artifact, "ASCA_SZR_1B_M01_20241217081500Z_cropped_10.nat")
+SZF_V13_test_file = joinpath(
+    test_data_artifact, "ASCA_SZF_1B_M03_20241217091500Z_cropped_10.nat")
+SMO_V12_test_file = joinpath(
+    test_data_artifact, "ASCA_SMO_02_M01_20250504205100Z_cropped_10.nat")
+SMR_V12_test_file = joinpath(
+    test_data_artifact, "ASCA_SMR_02_M01_20241217081500Z_cropped_10.nat")
 
 function test_dimensions(record_type)
     fields = fieldnames(record_type)
@@ -94,98 +96,70 @@ function get_data_record_type(file)
     return data_record_type
 end
 
-if isdir("testData") #TODO test data should be handle as an artifact or something similar.
-    @testset "Test data_record_type" begin
-        @test get_data_record_type(SZO_V13_test_file) == MetopDatasets.ASCA_SZO_1B_V13
-        @test get_data_record_type(SZR_V13_test_file) == MetopDatasets.ASCA_SZR_1B_V13
-        @test get_data_record_type(SZR_V12_test_file) == MetopDatasets.ASCA_SZR_1B_V12
-    end
+@testset "Test data_record_type" begin
+    @test get_data_record_type(SZO_V13_test_file) == MetopDatasets.ASCA_SZO_1B_V13
+    @test get_data_record_type(SZR_V13_test_file) == MetopDatasets.ASCA_SZR_1B_V13
+    @test get_data_record_type(SZF_V13_test_file) == MetopDatasets.ASCA_SZF_1B_V13
 end
 
-if isdir("testData") #TODO test data should be handle as an artifact or something similar.
-    @testset "SZF with dummy record" begin
-        ds = MetopDataset(SZF_with_dummy_in_mid)
+@testset "SZR no dummy record" begin
+    ds = MetopDataset(SZR_V13_test_file)
 
-        # check the number of records
-        total_count = parse(Int, ds.attrib["total_mdr"])
-        data_count = ds.dim[MetopDatasets.RECORD_DIM_NAME]
-        dummy_count = 3 # the product have 3 dummy records
-        @test total_count ==
-              (data_count + dummy_count)
+    # check the number of records
+    total_count = parse(Int, ds.attrib["total_mdr"])
+    data_count = ds.dim[MetopDatasets.RECORD_DIM_NAME]
+    @test total_count == data_count
 
-        # check that longitude and latitude are in the correct range
-        longitude = Array(ds["longitude_full"])
-        latitude = Array(ds["latitude_full"])
+    # check that longitude and latitude are in the correct range
+    longitude = Array(ds["longitude"])
+    latitude = Array(ds["latitude"])
 
-        @test all((0 .<= longitude) .& (longitude .<= 360))
-        @test all((-90 .<= latitude) .& (latitude .<= 90))
+    @test all((0 .<= longitude) .& (longitude .<= 360))
+    @test all((-90 .<= latitude) .& (latitude .<= 90))
 
-        # test time stamps
-        @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_localisation"][1]) <
-              Second(2)
-        @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_localisation"][end]) <
-              Second(2)
-    end
+    # test time stamps
+    @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
+          Second(2)
+    @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
+          Second(2)
+end
 
-    @testset "SZR no dummy record" begin
-        ds = MetopDataset(SZR_V13_test_file)
+@testset "SZO " begin
+    ds = MetopDataset(SZO_V13_test_file)
 
-        # check the number of records
-        total_count = parse(Int, ds.attrib["total_mdr"])
-        data_count = ds.dim[MetopDatasets.RECORD_DIM_NAME]
-        @test total_count == data_count
+    # check times to sample start and end of file.
+    @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
+          Second(2)
+    @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
+          Second(2)
+end
 
-        # check that longitude and latitude are in the correct range
-        longitude = Array(ds["longitude"])
-        latitude = Array(ds["latitude"])
+@testset "SZF " begin
+    ds = MetopDataset(SZF_V13_test_file)
 
-        @test all((0 .<= longitude) .& (longitude .<= 360))
-        @test all((-90 .<= latitude) .& (latitude .<= 90))
+    # check times to sample start and end of file.
+    @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_localisation"][1]) <
+          Second(2)
+    @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_localisation"][end]) <
+          Second(2)
+end
 
-        # test time stamps
-        @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
-              Second(2)
-        @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
-              Second(2)
-    end
+@testset "SMR v12" begin
+    ds = MetopDataset(SMR_V12_test_file)
 
-    @testset "SZO " begin
-        ds = MetopDataset(SZO_V13_test_file)
+    # check times to sample start and end of file.
+    @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
+          Second(2)
+    @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
+          Second(2)
+end
 
-        # check times to sample start and end of file.
-        @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
-              Second(2)
-        @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
-              Second(2)
-    end
+@testset "SMO v12" begin
+    ds = MetopDataset(SMO_V12_test_file)
 
-    @testset "SZF v11" begin
-        ds = MetopDataset(SZF_V11_test_file)
-
-        # check times to sample start and end of file.
-        @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_localisation"][1]) <
-              Second(2)
-        @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_localisation"][end]) <
-              Second(2)
-    end
-
-    @testset "SMR v13" begin
-        ds = MetopDataset(SMR_V12_test_file)
-
-        # check times to sample start and end of file.
-        @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
-              Second(2)
-        @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
-              Second(2)
-    end
-
-    @testset "SMO v13" begin
-        ds = MetopDataset(SMO_V12_test_file)
-
-        # check times to sample start and end of file.
-        @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
-              Second(2)
-        @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
-              Second(2)
-    end
+    # check times to sample start and end of file.
+    @test abs(DateTime(ds.attrib["sensing_start"]) - ds["utc_line_nodes"][1]) <
+          Second(2)
+    @test abs(DateTime(ds.attrib["sensing_end"]) - ds["utc_line_nodes"][end]) <
+          Second(2)
 end

@@ -3,7 +3,6 @@
 
 using MetopDatasets, Test
 
-
 const TEST_FORMAT_PATH = MetopDatasets.@path joinpath(@__DIR__, "TEST_FORmaT.csv")
 const TEST_FORMAT_PATH2 = MetopDatasets.@path joinpath(@__DIR__, "TEST_FORMAT2.csv")
 eval(MetopDatasets.record_struct_expression(

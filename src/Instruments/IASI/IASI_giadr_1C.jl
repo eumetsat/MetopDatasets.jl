@@ -2,7 +2,8 @@
 # License: MIT
 
 # Add IASI Level 1C meta data record.
-const GIADR_IASI_xxx_1C_V11_format = @path joinpath(@__DIR__, "csv_formats/GIADR_IASI_xxx_1C_V11.csv")
+const GIADR_IASI_xxx_1C_V11_format = @path joinpath(
+    @__DIR__, "csv_formats/GIADR_IASI_xxx_1C_V11.csv")
 
 abstract type GIADR_IASI_XXX_1C <: GlobalInternalAuxillary end
 

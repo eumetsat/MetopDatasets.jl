@@ -4,10 +4,6 @@
 using MetopDatasets
 using Test, Aqua, SafeTestsets
 
-if !isdir("testData") #TODO test data should be handle as an artifact or something similar.
-    println("Skipping tests that needs real test data")
-end
-
 @testset "MetopDatasets.jl" begin
     @safetestset "Auto generate structs" begin
         include("auto_generate.jl")
@@ -34,28 +30,29 @@ end
     end
 
     @safetestset "Main product header" begin
-        if isdir("testData")
-            include("main_product_header.jl")
-        end
+        include("main_product_header.jl")
     end
 
     @safetestset "MetopDiskArray" begin
-        if isdir("testData")
-            include("MetopDiskArray.jl")
-        end
+        include("MetopDiskArray.jl")
     end
 
     @safetestset "MetopDataset" begin
-        if isdir("testData")
-            include("Dataset.jl")
-        end
+        include("Dataset.jl")
     end
 
     @safetestset "Convert to netCDF" begin
-        if isdir("testData")
-            include("conversions.jl")
-        end
+        include("conversions.jl")
     end
 
     Aqua.test_all(MetopDatasets)
+
+    @safetestset "Extended tests" begin
+        if isdir("testData")
+            @info "Running extended tests"
+            include("extended_tests.jl")
+        else
+            @info "Skipping extended tests"
+        end
+    end
 end
