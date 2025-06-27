@@ -7,7 +7,7 @@ using Dates: DateFormat, Day, Millisecond, Microsecond, format
 import CommonDataModel as CDM
 import CSV
 import Dates: DateTime
-import Base: size, keys, close, getindex
+import Base: size, keys, close, getindex, parent
 import DiskArrays
 using Compat: @compat
 using PrecompileTools: @setup_workload, @compile_workload
@@ -37,7 +37,7 @@ Returns path to folder storing reduced test data. Note that the test data is dow
 the first time the function it called.
 """
 get_test_data_artifact() = joinpath(
-    LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
+        LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
 
 export MetopDataset
 
