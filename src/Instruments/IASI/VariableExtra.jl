@@ -28,7 +28,7 @@ function CDM.variable(
 
         T = eltype(disk_array)
         N = ndims(disk_array)
-        return MetopVariable{T, N, R}(ds, disk_array, varname)
+        return MetopVariable{T, N, R, typeof(disk_array)}(ds, disk_array, varname)
     else
         return default_variable(ds, varname)
     end
@@ -106,7 +106,7 @@ function CDM.variable(
         data_array = getfield(gaird, varname)
         T = eltype(data_array)
         N = ndims(data_array)
-        return MetopVariable{T, N, R}(ds, data_array, varname)
+        return MetopVariable{T, N, R, typeof(data_array)}(ds, data_array, varname)
     end
 
     return default_variable(ds, varname)
