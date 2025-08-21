@@ -46,7 +46,7 @@ function default_cf_attributes(
             missing_value = _auto_convert(T, missing_value)
         end
 
-        cf_attributes[:missing_value] = [missing_value]
+        cf_attributes[:missing_value] = missing_value
 
         if !fixed_size(R, field)
             cf_attributes[:_FillValue] = missing_value
