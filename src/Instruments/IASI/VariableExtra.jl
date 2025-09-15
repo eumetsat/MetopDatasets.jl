@@ -95,7 +95,7 @@ function CDM.variable(
         error_field_offset = sum(layout.field_sizes, dims = 1)[:]
         error_field_size = layout.record_sizes .- error_field_offset
         data_array = LazyByteField(ds.file_pointer, error_field_offset, error_field_size)
-        return MetopVariable{Vector{UInt8}, 1, R}(ds, data_array, varname)
+        return MetopVariable{Vector{UInt8}, 1, R, typeof(disk_array)}(ds, data_array, varname)
     end
 
     gaird_type = _get_giard_type(R)
