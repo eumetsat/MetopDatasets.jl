@@ -18,6 +18,7 @@ const TYPE_NAMES = Dict("rec_head" => RecordHeader,
     "bitst(16)" => BitString{2},
     "bitst(24)" => BitString{3},
     "bitst(32)" => BitString{4},
+    "bitst(40)" => BitString{5},
     "bitst(48)" => BitString{6},
     "bitst(64)" => BitString{8},
     "bitst(256)" => BitString{32},
@@ -27,7 +28,8 @@ const TYPE_NAMES = Dict("rec_head" => RecordHeader,
     "vu-byte" => VInteger{UInt8},
     "vu-integer2" => VInteger{UInt16},
     "vu-integer4" => VInteger{UInt32},
-    "vu-integer8" => VInteger{UInt64}
+    "vu-integer8" => VInteger{UInt64},
+    "data_calqual" => DataCalibrationQuality
 )
 
 function _get_field_name(row::CSV.Row)

@@ -343,20 +343,21 @@ end
 - ASCAT Level 2 Soil Moisture
 - IASI Level 1C
 - IASI Level 2 Combined Sounding
+- MHS Level 1B 
 
 ### Formats not yet supported
 - AMSU-A Level 1B
 - AVHRR Level 1B
 - GOME-2 Level 1B
 - HIRS Level 1B 
-- MHS Level 1B 
 
 ### Reference documents 
 - [EPS Generic Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_gen_pfs_13e3f0feb7.pdf)
 - [ASCAT Level 1: Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/ASCAT_Level_1_Product_Format_V12_Annexe_50fe72d349.pdf)
 - [ASCAT Level 2 Soil Moisture: Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_0343_eps_ascatl2_pfs_f509981295.pdf)
 - [IASI Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_iasi_level_1_pfs_2105bc9ccf.pdf)
-- [IASI Level 2 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_980760_eps_iasi_l2_f9511c26d2.pdf)
+- [MHS Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_97229_eps_mhs_pfs_2069b45efc.pdf)
+
 
 ## Development status and versioning
 The package was previously named **MetopNative.jl** and was hosted on the [EUMETSAT GitLab](https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl).

@@ -1,7 +1,7 @@
 [test_data_MetopDatasets]
-git-tree-sha1 = "f3b12f6ed40f19382d48e4661e77d61a6f2dc5e6"
+git-tree-sha1 = "8958418f0be76c385461ed038225f62a8a35de8f"
 lazy = true
 
     [[test_data_MetopDatasets.download]]
-    url = "https://github.com/eumetsat/test-data-MetopDatasets/raw/a237b6eed126f525289d8d8c6aedd0da80218135/reduced_data.tar.gz"
-    sha256 = "6be02adb17179917c3637b6350c77e060479db8eaf6b1c5820a017a212ae98e1"
+    url = "https://github.com/eumetsat/test-data-MetopDatasets/raw/57a1cf647c445e52c1a12a92b047f425983e63f3/reduced_data.tar.gz"
+    sha256 = "b0b1f1ff9b7a30c5035bb5b6e1370b7b8c721e2e15754bded27031be099b33db"

@@ -73,3 +73,20 @@ A simple alias for `read_single_record(source, record_type, 1)`
 """
 read_first_record(source, record_type)::record_type = read_single_record(
     source, record_type, 1)
+
+"""
+    get_scaled(record::T, field::Union{AbstractString,Symbol}) where T <: BinaryRecord
+
+Get the property from a data record type and apply scale factor if defined.
+"""
+function get_scaled(
+        record::T, field::Union{AbstractString, Symbol}) where {T <: BinaryRecord}
+    field = Symbol(field)
+    scale_factor = get_scale_factor(T, field)
+    raw_val = getproperty(record, field)
+    if isnothing(scale_factor) || scale_factor == 0
+        return raw_val
+    else
+        return raw_val / 10.0^scale_factor
+    end
+end

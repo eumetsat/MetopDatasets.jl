@@ -5,7 +5,7 @@
     brightness_temperature(I::T, wavenumber::Real, default=T(NaN)) where T <: Real
 
 Converting the IASI L1C spectrum from radiances to brightness temperature.
-Note that the wavenumber must in meters^-1
+Note that the wavenumber must in m^-1 and I in W/m2/sr/m-1
 
 # Example
 ```julia-repl
