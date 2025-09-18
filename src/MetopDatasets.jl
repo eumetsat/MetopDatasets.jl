@@ -65,11 +65,11 @@ export cfvariable, dimnames
         "ASCA_SZO_1B_M03_20250504214500Z_cropped_10.nat",
         "ASCA_SZR_1B_M01_20241217081500Z_cropped_10.nat",
         "MHSx_xxx_1B_M03_20250915084851Z_cropped_10.nat",
+        "AMSA_xxx_1B_M03_20250915221320Z_cropped_10.nat",
         "IASI_SND_02_M03_20250120105357Z_cropped_10.nat",
-        "IASI_xxx_1C_M01_20240925202059Z_cropped_5.nat",]
+        "IASI_xxx_1C_M01_20240925202059Z_cropped_5.nat"]
 
     test_files = joinpath.(test_data_artifact, file_names)
-
 
     @compile_workload begin
         # Store some output.

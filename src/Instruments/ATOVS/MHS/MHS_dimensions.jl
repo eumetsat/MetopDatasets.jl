@@ -16,7 +16,7 @@ end
 
 function get_field_dimensions(T::Type{<:MHS_XXX_1B_V10},
         field_name::Symbol)::Vector{<:AbstractString}
-    if field_name in (MHS_DATA_CAL_QUALITY_NAME, MHS_DATA_CAL_NEDT_NAME)
+    if field_name in (DATA_CAL_QUALITY_NAME, DATA_CAL_NEDT_NAME)
         return ["channels_h"]
     end
 

@@ -32,6 +32,10 @@ end
     include("MHS.jl")
 end
 
+@safetestset "AMSU-A" begin
+    include("AMSU_A.jl")
+end
+
 @safetestset "Main product header" begin
     include("main_product_header.jl")
 end
