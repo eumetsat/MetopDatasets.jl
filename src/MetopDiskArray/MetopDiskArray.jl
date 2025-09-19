@@ -17,7 +17,7 @@ function DiskArrays.writeblock!(A::AbstractMetopDiskArray{T, N},
     return error("MetopDiskArray is read-only")
 end
 
-Base.size(disk_array::AbstractMetopDiskArray) = disk_array.size
+Base.size(disk_array::AbstractMetopDiskArray) = disk_array.dim_size
 
 # Define chunk structure
 DiskArrays.haschunks(::AbstractMetopDiskArray) = DiskArrays.Chunked();
@@ -41,7 +41,7 @@ struct MetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     field_type::Type
     offsets_in_file::Vector{Int64}
     record_type::Type{<:DataRecord}
-    size::NTuple{N, Int64}
+    dim_size::NTuple{N, Int64}
 end
 
 """
@@ -62,9 +62,9 @@ function MetopDiskArray(file_pointer::IOStream,
     local dim_size::NTuple{N, Int64}
     if field_type <: AbstractArray
         field_array_size = _get_field_array_size(record_layouts, record_type, field_name)
-        size = (field_array_size..., record_count)
+        dim_size = (field_array_size..., record_count)
     else
-        size = (record_count,)
+        dim_size = (record_count,)
     end
 
     return MetopDiskArray{T, N}(
@@ -75,7 +75,7 @@ function MetopDiskArray(file_pointer::IOStream,
         field_type,
         offsets_in_file,
         record_type,
-        size)
+        dim_size)
 end
 
 # Extend get index functions
@@ -94,7 +94,7 @@ function DiskArrays.readblock!(disk_array::MetopDiskArray{T, N},
 
         if N > 1
             # TODO optimise to not read entire field for Array fields
-            field_array_size = disk_array.size[1:(end - 1)]
+            field_array_size = disk_array.dim_size[1:(end - 1)]
             full_field = native_read_array(
                 disk_array.file_pointer, disk_array.field_type, field_array_size)
             aout_rec = selectdim(aout, N, k)

@@ -1,3 +1,6 @@
+# Copyright (c) 2025 EUMETSAT
+# License: MIT
+
 function get_dimensions(T::Type{<:MHS_XXX_1B_V10})
     return Dict(
         "thermistor_tm_channels" => 24,

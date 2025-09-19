@@ -29,7 +29,9 @@ const TYPE_NAMES = Dict("rec_head" => RecordHeader,
     "vu-integer2" => VInteger{UInt16},
     "vu-integer4" => VInteger{UInt32},
     "vu-integer8" => VInteger{UInt64},
-    "data_calqual" => DataCalibrationQuality
+    "data_calqual" => DataCalibrationQuality,
+    "data_elem_rad" => DataElementRadiance,
+    "data_elem_flag" => DataElementFlags
 )
 
 function _get_field_name(row::CSV.Row)

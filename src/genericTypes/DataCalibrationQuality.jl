@@ -1,3 +1,5 @@
+# Copyright (c) 2025 EUMETSAT
+# License: MIT
 
 struct DataCalibrationQuality <: RecordSubType
     noise_temperature::UInt8

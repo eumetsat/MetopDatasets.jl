@@ -1,0 +1,39 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,0,,1,1,1,REC_HEAD,20,20,0
+,GENERIC QUALITY INDICATORS,,,,,,,,,20
+DEGRADED_INST_MDR,Quality of MDR has been degraded from nominal due to an instrument degradation,0,NA,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation,0,NA,1,1,1,boolean,1,1,21
+Scan Line Information,,,,,,,,,,22
+LINE_COUNTER,Line counter since last auto-calibration sequence. If calibration enabled then it runs from 0 to 39 else from 0 to 8191 followed by 0 to 8191 and so on,0,NA,1,1,1,u-integer2,2,2,22
+SCAN_TYPE_CODE,"Scan type code (0 = Earth view, 1 = space view, 2 = cold BB view, 3 = warm BB view, 4 = else.",0,NA,1,1,1,u-integer2,2,2,24
+QUALITY_INDICATOR,Quality Indicator Bit Field,0,N/A,1,1,1,bitst(32),4,4,26
+SCAN_LINE_QUALITY,Scan Line Quality Flags,0,N/A,1,1,1,bitst(32),4,4,30
+DATA_CALIBRATION,Noise-Equivalent Delta N and Channel Quality Flags,0,N/A,20,1,1,DATA_CALQUAL,2,40,34
+MEASUREMENT DATA ,,,,,,,,,,74
+DIGITAL_A_DATA_ELEMENT_RAD,Radiances for 56 pixel values of a scan line in the 20 channels. Earth scan pixel values are calibrated to radiances (channel 1 - 19) and reflectance factors (channel 20),4,NA,56,1,1,DATA_ELEM_RAD,84,4704,74
+DIGITAL_A_DATA_ELEMENT_FLAG,Information on the instrument status.,0,NA,8,1,1,DATA_ELEM_FLAG,44,352,4778
+Digital B telemetry,,,,,,,,,,5130
+INSTRUMENT_INVALID_DIGITAL_WORD_FLAG,Invalid Word Bit Flags,0,N/A,1,1,1,bitst(16),2,2,5130
+DIGITAL_B_DATA,Digital B Data,0,N/A,1,1,1,bitst(16),2,2,5132
+Analog telemetry,,,,,,,,,,5134
+INSTRUMENT_INVALID_ANALOG_WORD_FLAG,Invalid Word Bit Flags,0,N/A,1,1,1,bitst(32),4,4,5134
+ANALOG_DATA,Analog Data,0,N/A,16,1,1,u-byte,1,16,5138
+NAVIGATION DATA AT SCAN LINE,,,,,,,,,,5154
+TIME_ATTITUDE,Time Associated with Attitude Angles,0,s,1,1,1,u-integer4,4,4,5154
+EULER_ANGLE,"Euler Angles: Roll, Pitch, Yaw",3,deg,3,1,1,integer2,2,6,5158
+NAVIGATION_STATUS,Navigation Status Bit Field,0,N/A,1,1,1,bitst(32),4,4,5164
+SPACECRAFT_ALTITUDE,Spacecraft Altitude Above Reference Geoid (MSL) ,1,km,1,1,1,u-integer4,4,4,5168
+ANGULAR_RELATION,"Angular relationships: solar zenith angle, satellite zenith angle, solar azimuth angle, satellite azimuth angle (FOV 1 to 56) Note: azimuth angle range is -180 to +180, where minus is west and plus is east.",2,deg,4,56,1,integer2,2,448,5172
+EARTH_LOCATION,"Earth Location: latitude, longitude (FOV 1 to 56)",4,deg,2,56,1,integer4,4,448,5620
+SURFACE_PROPERTY,"Surface property (0 = water, 1 = mixed/coast, 2 = land) ",,,56,1,1,integer2,2,112,6068
+TERRAIN_ELEVATION,Average terrain elevation (FOV 1 to 56),,m,56,1,1,integer2,2,112,6180
+Calibration Coefficient (see Section 3.5.1.12),,,,,,,,,,6292
+PRIMARY_CALIBRATION_SECOND_TERM,Primary Calibration Second Order Term a2 (ch. 1-20) ,12,†mW/m2/sr/cm-1/cnt2 or % alb/cnt2 (ch 20),20,1,1,integer4,4,80,6292
+PRIMARY_CALIBRATION_FIRST_TERM,Primary Calibration First Order Term a1 (ch. 1-20) ,9,†mW/m2/sr/cm-1/cnt or % alb/cnt (ch 20),20,1,1,integer4,4,80,6372
+PRIMARY_CALIBRATION_ZEROTH_TERM,Primary Calibration Zeroth Order Term a0 (ch. 1-20) ,6,†mW/m2/sr/cm-1 or % alb (ch 20) ,20,1,1,integer4,4,80,6452
+SPARE_CALIBRATION_SECOND_TERM,Spare Calibration Second Order Term (ch. 1-20) ,12,†mW/m2/sr/cm-1/cnt2 or % alb/cnt2 (ch 20),20,1,1,integer4,4,80,6532
+SPARE_CALIBRATION_FIRST_TERM,Spare Calibration First Order Term (ch. 1-20) ,9,†mW/m2/sr/cm-1/cnt or % alb/cnt (ch 20),20,1,1,integer4,4,80,6612
+SPARE_CALIBRATION_ZEROTH_TERM,Spare Calibration Zeroth Order Term(ch. 1-20) ,6,†mW/m2/sr/cm-1 or % alb (ch 20),20,1,1,integer4,4,80,6692
+CLOUD COVERAGE INFORMATION,,,,,,,,,,6772
+PERCENTAGE_CLEAR_SKY,Percentage of sky that is clear of clouds,2,%,56,1,1,u-integer2,2,112,6772
+SIZE OF THE MDR,,,,,,,,,,6884
