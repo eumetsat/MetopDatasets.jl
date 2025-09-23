@@ -1,3 +1,6 @@
+# Copyright (c) 2025 EUMETSAT
+# License: MIT
+
 using MetopDatasets, Test
 using Dates
 

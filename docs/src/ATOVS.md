@@ -58,7 +58,56 @@ end
 The plot shows the radiance for the AMSU-A channel 2 (31.4 GHz) observed during an orbit.
 
 ## HIRS
-To be done
+The High Resolution Infrared Sounder (HIRS) is an instrument on the METOP satellites. It is a 20 channel infrared sounder and one of the three Advanced TIROS Operational Sounder (ATOVS) sensors. 
+
+The level 1B HIRS files contain the radiance of the 19 channels and the reflectance for channel 20.  See the [HIRS Level 1B product page](https://data.eumetsat.int/product/EO:EUM:DAT:MULT:HIRSL1) for more information.  
+This example shows how we plot the radiance from channel 7 on a map.
+
+This example is made using the following packages.
+```
+[13f3f980] CairoMakie v0.15.6
+[db073c08] GeoMakie v0.7.15
+```
+
+```julia
+using MetopDatasets
+using CairoMakie, GeoMakie, Statistics
+
+# Open the dataset.
+path = "HIRS_xxx_1B_M01_20160720074253Z_20160720092153Z_N_O_20160720083048Z.nat"
+ds = MetopDataset(path, maskingvalue=NaN);
+
+# read location
+latitude = ds["earth_location"][1,:,:]
+longitude = ds["earth_location"][2,:,:]
+
+# read radiance
+radiance_of_band = ds["digital_a_rad"][7,:,:] # Channel 7
+
+radiance_q05 = quantile(radiance_of_band[.!isnan.(radiance_of_band)],0.05)
+radiance_q95 = quantile(radiance_of_band[.!isnan.(radiance_of_band)],0.95)
+
+fig = let
+    # Create figure and axis
+    fig = Figure()
+    ax = GeoAxis(fig[1, 1],
+        title = "HIRS Channel 7",
+        xlabel = "longitude",
+        ylabel = "latitude")
+
+    # plot data with color map
+        scatter!(ax, longitude[:], latitude[:],
+        color = radiance_of_band[:], colorrange = (radiance_q05,radiance_q95), markersize = 2)
+
+    # Add colorbar
+    Colorbar(fig[1,2], colorrange = (radiance_q05,radiance_q95))
+
+    # Add coastlines
+    lines!(ax, GeoMakie.coastlines()) 
+    fig
+end
+```
+![HIRS channel 7](HIRS_plot.png)
 
 ## MHS
 The Microwave Humidity Sounder (MHS) is an instrument on the METOP satellites. It measures the earth using 5 microwave channels sensitive to surface temperatures, emissivities, and atmospheric humidity. MHS is one of the three Advanced TIROS Operational Sounder (ATOVS) sensors.

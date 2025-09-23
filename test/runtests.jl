@@ -36,6 +36,10 @@ end
     include("AMSU_A.jl")
 end
 
+@safetestset "HIRS" begin
+    include("HIRS.jl")
+end
+
 @safetestset "Main product header" begin
     include("main_product_header.jl")
 end
@@ -52,8 +56,6 @@ end
     include("conversions.jl")
 end
 
-Aqua.test_all(MetopDatasets)
-
 @safetestset "Extended tests" begin
     if isdir("testData")
         @info "Running extended tests"
@@ -62,3 +64,5 @@ Aqua.test_all(MetopDatasets)
         @info "Skipping extended tests"
     end
 end
+
+Aqua.test_all(MetopDatasets)
