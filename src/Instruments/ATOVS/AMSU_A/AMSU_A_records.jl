@@ -1,4 +1,4 @@
-# Copyright (c) 2024 EUMETSAT
+# Copyright (c) 2025 EUMETSAT
 # License: MIT
 
 const AMSA_XXX_1B_V10_format = @path joinpath(@__DIR__, "csv_formats/AMSA_XXX_1B_V10.csv")

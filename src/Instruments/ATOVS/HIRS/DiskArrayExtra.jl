@@ -1,4 +1,4 @@
-# Copyright (c) 2024 EUMETSAT
+# Copyright (c) 2025 EUMETSAT
 # License: MIT
 
 # DataElementMetopDiskArray is used to handle the compound types in the HIRS L1B format.
