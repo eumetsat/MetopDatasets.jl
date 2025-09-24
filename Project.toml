@@ -16,7 +16,7 @@ RelocatableFolders = "05181044-ff0b-4ac5-8273-598c1e38db00"
 [compat]
 Aqua = "0.8.9"
 CSV = "0.10"
-CommonDataModel = "0.3"
+CommonDataModel = "0.3, 0.4"
 Compat = "4.10"
 Dates = "1"
 DiskArrays = "0.3, 0.4"
