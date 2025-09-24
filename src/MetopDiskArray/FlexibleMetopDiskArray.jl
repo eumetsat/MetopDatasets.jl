@@ -15,7 +15,7 @@ struct FlexibleMetopDiskArray{T, N} <: AbstractMetopDiskArray{T, N}
     field_type::Type
     offsets_in_file::Vector{Int64}
     record_type::Type{<:DataRecord}
-    size::NTuple{N, Int64}
+    dim_size::NTuple{N, Int64}
     flexible_dim::Int64
     data_location::DiskArrays.AbstractDiskArray{Bool}
 end
@@ -107,7 +107,7 @@ end
 
 function _read_full_field(
         disk_array::FlexibleMetopDiskArray, flex_dim_length::Integer, record_index::Integer)
-    full_size = disk_array.size[1:(end - 1)]
+    full_size = disk_array.dim_size[1:(end - 1)]
 
     array_size = (full_size[1:(disk_array.flexible_dim - 1)]..., flex_dim_length,
         full_size[(disk_array.flexible_dim + 1):end]...)

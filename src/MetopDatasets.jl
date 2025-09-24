@@ -28,6 +28,7 @@ include("InterfaceDataModel/InterfaceDataModel.jl")
 # Instruments 
 include("Instruments/ASCAT/ASCAT.jl")
 include("Instruments/IASI/IASI.jl")
+include("Instruments/ATOVS/ATOVS.jl")
 
 """
     get_test_data_artifact()
@@ -42,7 +43,7 @@ export MetopDataset
 
 # helper functions
 export read_single_record, read_first_record, scale_iasi_spectrum, max_giadr_channel,
-       brightness_temperature
+       brightness_temperature, get_scaled
 
 # export cfvariable to enable maskingvalue 
 cfvariable = CDM.cfvariable
@@ -59,7 +60,17 @@ export cfvariable, dimnames
 # Precompile
 @setup_workload begin
     test_data_artifact = get_test_data_artifact()
-    test_files = readdir(test_data_artifact, join = true)
+    file_names = [
+        "ASCA_SZF_1B_M03_20241217091500Z_cropped_10.nat",
+        "ASCA_SZO_1B_M03_20250504214500Z_cropped_10.nat",
+        "ASCA_SZR_1B_M01_20241217081500Z_cropped_10.nat",
+        "MHSx_xxx_1B_M03_20250915084851Z_cropped_10.nat",
+        "HIRS_xxx_1B_M01_20241104213353Z_cropped_10.nat",
+        "AMSA_xxx_1B_M03_20250915221320Z_cropped_10.nat",
+        "IASI_SND_02_M03_20250120105357Z_cropped_10.nat",
+        "IASI_xxx_1C_M01_20240925202059Z_cropped_5.nat"]
+
+    test_files = joinpath.(test_data_artifact, file_names)
 
     @compile_workload begin
         # Store some output.

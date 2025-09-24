@@ -62,7 +62,7 @@ struct IasiWaveNumberDiskArray <: AbstractMetopDiskArray{Float64, 2}
     field_name::Symbol
     number_of_first_sample::MetopDiskArray
     sample_width::MetopDiskArray
-    size::Tuple{Int64, Int64}
+    dim_size::Tuple{Int64, Int64}
 end
 
 const IASI_WAVENUMBER_NAME = :spectra_wavenumber
@@ -83,7 +83,7 @@ function IasiWaveNumberDiskArray(
         R, field_name, number_of_first_sample, sample_width, (spectrum_size, record_count))
 end
 
-Base.size(disk_array::IasiWaveNumberDiskArray) = disk_array.size
+Base.size(disk_array::IasiWaveNumberDiskArray) = disk_array.dim_size
 
 function DiskArrays.readblock!(disk_array::IasiWaveNumberDiskArray, aout,
         i_channel::OrdinalRange, i_record::OrdinalRange)

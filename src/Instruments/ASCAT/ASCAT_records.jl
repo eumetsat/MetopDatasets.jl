@@ -2,8 +2,6 @@
 # License: MIT
 
 ########### SZR ###########
-# Note, there is probably a better way to handle the path. @__DIR__ is a bit of a hack
-#  @__DIR__ ensure that the path is relative to the location of this file.
 const ASCA_SZR_1B_V13_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V13.csv")
 const ASCA_SZR_1B_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V12.csv")
 const ASCA_SZR_1B_V11_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SZR_1B_V11.csv")

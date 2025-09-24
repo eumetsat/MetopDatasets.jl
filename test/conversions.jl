@@ -79,3 +79,69 @@ end
     close(ds_nat)
     close(ds_nc)
 end
+
+@testset "MHS L1B to netCDF" begin
+    test_file = joinpath(
+        test_data_artifact, "MHSx_xxx_1B_M03_20250915084851Z_cropped_10.nat")
+    netcdf_file = tempname(; cleanup = true)
+
+    # convert file to netCDF
+    @time MetopDataset(test_file) do ds_nat
+        NCDataset(netcdf_file, "c") do ds_temp
+            NCDatasets.write(ds_temp, ds_nat)
+            return nothing
+        end
+    end
+
+    ds_nat = MetopDataset(test_file)
+    ds_nc = NCDataset(netcdf_file)
+
+    @test !isnothing(ds_nc)
+
+    close(ds_nat)
+    close(ds_nc)
+end
+
+@testset "AMSU-A L1B to netCDF" begin
+    test_file = joinpath(
+        test_data_artifact, "AMSA_xxx_1B_M03_20250915221320Z_cropped_10.nat")
+    netcdf_file = tempname(; cleanup = true)
+
+    # convert file to netCDF
+    @time MetopDataset(test_file) do ds_nat
+        NCDataset(netcdf_file, "c") do ds_temp
+            NCDatasets.write(ds_temp, ds_nat)
+            return nothing
+        end
+    end
+
+    ds_nat = MetopDataset(test_file)
+    ds_nc = NCDataset(netcdf_file)
+
+    @test !isnothing(ds_nc)
+
+    close(ds_nat)
+    close(ds_nc)
+end
+
+@testset "HIRS L1B to netCDF" begin
+    test_file = joinpath(
+        test_data_artifact, "HIRS_xxx_1B_M01_20241104213353Z_cropped_10.nat")
+    netcdf_file = tempname(; cleanup = true)
+
+    # convert file to netCDF
+    @time MetopDataset(test_file) do ds_nat
+        NCDataset(netcdf_file, "c") do ds_temp
+            NCDatasets.write(ds_temp, ds_nat)
+            return nothing
+        end
+    end
+
+    ds_nat = MetopDataset(test_file)
+    ds_nc = NCDataset(netcdf_file)
+
+    @test !isnothing(ds_nc)
+
+    close(ds_nat)
+    close(ds_nc)
+end
