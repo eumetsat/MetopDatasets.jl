@@ -37,7 +37,7 @@ Returns path to folder storing reduced test data. Note that the test data is dow
 the first time the function it called.
 """
 get_test_data_artifact() = joinpath(
-        LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
+    LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
 
 export MetopDataset
 

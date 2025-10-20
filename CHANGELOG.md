@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-## v0.2
+## v0.2.1
+- Upgrade to [CommonDataModel v0.4](https://github.com/JuliaGeo/CommonDataModel.jl/releases/tag/v0.4.0) 
+- Add `get_scaled` helper function. The function helps get a field and apply the scale function for a single `Record`. Useful to handle auxiliary records.
+- Add [AMSU-A Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_amsu_a_l1_pfs_c89fa9d9ea.pdf)
+- Add [HIRS Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_97230_eps_hirs4l1_pfs_0ddaefcb74.pdf)
+- Add [MHS Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_97229_eps_mhs_pfs_2069b45efc.pdf)
+
+## v0.2.0
 - Error message for invalid file types
 - (**BREAKING**) Improved padding of flexible IASI L2 variables e.g. "o3_cp_air". The variable dimensions now matches the variable storing the location. See [issue 15](https://github.com/eumetsat/MetopDatasets.jl/issues/15) for more information.
 - Internal changes to only use `FlexibleMetopDiskArray` for the IASI L2 flexible variables that varies in size between each record.
