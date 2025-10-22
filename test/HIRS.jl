@@ -23,7 +23,7 @@ end
 
     @test "digital_a_rad" in keys(ds)
     @test "digital_a_rad_header" in keys(ds)
-    
+
     @test size(ds["digital_a_rad"]) == (20, 56, 10)
     @test size(ds["digital_a_rad_header"]) == (56, 10)
 end

@@ -64,7 +64,7 @@ function CDM.variable(ds::MetopDataset{R},
 
         T = eltype(disk_array)
         N = ndims(disk_array)
-        return MetopVariable{T, N, R}(ds, disk_array, varname)
+        return MetopVariable{T, N, R, typeof(disk_array)}(ds, disk_array, varname)
     end
 
     return default_variable(ds, varname)

@@ -28,7 +28,7 @@ function CDM.variable(
 
         T = eltype(disk_array)
         N = ndims(disk_array)
-        return MetopVariable{T, N, R}(ds, disk_array, varname)
+        return MetopVariable{T, N, R, typeof(disk_array)}(ds, disk_array, varname)
     else
         return default_variable(ds, varname)
     end
@@ -95,7 +95,7 @@ function CDM.variable(
         error_field_offset = sum(layout.field_sizes, dims = 1)[:]
         error_field_size = layout.record_sizes .- error_field_offset
         data_array = LazyByteField(ds.file_pointer, error_field_offset, error_field_size)
-        return MetopVariable{Vector{UInt8}, 1, R}(ds, data_array, varname)
+        return MetopVariable{Vector{UInt8}, 1, R, typeof(data_array)}(ds, data_array, varname)
     end
 
     gaird_type = _get_giard_type(R)
@@ -106,7 +106,7 @@ function CDM.variable(
         data_array = getfield(gaird, varname)
         T = eltype(data_array)
         N = ndims(data_array)
-        return MetopVariable{T, N, R}(ds, data_array, varname)
+        return MetopVariable{T, N, R, typeof(data_array)}(ds, data_array, varname)
     end
 
     return default_variable(ds, varname)
