@@ -2,14 +2,14 @@
 # License: MIT
 
 """
-    MetopVariable{T, N, R <: DataRecord} <: CommonDataModel.AbstractVariable{T, N}
+    MetopVariable{T, N, R <: DataRecord, A <: AbstractArray{T, N}} <: CommonDataModel.AbstractVariable{T, N}
 
 `MetopVariable` wraps an `AbstractArray` so it can be used with `MetopDataset`. 
 The data array is normally `AbstractMetopDiskArray`.
 """
-struct MetopVariable{T, N, R} <: CDM.AbstractVariable{T, N}
+struct MetopVariable{T, N, R, A <: AbstractArray{T, N}} <: CDM.AbstractVariable{T, N}
     parent::MetopDataset{R}
-    data_array::AbstractArray{T, N}
+    data_array::A
     field_name::Symbol
 end
 
@@ -80,7 +80,7 @@ function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) wher
     T = eltype(disk_array)
     N = ndims(disk_array)
 
-    return MetopVariable{T, N, R}(ds, disk_array, varname)
+    return MetopVariable{T, N, R, typeof(disk_array)}(ds, disk_array, varname)
 end
 
 function default_dimnames(v::MetopVariable{T, N, R}) where {T, N, R}
@@ -130,14 +130,17 @@ function CDM.attrib(v::MetopVariable, name::CDM.SymbolOrString)
 end
 
 Base.size(v::MetopVariable) = size(v.data_array)
+Base.parent(v::MetopVariable) = v.data_array
 
-### get index 
-function Base.getindex(v::MetopVariable, indices...)
-    checkbounds(v, indices...)
-    return getindex(v.data_array, indices...)
+function DiskArrays.readblock!(v::MetopVariable{T, N, R, <:DiskArrays.AbstractArray},
+        aout,
+        indexes::Vararg{OrdinalRange, N}) where {T, N, R}
+    return DiskArrays.readblock!(parent(v), aout, indexes...)
 end
-# fix ambiguity
-Base.getindex(v::MetopVariable, n::CDM.CFStdName) = getindex(v::CDM.AbstractVariable, n)
-function Base.getindex(v::MetopVariable, name::CDM.SymbolOrString)
-    return getindex(v::CDM.AbstractVariable, name)
+
+function DiskArrays.readblock!(v::MetopVariable{T, N},
+        aout,
+        indexes::Vararg{OrdinalRange, N}) where {T, N}
+    aout .= getindex(parent(v), indexes...)
+    return nothing
 end
