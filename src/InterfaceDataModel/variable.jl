@@ -15,12 +15,13 @@ end
 
 ### helper functions to get_cf_attributes.
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
-        auto_convert::Bool)::Dict{Symbol, Any} where {R <: DataRecord}
+        auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: DataRecord}
     return default_cf_attributes(R, field, auto_convert) # logic is factored out for reusability
 end
 
 function default_cf_attributes(
-        R::Type{<:BinaryRecord}, field::Symbol, auto_convert::Bool)::Dict{Symbol, Any}
+        R::Type{<:BinaryRecord}, field::Symbol, auto_convert::Bool)::AbstractDict{
+        Symbol, Any}
     cf_attributes = Dict{Symbol, Any}()
 
     F = _get_field_eltype(R, field)

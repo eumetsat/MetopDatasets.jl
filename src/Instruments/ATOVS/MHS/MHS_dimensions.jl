@@ -2,7 +2,7 @@
 # License: MIT
 
 function get_dimensions(T::Type{<:MHS_XXX_1B_V10})
-    return Dict(
+    return OrderedDict(
         "thermistor_tm_channels" => 24,
         "lat_lon" => 2,
         "channels_h" => 5,

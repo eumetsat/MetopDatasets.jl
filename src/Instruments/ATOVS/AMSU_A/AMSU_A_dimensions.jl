@@ -2,7 +2,7 @@
 # License: MIT
 
 function get_dimensions(T::Type{<:AMSA_XXX_1B})
-    return Dict(
+    return OrderedDict(
         "lat_lon" => 2,
         "channels" => 15,
         "xtrack" => 30,

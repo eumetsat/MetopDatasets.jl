@@ -3,6 +3,7 @@
 
 using MetopDatasets, Test
 using Dates
+import OrderedCollections: OrderedDict
 
 test_data_artifact = MetopDatasets.get_test_data_artifact()
 
@@ -42,7 +43,7 @@ end
 
     @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) == 6
     @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZR_1B_V13) ==
-          Dict("num_band" => 3, "xtrack" => 82)
+          OrderedDict("num_band" => 3, "xtrack" => 82)
     @test MetopDatasets.get_field_dimensions(MetopDatasets.ASCA_SZR_1B_V13, :sigma0_trip) ==
           ["num_band", "xtrack"]
     @test MetopDatasets.get_field_dimensions(
@@ -58,14 +59,14 @@ end
     @test isnothing(MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZO_1B_V13,
         :record_header))
     @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZO_1B_V13) ==
-          Dict("num_band" => 3, "xtrack" => 42)
+          OrderedDict("num_band" => 3, "xtrack" => 42)
 
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V13) == 4256
     @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V13)
     @test MetopDatasets.get_scale_factor(MetopDatasets.ASCA_SZF_1B_V13, :inc_angle_full) ==
           2
     @test MetopDatasets.get_dimensions(MetopDatasets.ASCA_SZF_1B_V13) ==
-          Dict("xtrack" => 192)
+          OrderedDict("xtrack" => 192)
 
     @test MetopDatasets.native_sizeof(MetopDatasets.ASCA_SZF_1B_V12) == 3684
     @test test_dimensions(MetopDatasets.ASCA_SZF_1B_V12)

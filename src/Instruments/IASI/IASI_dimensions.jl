@@ -2,7 +2,7 @@
 # License: MIT
 
 function get_dimensions(T::Type{<:IASI_XXX_1C})
-    return Dict(
+    return OrderedDict(
         "corner_cube_direction" => 2,
         "lon_lat" => 2,
         "line_column" => 2,
@@ -76,7 +76,7 @@ end
 ############  IASI_SND_02  ################
 
 function _get_fixed_dimensions(T::Type{IASI_SND_02_V11})
-    dimensions_dict = Dict(
+    dimensions_dict = OrderedDict(
         "lat_lon" => 2,
         "cloud_formations" => 3,
         "solar_sat_zenith_azimuth" => 4,
@@ -86,7 +86,7 @@ function _get_fixed_dimensions(T::Type{IASI_SND_02_V11})
 end
 
 function _get_fixed_dimensions(T::Type{IASI_SND_02_V10})
-    dimensions_dict = Dict(
+    dimensions_dict = OrderedDict(
         "lat_lon" => 2,
         "cloud_formations" => 3,
         "solar_sat_zenith_azimuth" => 4,
@@ -99,8 +99,8 @@ function _get_fixed_dimensions(T::Type{IASI_SND_02_V10})
 end
 
 function get_dimensions(T::Type{<:IASI_SND_02},
-        data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
-    dimensions_dict = Dict{String, Integer}()
+        data_record_layouts::Vector{<:RecordLayout})::OrderedDict{String, <:Integer}
+    dimensions_dict = OrderedDict{String, Integer}()
     layout = only(data_record_layouts)
 
     for d in keys(layout.flexible_dims_file)

@@ -142,7 +142,7 @@ struct FlexibleRecordLayout <: RecordLayout
     offsets::Vector{Int64}
     record_type::Type{<:Record}
     record_sizes::Vector{Int64}
-    flexible_dims_file::Dict{Symbol, Int64}
+    flexible_dims_file::OrderedDict{Symbol, Int64}
     field_sizes::Matrix{Int64}
 end
 
@@ -152,7 +152,7 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
 
     flexible_dims_file = _get_flexible_dims_file(file_pointer, record_type)
 
-    flexible_dims_records = Dict{Symbol, Int64}[]
+    flexible_dims_records = OrderedDict{Symbol, Int64}[]
     offsets = Int64[]
     record_sizes = Int64[]
 
@@ -243,7 +243,7 @@ function _get_field_array_size(
 
     field_array_size = _get_array_size_flexible(
         record_type, field_name,
-        layout.flexible_dims_file, Dict{Symbol, Int64}())
+        layout.flexible_dims_file, OrderedDict{Symbol, Int64}())
 
     return field_array_size
 end

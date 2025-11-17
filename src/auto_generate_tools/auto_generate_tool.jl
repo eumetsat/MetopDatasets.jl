@@ -129,17 +129,17 @@ end
 
 function description_dict(file_name)
     csv_format = _read_data_rows(file_name)
-    return Dict(_get_field_name.(csv_format) .=> _get_description.(csv_format))
+    return OrderedDict(_get_field_name.(csv_format) .=> _get_description.(csv_format))
 end
 
 function scale_factor_dict(file_name)
     csv_format = _read_data_rows(file_name)
-    return Dict(_get_field_name.(csv_format) .=> _get_scale_factor.(csv_format))
+    return OrderedDict(_get_field_name.(csv_format) .=> _get_scale_factor.(csv_format))
 end
 
 function raw_format_dim_dict(file_name)
     csv_format = _read_data_rows(file_name)
-    return Dict(_get_field_name.(csv_format) .=> _get_raw_format_dim.(csv_format))
+    return OrderedDict(_get_field_name.(csv_format) .=> _get_raw_format_dim.(csv_format))
 end
 
 """

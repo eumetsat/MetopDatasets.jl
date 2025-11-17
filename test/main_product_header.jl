@@ -9,7 +9,8 @@ test_data_artifact = MetopDatasets.get_test_data_artifact()
     test_files = joinpath(
         test_data_artifact, "ASCA_SZO_1B_M03_20250504214500Z_cropped_10.nat")
 
-    main_header, bytes_read = open(test_files, "r") do file_pointer
+    main_header,
+    bytes_read = open(test_files, "r") do file_pointer
         main_header = MetopDatasets.native_read(
             file_pointer, MetopDatasets.MainProductHeader)
         return main_header, position(file_pointer)

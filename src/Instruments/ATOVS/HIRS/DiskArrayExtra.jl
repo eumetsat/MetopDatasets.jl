@@ -18,7 +18,9 @@ end
 function DataElementMetopDiskArray(file_pointer::IOStream,
         record_layouts::Vector{<:RecordLayout},
         field_name::Symbol, data_element_field_name::Symbol; auto_convert = true)
-    data_element_type, record_count, offsets_in_file, record_type = layout_info_for_disk_array(
+    data_element_type, record_count,
+    offsets_in_file,
+    record_type = layout_info_for_disk_array(
         record_layouts, data_element_field_name)
 
     is_header = field_name in (ELEMENT_RAD_HEADER_NAME, ELEMENT_FLAG_HEADER_NAME)

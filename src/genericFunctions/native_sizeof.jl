@@ -18,7 +18,8 @@ native_sizeof(T::Type{<:Number})::Integer = sizeof(T)
 native_sizeof(T::Type{<:RecordSubType})::Integer = sum(native_sizeof.(T, fieldnames(T)))
 
 native_sizeof(T::Type{<:BinaryRecord}) = native_sizeof(T, Val(fixed_size(T)))
-native_sizeof(T::Type{<:BinaryRecord}, fixed_size::Val{true})::Integer = sum(native_sizeof.(
+native_sizeof(T::Type{<:BinaryRecord},
+    fixed_size::Val{true})::Integer = sum(native_sizeof.(
     T, fieldnames(T)))
 
 function native_sizeof(T::Type, field_name::Symbol)

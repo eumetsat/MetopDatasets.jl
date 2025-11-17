@@ -32,7 +32,8 @@ function native_read(io::IO, T::Type{<:Record})::T
 end
 
 function native_read(io::IO, T::Type{<:Record}, fixed_size::Val{true})::T
-    return T((native_read(io, T, ft, n) for (ft, n) in zip(fieldtypes(T), fieldnames(T)))...)
+    return T((native_read(io, T, ft, n)
+    for (ft, n) in zip(fieldtypes(T), fieldnames(T)))...)
 end
 
 function native_read(io::IO, T::Type{NTuple{N, UInt8}})::T where {N}
@@ -81,10 +82,11 @@ end
 function native_read_flexible(io::IO, T::Type{<:Record},
         flexible_dims_file)::T
     record_dim_fields = get_flexible_dim_fields(T)
-    flexible_dims_record = Dict{Symbol, Int64}()
+    flexible_dims_record = OrderedDict{Symbol, Int64}()
 
     vals = (_read_flex_field!(io, T, field_name,
-                record_dim_fields, flexible_dims_file, flexible_dims_record) for field_name in fieldnames(T))
+                record_dim_fields, flexible_dims_file, flexible_dims_record) for field_name in
+                                                                                 fieldnames(T))
 
     return T(vals...)
 end
@@ -129,11 +131,12 @@ function _read_flex_field!(
     return native_read(io, T)
 end
 
-_lookup_flexible_dim(dim_size::Integer, flexible_dims_file::Dict, flexible_dims_record::Dict)::Int64 = dim_size
+_lookup_flexible_dim(dim_size::Integer, flexible_dims_file::AbstractDict,
+    flexible_dims_record::AbstractDict)::Int64 = dim_size
 
 # helper function to lookup Symbol dims
 function _lookup_flexible_dim(
-        dim_size::Symbol, flexible_dims_file::Dict, flexible_dims_record::Dict)::Int64
+        dim_size::Symbol, flexible_dims_file::AbstractDict, flexible_dims_record::AbstractDict)::Int64
     if haskey(flexible_dims_file, dim_size)
         return flexible_dims_file[dim_size]
     elseif haskey(flexible_dims_record, dim_size)
@@ -147,7 +150,8 @@ end
 
 # functions to look up the array size of a flexible field
 function _get_array_size_flexible_raw(parent_type::Type, field_name::Symbol,
-        flexible_dims_file::Dict, flexible_dims_record::Dict)::NTuple{4, Int64}
+        flexible_dims_file::AbstractDict, flexible_dims_record::AbstractDict)::NTuple{
+        4, Int64}
     array_size_raw = get_raw_format_dim(parent_type, field_name)
     array_size = Tuple((_lookup_flexible_dim(
                             dim_i, flexible_dims_file, flexible_dims_record)
@@ -156,7 +160,7 @@ function _get_array_size_flexible_raw(parent_type::Type, field_name::Symbol,
 end
 
 function _get_array_size_flexible(parent_type::Type, field_name::Symbol,
-        flexible_dims_file::Dict, flexible_dims_record::Dict)
+        flexible_dims_file::AbstractDict, flexible_dims_record::AbstractDict)
     array_size_full = _get_array_size_flexible_raw(parent_type, field_name,
         flexible_dims_file, flexible_dims_record)
 
@@ -167,7 +171,7 @@ function _get_array_size_flexible(parent_type::Type, field_name::Symbol,
 end
 
 # helper functions to only read flexible dims from record
-function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_dims_file::Dict)
+function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_dims_file::AbstractDict)
     header = native_read(io, RecordHeader)
     flexible_dims_record = _read_flex_dims_from_record_no_header(io, T, flexible_dims_file)
 
@@ -175,9 +179,9 @@ function _read_flex_dims_from_record(io::IO, T::Type{<:Record}, flexible_dims_fi
 end
 
 function _read_flex_dims_from_record_no_header(
-        io::IO, T::Type{<:Record}, flexible_dims_file::Dict)
+        io::IO, T::Type{<:Record}, flexible_dims_file::AbstractDict)
     record_dim_fields = get_flexible_dim_fields(T)
-    flexible_dims_record = Dict{Symbol, Int64}()
+    flexible_dims_record = OrderedDict{Symbol, Int64}()
 
     for field_name in fieldnames(T)[2:end]
         field_type = fieldtype(T, field_name)
