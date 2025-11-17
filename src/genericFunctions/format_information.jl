@@ -31,7 +31,8 @@ julia> get_scale_factor(ASCA_SZR_1B_V13, :sigma0_trip)
 6
 ```
 """
-get_scale_factor(T::Type{<:BinaryRecord}, field::Symbol)::Union{Number, Nothing} = get_scale_factor(T)[field]
+get_scale_factor(T::Type{<:BinaryRecord},
+    field::Symbol)::Union{Number, Nothing} = get_scale_factor(T)[field]
 
 """
     get_raw_format_dim(T::Type{<:BinaryRecord}, field::Symbol)
@@ -114,18 +115,18 @@ end
 
 # get_dimensions and get_field_dimensions should be implemented manually but fallback methods exits 
 """
-    get_dimensions(T::Type{<:BinaryRecord})::Dict{String, <:Integer}
+    get_dimensions(T::Type{<:BinaryRecord})::OrderedDict{String, <:Integer}
 
 Get the the named dimensions in a BinaryRecord and their length.
 # Example
 ```julia-repl
 julia> get_dimensions(ASCA_SZR_1B_V13)
-Dict{String, Int64} with 2 entries:
+OrderedDict{String, Int64} with 2 entries:
   "num_band" => 3
   "xtrack"   => 82
 ```
 """
-function get_dimensions(T::Type{<:BinaryRecord})::Dict{String, <:Integer}
+function get_dimensions(T::Type{<:BinaryRecord})::OrderedDict{String, <:Integer}
     # find all array fields size
     array_sizes = [MetopDatasets._get_array_size(T, n)
                    for n in fieldnames(T) if fieldtype(T, n) <: Array]
@@ -135,7 +136,7 @@ function get_dimensions(T::Type{<:BinaryRecord})::Dict{String, <:Integer}
     unique!(dims)
     sort!(dims)
 
-    dims_dict = Dict{String, Int64}()
+    dims_dict = OrderedDict{String, Int64}()
     for i in eachindex(dims)
         dims_dict["dim_$i"] = dims[i]
     end
@@ -193,7 +194,7 @@ end
 ### Methods needed for flexible record types  ####
 
 """
-    get_flexible_dim_fields(T::Type{<:BinaryRecord})::Dict{Symbol,Symbol}
+    get_flexible_dim_fields(T::Type{<:BinaryRecord})::AbstractDict{Symbol,Symbol}
 
 Get a dictionary with field names as key and the corresponding flexible dim as value. 
 Only fields representing a flexible dim is included. Must be implemented for Records containing 
@@ -202,7 +203,7 @@ flexible dim values.
 # Example
 ```julia-repl
 julia> get_flexible_dim_fields(IASI_SND_02)
-Dict{Symbol, Symbol} with 4 entries:
+OrderedDict{Symbol, Symbol} with 4 entries:
   :co_nbr   => :CO_NBR
   :o3_nbr   => :O3_NBR
   :nerr     => :NERR
@@ -217,4 +218,6 @@ get_flexible_dim_fields(T::Type{<:BinaryRecord}) = error("Method missing for $T"
 Read the flexible types from a product. Note that the `IO` position is not changed by
 calling the function
 """
-_get_flexible_dims_file(file_pointer::IO, T::Type{<:BinaryRecord}) = Dict{Symbol, Int64}()
+function _get_flexible_dims_file(file_pointer::IO, T::Type{<:BinaryRecord})
+    return OrderedDict{Symbol, Int64}()
+end

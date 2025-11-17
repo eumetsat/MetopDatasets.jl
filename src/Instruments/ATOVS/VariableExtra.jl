@@ -93,7 +93,7 @@ function CDM.attrib(
 end
 
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
-        auto_convert::Bool)::Dict{Symbol, Any} where {R <: ATOVS_1B}
+        auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: ATOVS_1B}
     if (field == DATA_CAL_NEDT_NAME)
         return Dict{Symbol, Any}(
             :units => "K",

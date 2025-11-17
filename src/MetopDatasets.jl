@@ -13,6 +13,7 @@ using Compat: @compat
 using PrecompileTools: @setup_workload, @compile_workload
 using RelocatableFolders: @path
 import LazyArtifacts
+import OrderedCollections: OrderedDict
 
 const RECORD_DIM_NAME = "atrack"
 
@@ -36,8 +37,10 @@ include("Instruments/ATOVS/ATOVS.jl")
 Returns path to folder storing reduced test data. Note that the test data is downloaded from https://github.com/eumetsat/test-data-MetopDatasets
 the first time the function it called.
 """
-get_test_data_artifact() = joinpath(
-    LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
+function get_test_data_artifact()
+    return joinpath(
+        LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
+end
 
 export MetopDataset
 

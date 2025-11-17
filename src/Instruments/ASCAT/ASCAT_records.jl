@@ -13,7 +13,7 @@ eval(record_struct_expression(ASCA_SZR_1B_V12_format, ASCA_SZR_1B))
 eval(record_struct_expression(ASCA_SZR_1B_V11_format, ASCA_SZR_1B))
 
 # Named dimensions must be added manual since they are not part of the normal format
-get_dimensions(T::Type{<:ASCA_SZR_1B}) = Dict("num_band" => 3, "xtrack" => 82)
+get_dimensions(T::Type{<:ASCA_SZR_1B}) = OrderedDict("num_band" => 3, "xtrack" => 82)
 
 function get_field_dimensions(T::Type{<:ASCA_SZR_1B},
         field_name::Symbol)::Vector{<:AbstractString}
@@ -51,7 +51,7 @@ eval(record_struct_expression(ASCA_SZO_1B_V13_format, ASCA_SZO_1B))
 eval(record_struct_expression(ASCA_SZO_1B_V12_format, ASCA_SZO_1B))
 eval(record_struct_expression(ASCA_SZO_1B_V11_format, ASCA_SZO_1B))
 
-get_dimensions(T::Type{<:ASCA_SZO_1B}) = Dict("num_band" => 3, "xtrack" => 42)
+get_dimensions(T::Type{<:ASCA_SZO_1B}) = OrderedDict("num_band" => 3, "xtrack" => 42)
 function get_field_dimensions(T::Type{<:ASCA_SZO_1B},
         field_name::Symbol)::Vector{<:AbstractString}
     if !(fieldtype(T, field_name) <: Array)
@@ -88,7 +88,7 @@ eval(record_struct_expression(ASCA_SZF_1B_V13_format, ASCA_SZF_1B))
 eval(record_struct_expression(ASCA_SZF_1B_V12_format, ASCA_SZF_1B))
 eval(record_struct_expression(ASCA_SZF_1B_V11_format, ASCA_SZF_1B))
 
-get_dimensions(T::Type{<:ASCA_SZF_1B}) = Dict("xtrack" => 192)
+get_dimensions(T::Type{<:ASCA_SZF_1B}) = OrderedDict("xtrack" => 192)
 function get_field_dimensions(T::Type{<:ASCA_SZF_1B},
         field_name::Symbol)::Vector{<:AbstractString}
     if !(fieldtype(T, field_name) <: Array)
@@ -101,7 +101,7 @@ function get_field_dimensions(T::Type{<:ASCA_SZF_1B},
 end
 
 # Dimensions are different for V11
-get_dimensions(T::Type{ASCA_SZF_1B_V11}) = Dict("xtrack" => 256, "beam" => 6)
+get_dimensions(T::Type{ASCA_SZF_1B_V11}) = OrderedDict("xtrack" => 256, "beam" => 6)
 function get_field_dimensions(T::Type{ASCA_SZF_1B_V11},
         field_name::Symbol)::Vector{<:AbstractString}
     if !(fieldtype(T, field_name) <: Array)
@@ -136,7 +136,7 @@ const ASCA_SMR_02_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMR_02
 
 eval(record_struct_expression(ASCA_SMR_02_V12_format, ASCA_SMR_02))
 
-get_dimensions(T::Type{<:ASCA_SMR_02}) = Dict("num_band" => 3, "xtrack" => 82)
+get_dimensions(T::Type{<:ASCA_SMR_02}) = OrderedDict("num_band" => 3, "xtrack" => 82)
 function get_field_dimensions(T::Type{<:ASCA_SMR_02},
         field_name::Symbol)::Vector{<:AbstractString}
     if !(fieldtype(T, field_name) <: Array)
@@ -165,7 +165,7 @@ const ASCA_SMO_02_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMO_02
 
 eval(record_struct_expression(ASCA_SMO_02_V12_format, ASCA_SMO_02))
 
-get_dimensions(T::Type{<:ASCA_SMO_02}) = Dict("num_band" => 3, "xtrack" => 42)
+get_dimensions(T::Type{<:ASCA_SMO_02}) = OrderedDict("num_band" => 3, "xtrack" => 42)
 function get_field_dimensions(T::Type{<:ASCA_SMO_02},
         field_name::Symbol)::Vector{<:AbstractString}
     if !(fieldtype(T, field_name) <: Array)

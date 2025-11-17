@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Use `OrderedDict` to ensure that dimensions always have the same order. Fixes: https://github.com/eumetsat/MetopDatasets.jl/issues/21
 
 ## v0.2.1
 - Upgrade to [CommonDataModel v0.4](https://github.com/JuliaGeo/CommonDataModel.jl/releases/tag/v0.4.0) 

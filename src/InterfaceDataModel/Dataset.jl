@@ -60,9 +60,12 @@ julia> # close data set
 julia> close(ds);
 ``` 
 """
-MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing) = MetopDataset(
-    open(file_path, "r"); auto_convert = auto_convert,
-    high_precision = high_precision, maskingvalue = maskingvalue)
+function MetopDataset(file_path::AbstractString; auto_convert::Bool = true,
+        high_precision::Bool = false, maskingvalue = missing)
+    return MetopDataset(
+        open(file_path, "r"); auto_convert = auto_convert,
+        high_precision = high_precision, maskingvalue = maskingvalue)
+end
 
 # method to enable `do` syntax.
 function MetopDataset(f::Function, file_path::AbstractString;
@@ -115,23 +118,27 @@ end
 Base.keys(ds::MetopDataset) = CDM.varnames(ds)
 
 function get_dimensions(R::Type{<:DataRecord},
-        data_record_layouts::Vector{<:RecordLayout})::Dict{String, <:Integer}
+        data_record_layouts::Vector{<:RecordLayout})::OrderedDict{String, <:Integer}
     return get_dimensions(R)
 end
 
-function CDM.dimnames(ds::MetopDataset{R}) where {R}
-    names = collect(keys(get_dimensions(R, ds.data_record_layouts)))
+function get_dimensions(ds::MetopDataset{R}) where {R}
+    return get_dimensions(R, ds.data_record_layouts)
+end
+
+function CDM.dimnames(ds::MetopDataset)
+    names = collect(keys(get_dimensions(ds)))
     push!(names, RECORD_DIM_NAME)
     return names
 end
 
-function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R}
+function CDM.dim(ds::MetopDataset, name::CDM.SymbolOrString)
     name = string(name)
     if RECORD_DIM_NAME == name
         return ds.data_record_count
     end
 
-    return get_dimensions(R, ds.data_record_layouts)[name]
+    return get_dimensions(ds)[name]
 end
 
 CDM.attribnames(ds::MetopDataset) = string.(fieldnames(MainProductHeader))[2:end] ## Skip record_header
@@ -160,8 +167,10 @@ Base.close(ds::MetopDataset) = close(ds.file_pointer)
 Read the n'th record of type `record_type` from the dataset. This can be used to access records that are 
 not directly exposed through the `MetopDataset` interface.
 """
-read_single_record(ds::MetopDataset, record_type::Type{<:Record}, n::Integer) = read_single_record(
-    ds.file_pointer, record_type, n::Integer)
+function read_single_record(ds::MetopDataset, record_type::Type{<:Record}, n::Integer)
+    return read_single_record(
+        ds.file_pointer, record_type, n::Integer)
+end
 
 # helper function to test and/or debug dimension
 function _valid_dimensions(ds::MetopDataset)

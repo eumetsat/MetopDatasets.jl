@@ -2,6 +2,7 @@
 # License: MIT
 
 using MetopDatasets, Test
+import OrderedCollections: OrderedDict
 
 struct TestRecord <: MetopDatasets.DataRecord
     f1::Array{Int16, 3}
@@ -15,7 +16,7 @@ f2_array_size = (10, 11, 12, 13)
 f3_array_size = (1, 1, 1, 1)
 
 function MetopDatasets.get_raw_format_dim(T::Type{TestRecord})
-    return Dict(:f1 => (f1_array_size..., 1),
+    return OrderedDict(:f1 => (f1_array_size..., 1),
         :f2 => f2_array_size,
         :f3 => f3_array_size)
 end

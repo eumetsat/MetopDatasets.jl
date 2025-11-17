@@ -37,7 +37,7 @@ function get_giard_varnames(::Type{GIADR_IASI_SND_02_V10})
 end
 
 function get_flexible_dim_fields(::Type{GIADR_IASI_SND_02_V11})
-    return Dict(
+    return OrderedDict(
         :num_temperature_pcs => :NPCT,
         :num_pressure_levels_temp => :NLT,
         :num_ozone_pcs => :NPCO,
@@ -52,7 +52,7 @@ function get_flexible_dim_fields(::Type{GIADR_IASI_SND_02_V11})
 end
 
 function get_flexible_dim_fields(::Type{GIADR_IASI_SND_02_V10})
-    return Dict(
+    return OrderedDict(
         :num_pressure_levels_temp => :NLT,
         :num_pressure_levels_ozone => :NLO,
         :num_pressure_levels_humidity => :NLQ,
@@ -60,7 +60,7 @@ function get_flexible_dim_fields(::Type{GIADR_IASI_SND_02_V10})
 end
 
 function get_iasi_l2_flex_size(giard::T) where {T <: GIADR_IASI_SND_02}
-    flex_size_prod = Dict{Symbol, Int64}()
+    flex_size_prod = OrderedDict{Symbol, Int64}()
     giard_size_fields = get_flexible_dim_fields(typeof(giard))
 
     for k in keys(giard_size_fields)
@@ -74,7 +74,7 @@ function get_iasi_l2_flex_size(giard::T) where {T <: GIADR_IASI_SND_02}
     return flex_size_prod
 end
 
-function _add_computed_dimension!(flex_size_prod::Dict, ::Type{GIADR_IASI_SND_02_V11})
+function _add_computed_dimension!(flex_size_prod::AbstractDict, ::Type{GIADR_IASI_SND_02_V11})
     flex_size_prod[:NEVA_CO] = ceil(Int64, flex_size_prod[:NL_CO] / 2)
     flex_size_prod[:NEVE_CO] = flex_size_prod[:NEVA_CO] * flex_size_prod[:NL_CO]
     flex_size_prod[:NEVA_HNO3] = ceil(Int64, flex_size_prod[:NL_HNO3] / 2)
@@ -87,7 +87,7 @@ function _add_computed_dimension!(flex_size_prod::Dict, ::Type{GIADR_IASI_SND_02
     return nothing
 end
 
-function _add_computed_dimension!(flex_size_prod::Dict, ::Type{GIADR_IASI_SND_02_V10})
+function _add_computed_dimension!(flex_size_prod::AbstractDict, ::Type{GIADR_IASI_SND_02_V10})
     return nothing
 end
 

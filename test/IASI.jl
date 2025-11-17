@@ -3,6 +3,7 @@
 
 using MetopDatasets, Test
 import CommonDataModel as CDM
+import OrderedCollections: OrderedDict
 
 test_data_artifact = MetopDatasets.get_test_data_artifact()
 
@@ -81,12 +82,12 @@ test_data_artifact = MetopDatasets.get_test_data_artifact()
     @test ds["ggeosondloc"][1, 1, 1, 1]≈-83 atol=1 # test first longitude in file
     @test ds["ggeosondloc"][2, 1, 1, 1]≈72 atol=1 # test first latitude in file
 
-    @test sort(CDM.dimnames(ds)) ==
-          ["atrack", "avhrr_channel", "avhrr_image_column", "avhrr_image_line", "band",
-        "corner_cube_direction", "eigenvalue", "fov_class",
-        "integrated_imager_column", "integrated_imager_line",
-        "line_column", "lon_lat", "sounder_pixel", "spectral",
-        "subgrid_imager_pixel", "xtrack", "zenith_azimuth"]
+    @test CDM.dimnames(ds) ==
+          ["corner_cube_direction", "lon_lat", "line_column", "zenith_azimuth", "band",
+        "sounder_pixel", "avhrr_channel", "fov_class", "subgrid_imager_pixel",
+        "xtrack", "integrated_imager_column", "integrated_imager_line",
+        "avhrr_image_column", "avhrr_image_line", "eigenvalue", "spectral", "atrack"]
+
     @test CDM.dim(ds, :spectral) == 8700
     @test CDM.dim(ds, "atrack") == ds.main_product_header.total_mdr
 
@@ -180,7 +181,8 @@ end
     @test flex_sizes[:NERRW] == 171
     @test flex_sizes[:NERRO] == 55
 
-    flexible_record_layout, total_mdr = open(test_file) do file_pointer
+    flexible_record_layout,
+    total_mdr = open(test_file) do file_pointer
         main_header = MetopDatasets.native_read(
             file_pointer, MetopDatasets.MainProductHeader)
         return only(MetopDatasets.read_record_layouts(file_pointer, main_header)),
@@ -197,6 +199,12 @@ end
 
     # test dims and size
     @test !isnothing(ds.dim)
+    @test MetopDatasets.get_dimensions(ds) isa OrderedDict
+    @test CDM.dimnames(ds) ==
+          ["NPCT", "NLT", "NPCO", "NLO", "NL_CO", "NPCW", "NLQ", "NL_SO2", "NEW",
+        "NL_HNO3", "NL_O3", "NEVA_CO", "NEVE_CO", "NEVA_HNO3", "NEVE_HNO3", "NEVA_O3",
+        "NEVE_O3", "NERRT", "NERRW", "NERRO", "lat_lon", "cloud_formations",
+        "solar_sat_zenith_azimuth", "xtrack_sounder_pixels", "atrack"]
     @test CDM.dimnames(ds["co_h_eigenvalues"]) ==
           ["NEVA_CO", "xtrack_sounder_pixels", "atrack"]
     @test size(ds["co_h_eigenvalues"]) == (10, 120, 10)
@@ -226,7 +234,8 @@ end
           ["NLQ"]
 
     # manuel read levels from giadr
-    temp_pressure_levels, hum_pressure_levels = let
+    temp_pressure_levels,
+    hum_pressure_levels = let
         giard = MetopDatasets.read_first_record(ds, MetopDatasets.GIADR_IASI_SND_02_V11)
 
         scale_factor_temp = MetopDatasets.get_scale_factor(
@@ -277,22 +286,22 @@ end
           ["NERRT", "xtrack_sounder_pixels", "atrack"]
 
     expected_out_co = Union{Missing, Float64}[1.4921e24, 1.4902e24, 1.4941e24, 1.4967e24,
-        missing, 1.4771e24, 1.4782e24, missing, 1.4571e24, 1.4572e24, 1.4578e24,
-        1.4578e24, missing, missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, missing, missing, 1.4412e24, missing,
-        missing, 1.4425e24, 1.4464e24, 1.4406e24, 1.4442e24, 1.4608e24, missing, 1.4607e24,
-        1.4607e24, missing, missing, missing, missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, 1.4595e24,
-        missing, missing, missing, missing, 1.4448e24,
-        1.4448e24, missing, missing, missing, 1.4543e24, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, missing, missing, missing, missing, 1.4592e24, missing,
-        missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, 1.4537e24, missing,
-        missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, missing, missing,
-        missing, missing, missing, missing, missing, missing]
+    missing, 1.4771e24, 1.4782e24, missing, 1.4571e24, 1.4572e24, 1.4578e24,
+    1.4578e24, missing, missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, missing, missing, 1.4412e24, missing,
+    missing, 1.4425e24, 1.4464e24, 1.4406e24, 1.4442e24, 1.4608e24, missing, 1.4607e24,
+    1.4607e24, missing, missing, missing, missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, 1.4595e24,
+    missing, missing, missing, missing, 1.4448e24,
+    1.4448e24, missing, missing, missing, 1.4543e24, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, missing, missing, missing, missing, 1.4592e24, missing,
+    missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, 1.4537e24, missing,
+    missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, missing, missing,
+    missing, missing, missing, missing, missing, missing]
 
     actual_out_co = ds["co_cp_air"][6, :, 3]
 

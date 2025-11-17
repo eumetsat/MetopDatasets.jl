@@ -37,7 +37,7 @@ function data_record_type(header::MainProductHeader, product_type::Val{:IASI_SND
 end
 
 function get_flexible_dim_fields(::Type{IASI_SND_02_V11})
-    return Dict(
+    return OrderedDict(
         :nerr => :NERR,
         :co_nbr => :CO_NBR,
         :hno3_nbr => :HNO3_NBR,
@@ -46,7 +46,7 @@ function get_flexible_dim_fields(::Type{IASI_SND_02_V11})
 end
 
 function flexible_dim_data_location(::Type{IASI_SND_02_V11})
-    return Dict(
+    return OrderedDict(
         :NERR => :error_data_index,
         :CO_NBR => :co_nfitlayers,
         :HNO3_NBR => :hno3_nfitlayers,
@@ -55,7 +55,7 @@ function flexible_dim_data_location(::Type{IASI_SND_02_V11})
 end
 
 function get_flexible_dim_fields(::Type{IASI_SND_02_V10})
-    return Dict{Symbol, Symbol}(
+    return OrderedDict{Symbol, Symbol}(
     )
 end
 

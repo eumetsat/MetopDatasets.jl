@@ -66,7 +66,7 @@ end
 mphr_get_int(mphr_line) = parse(Int, last(split(mphr_line, '=')))
 
 function update_mphr!(mphr_bytes, last_header, cropped_size, n_data_records)
-    mdr_corrections = Dict{AbstractString, AbstractString}()
+    mdr_corrections = OrderedDict{AbstractString, AbstractString}()
     mphr_string = String(mphr_bytes[21:end])
 
     # update product size
@@ -114,7 +114,8 @@ function crop_product(file, destination_folder, n_data_records)
     dest = joinpath(destination_folder, new_file_name)
 
     # read part of the product
-    data_record_count, headers, records_as_byte, cropped_size = _get_cropped_records(
+    data_record_count, headers, records_as_byte,
+    cropped_size = _get_cropped_records(
         file, n_data_records)
 
     # check assumptions

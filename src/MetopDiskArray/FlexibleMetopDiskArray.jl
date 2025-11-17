@@ -23,7 +23,8 @@ end
 function FlexibleMetopDiskArray(file_pointer::IOStream,
         record_layouts::Vector{FlexibleRecordLayout},
         field_name::Symbol; auto_convert = true)
-    field_type, record_count, offsets_in_file, record_type = layout_info_for_disk_array(
+    field_type, record_count,
+    offsets_in_file, record_type = layout_info_for_disk_array(
         record_layouts, field_name)
 
     T, N = _get_T_and_N(field_type, auto_convert)

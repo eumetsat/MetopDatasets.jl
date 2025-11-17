@@ -36,7 +36,7 @@ end
 
 # Overload to add :gircimage scale_factor from giadr. Not given in the format specs like the rest.
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
-        auto_convert::Bool)::Dict{Symbol, Any} where {R <: IASI_XXX_1C}
+        auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: IASI_XXX_1C}
     if field == IASI_WAVENUMBER_NAME
         return Dict{Symbol, Any}(
             :units => "m-1"
@@ -113,7 +113,7 @@ function CDM.variable(
 end
 
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
-        auto_convert::Bool)::Dict{Symbol, Any} where {R <: IASI_SND_02}
+        auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: IASI_SND_02}
     if (field == IASI_L2_V10_ERROR_DATA_NAME)
         return Dict{Symbol, Any}()
     end
