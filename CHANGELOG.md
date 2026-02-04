@@ -1,7 +1,12 @@
 # Changelog
 
 ## Unreleased
+
+## v0.2.2
 - Use `OrderedDict` to ensure that dimensions always have the same order. Fixes: https://github.com/eumetsat/MetopDatasets.jl/issues/21
+- Throw `KeyError` when an invalid variable name is given. Fixes: https://github.com/eumetsat/MetopDatasets.jl/issues/32
+- Update links in documentation
+- Add references to https://github.com/eumetsat/MetopPy in documentation.
 
 ## v0.2.1
 - Upgrade to [CommonDataModel v0.4](https://github.com/JuliaGeo/CommonDataModel.jl/releases/tag/v0.4.0) 
