@@ -76,6 +76,9 @@ end
 
 function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R}
     varname = Symbol(varname)
+    if !(string(varname) in CDM.varnames(ds))
+        throw( KeyError( string(varname) ) )
+    end
     disk_array = construct_disk_array(ds.file_pointer, ds.data_record_layouts,
         varname; auto_convert = ds.auto_convert)
     T = eltype(disk_array)

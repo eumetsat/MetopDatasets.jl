@@ -79,6 +79,8 @@ end
     # get single index test
     @test !isnothing(ds["utc_line_nodes"][2])
 
+    @test_throws KeyError ds["not_a_variable"]
+
     close(ds)
 end
 
