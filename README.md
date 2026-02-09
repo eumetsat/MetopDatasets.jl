@@ -9,7 +9,7 @@ MetopDatasets.jl exports the `MetopDataset` API which is an implementation of th
 
 Only a subset of the METOP native formats are supported currently but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__EPS%20Native). See [supported formats](https://eumetsat.github.io/MetopDatasets.jl/dev/#Supported-formats) for more information
 
-It is also possible to use MetopDatasets.jl from Python. See [section in documentation](https://eumetsat.github.io/MetopDatasets.jl/dev/python) for more information.
+MetopDatasets.jl can also be used from Python. The recommend way is to use the [MetopPy](https://github.com/eumetsat/MetopPy) package which is a python wrapper for MetopDatasets.jl. For other alternatives, see the [python section](https://eumetsat.github.io/MetopDatasets.jl/dev/python) in documentation page.
 
 ## Copyright and License
 This code is licensed under MIT license. See file LICENSE for details on the usage and distribution terms.

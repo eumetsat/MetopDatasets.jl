@@ -1,7 +1,7 @@
 ## IASI
 
 The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral infrared sensor measuring upwelling radiation from a sun-synchronous orbit in 8461 spectral channels (645.0 - 2760.0 cm-1). These measurements are used to derive a plethora of geophysical variables (e.g. temperature and humidity profiles). This makes IASI a key data source for numerical weather prediction (NWP) and applications in atmospheric chemistry and monitoring of essential climate variables.
-See [IASI Level 1: Product Guide](https://user.eumetsat.int/s3/eup-strapi-media/pdf_iasi_pg_487c765315.pdf) and [IASI Level 2: Product Guide](https://user.eumetsat.int/s3/eup-strapi-media/IASI_Level_2_Product_Guide_8f61a2369f.pdf) for more information.
+See [IASI Level 1 product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASIL1C-ALL) and [IASI Level 2 product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASSND02) for more information.
 
 
 ## Static plot of L1C spectra

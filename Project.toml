@@ -1,6 +1,6 @@
 name = "MetopDatasets"
 uuid = "0c26954c-4046-4b98-a13c-f9377ca4b9b7"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["lupemba <simon.koklupemba@eumetsat.int> and contributors"]
 
 [deps]

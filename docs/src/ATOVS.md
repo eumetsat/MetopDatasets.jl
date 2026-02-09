@@ -8,7 +8,7 @@ For more information see [ATOVS Level 1b Product Guide](https://user.eumetsat.in
 ## AMSU-A
 The Advanced Microwave Sounding Unit-A (AMSU-A) is an instrument on the METOP satellites. AMSU-A is a microwave radiometer with 15 channels and is one of the three ATOVS sensors.
 
-The AMSU-A L1B products contain the radiance measured at all 15 channels. See the [AMSU-A Level 1B product pagel](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:AMSUL1) for more information. The frequency of each channel is given in [NOAA KLM User's Guide](https://web.archive.org/web/20060420075941/http://www2.ncdc.noaa.gov/docs/klm/html/c3/sec3-3.htm)
+The AMSU-A L1B products contain the radiance measured at all 15 channels. See the [AMSU-A Level 1B product pagel](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:AMSUL1) for more information. The frequency of each channel is given in [NOAA KLM User's Guide](https://web.archive.org/web/20060420075941/http://www2.ncdc.noaa.gov/docs/klm/html/c3/sec3-3.htm)
 
 This example is made using the following packages.
 ```
@@ -60,7 +60,7 @@ The plot shows the radiance for the AMSU-A channel 2 (31.4 GHz) observed during 
 ## HIRS
 The High Resolution Infrared Sounder (HIRS) is an instrument on the METOP satellites. It is a 20 channel infrared sounder and one of the three Advanced TIROS Operational Sounder (ATOVS) sensors. 
 
-The level 1B HIRS files contain the radiance of the 19 channels and the reflectance for channel 20.  See the [HIRS Level 1B product page](https://data.eumetsat.int/product/EO:EUM:DAT:MULT:HIRSL1) for more information.  
+The level 1B HIRS files contain the radiance of the 19 channels and the reflectance for channel 20.  See the [HIRS Level 1B product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:MULT:HIRSL1) for more information.  
 This example shows how we plot the radiance from channel 7 on a map.
 
 This example is made using the following packages.
@@ -112,7 +112,7 @@ end
 ## MHS
 The Microwave Humidity Sounder (MHS) is an instrument on the METOP satellites. It measures the earth using 5 microwave channels sensitive to surface temperatures, emissivities, and atmospheric humidity. MHS is one of the three Advanced TIROS Operational Sounder (ATOVS) sensors.
 
-The level 1B MHS files contain the radiance of the 5 channels. See the [MHS Level 1B product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:MHSL1) for more information.  
+The level 1B MHS files contain the radiance of the 5 channels. See the [MHS Level 1B product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:MHSL1) for more information.  
 This example shows how we compute the brightness temperature of channel 3 and plot it on a map. Note that `scene_radiances` can also be plotted directly and this will result in a very similar image but with a different color range. 
 
 This example is made using the following packages.

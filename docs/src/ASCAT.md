@@ -6,7 +6,7 @@ For more information see [ASCAT User Guide](https://user.eumetsat.int/s3/eup-str
 All data used in examples are available from [EUMETSAT data store](https://data.eumetsat.int/extended?query=&filter=instrument__ASCAT&filter=availableFormats__EPS%20Native)
 
 ## SZF beam statistics
-The level 1B SZF files contain full resolution backscatter from the 6 antenna beams. See the [ASCAT level 1B SZF product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZF1B) for more information.  
+The level 1B SZF files contain full resolution backscatter from the 6 antenna beams. See the [ASCAT level 1B SZF product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:ASCSZF1B) for more information.  
 This example shows how we can get the 5% and 95% quantile of the backscatter from each beam only considering the observations with no flags. It should be noted that observations over land are are flagged with a land-flag so theses statistics only consider oceans.
 
 Read and inspect the variables:
@@ -61,7 +61,7 @@ Beam: 6, Sigma0 (q05,q95) range: (-28.4, -12.02)
 We can now see the sigma0 quintile ranges for each beam.
 
 ## SZR and SZO plot
-The level 1B SZR files contain backscatter values from the 6 ASCAT beams, resampled to a common 12.5 x 12.5 km grid. There are three beams imaging each side of the satellite so this results in 3 backscatter measurements for each grid point. The level 1B SZO files are identical but resampled to a 25 x 25 km grid instead. See [ASCAT level 1B SZR product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZR1B) and [ASCAT level 1B SZO product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:ASCSZO1B) for more information.
+The level 1B SZR files contain backscatter values from the 6 ASCAT beams, resampled to a common 12.5 x 12.5 km grid. There are three beams imaging each side of the satellite so this results in 3 backscatter measurements for each grid point. The level 1B SZO files are identical but resampled to a 25 x 25 km grid instead. See [ASCAT level 1B SZR product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:ASCSZR1B) and [ASCAT level 1B SZO product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:ASCSZO1B) for more information.
 
 These examples will work to both plot SZR and SZO data. The examples are made using the following packages.
 ```
@@ -204,7 +204,7 @@ The subset shows the measured backscatter from the right swath over the mediterr
 
 ## Soil moisture example
 The ASCAT Level 2 SMR product contains relative soil moisture on a 12.5 x 12.5 km grid. The SMO product is identical but resampled to a 25 x 25 km grid instead.
-See [ASCAT level 2 SMR product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:SOMO12) and [ASCAT level 2 SMO product page](https://data.eumetsat.int/product/EO:EUM:DAT:METOP:SOMO25) for more information.
+See [ASCAT level 2 SMR product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:SOMO12) and [ASCAT level 2 SMO product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:SOMO25) for more information.
 
 These examples will work to plot both SMR and SMO data. The examples are made using the following packages.
 ```
