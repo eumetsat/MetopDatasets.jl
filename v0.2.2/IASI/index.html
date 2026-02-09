@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>IASI · MetopDatasets.jl</title><meta name="title" content="IASI · MetopDatasets.jl"/><meta property="og:title" content="IASI · MetopDatasets.jl"/><meta property="twitter:title" content="IASI · MetopDatasets.jl"/><meta name="description" content="Documentation for MetopDatasets.jl."/><meta property="og:description" content="Documentation for MetopDatasets.jl."/><meta property="twitter:description" content="Documentation for MetopDatasets.jl."/><meta property="og:url" content="https://eumetsat.github.io/MetopDatasets.jl/IASI/"/><meta property="twitter:url" content="https://eumetsat.github.io/MetopDatasets.jl/IASI/"/><link rel="canonical" href="https://eumetsat.github.io/MetopDatasets.jl/IASI/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MetopDatasets.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li><a class="tocitem" href="../MetopDataset/">MetopDataset</a></li><li><a class="tocitem" href="../python/">Use with Python</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../ASCAT/">ASCAT</a></li><li class="is-active"><a class="tocitem" href>IASI</a><ul class="internal"><li><a class="tocitem" href="#IASI"><span>IASI</span></a></li><li><a class="tocitem" href="#Static-plot-of-L1C-spectra"><span>Static plot of L1C spectra</span></a></li><li><a class="tocitem" href="#Advanced-interactive-plots-of-L1C-spectra"><span>Advanced interactive plots of L1C spectra</span></a></li><li><a class="tocitem" href="#Level-2-Combined-Sounding-Products"><span>Level 2 Combined Sounding Products</span></a></li><li><a class="tocitem" href="#Level-2-Carbon-monoxide"><span>Level 2 Carbon monoxide</span></a></li></ul></li><li><a class="tocitem" href="../ATOVS/">ATOVS (AMSU-A, HIRS, MHS)</a></li></ul></li><li><a class="tocitem" href="../full_api/">Full API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>IASI</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>IASI</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/eumetsat/MetopDatasets.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/eumetsat/MetopDatasets.jl/blob/main/docs/src/IASI.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="IASI"><a class="docs-heading-anchor" href="#IASI">IASI</a><a id="IASI-1"></a><a class="docs-heading-anchor-permalink" href="#IASI" title="Permalink"></a></h2><p>The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral infrared sensor measuring upwelling radiation from a sun-synchronous orbit in 8461 spectral channels (645.0 - 2760.0 cm-1). These measurements are used to derive a plethora of geophysical variables (e.g. temperature and humidity profiles). This makes IASI a key data source for numerical weather prediction (NWP) and applications in atmospheric chemistry and monitoring of essential climate variables. See <a href="https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASIL1C-ALL">IASI Level 1 product page</a> and <a href="https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASSND02">IASI Level 2 product page</a> for more information.</p><h2 id="Static-plot-of-L1C-spectra"><a class="docs-heading-anchor" href="#Static-plot-of-L1C-spectra">Static plot of L1C spectra</a><a id="Static-plot-of-L1C-spectra-1"></a><a class="docs-heading-anchor-permalink" href="#Static-plot-of-L1C-spectra" title="Permalink"></a></h2><p>This example is made using the following packages.</p><pre><code class="nohighlight hljs">[13f3f980] CairoMakie v0.12.16
+[db073c08] GeoMakie v0.7.9</code></pre><p>The key variable is &quot;gs1cspect&quot; which contains the radiance spectra measured by IASI. The spectra from a full orbit are almost 2 GB of data. In this example we will just load one data record with observation locations and plot the spectra of two observations. The spectra are converted from radiances to brightness temperature since this is often convenient when interpreting the IASI spectra. The cloud cover in each individual field of view (from AVHRR) is also read from the file and included as legends on the plot of the spectra.  </p><pre><code class="language-julia hljs">using MetopDatasets
+using CairoMakie, GeoMakie
+
+ds = MetopDataset(&quot;IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat&quot;, maskingvalue=NaN);
+
+# Select a single data record
+data_record_index = 670
+
+# Select 2 points to plot the full spectrum 
+selected_points = CartesianIndex.([(2,15), (1,27)])
+selected_colors = [:red, :black]
+
+# Read the geolocation of the data record
+longitude, latitude = let 
+    lon_lat = ds[&quot;ggeosondloc&quot;][:,:,:,data_record_index]
+    lon_lat[1,:,:], lon_lat[2,:,:]
+end
+
+# read spectrum as brightness temperature
+wavenumber = ds[&quot;spectra_wavenumber&quot;][:, data_record_index]
+selected_T_b = let 
+    spectra = ds[&quot;gs1cspect&quot;][:,:,:,data_record_index]
+    # convert select spectra to brightness temperature
+    [brightness_temperature.(spectra[:,i] , wavenumber) 
+        for i in selected_points]
+end
+
+# Read cloud cover for the selected points
+selected_cloud_cover = ds[&quot;geumavhrr1bcldfrac&quot;][:,:,data_record_index][selected_points]
+
+# plot the data
+fig = let
+
+    fig = Figure()
+
+    # axis to plot geolocation
+    ax = GeoAxis(fig[1, 1],
+        title = &quot;Observations&quot;,
+        xlabel = &quot;longitude&quot;,
+        ylabel = &quot;latitude&quot;,
+        limits = (extrema(longitude), extrema(latitude)))
+
+    # plot all observations from data record in gray
+    scatter!(ax, longitude[:], latitude[:], color=:gray)
+    # plot selected observations in color
+    scatter!(ax, longitude[selected_points], latitude[selected_points], 
+        color=selected_colors, marker=:xcross, markersize = 15)
+
+    # Add coastlines
+    lines!(ax, GeoMakie.coastlines()) 
+
+    # Plot the selected spectra
+    ax2 = Axis(fig[2, 1],
+        title = &quot;Selected spectra&quot;,
+        xlabel = &quot;Wavenumber (cm-1)&quot;,
+        ylabel = &quot;Brightness Temperature (K)&quot;,
+        limits=((500,3500), (150,300)))
+
+    for i in eachindex(selected_points)
+        cloud_cover_i = Int(selected_cloud_cover[i])
+        lines!(ax2, wavenumber./100, selected_T_b[i], color = selected_colors[i],
+            label = &quot;$(cloud_cover_i)% cloud cover&quot;)
+    end
+
+    # Add legends
+    axislegend(ax2, position = :rb)
+
+    fig
+end</code></pre><p><img src="../static_IASI.png" alt="Static IASI spectrum"/> The top plot shows a row of observations west of the French coast. Two observation have been marked with a colored X. The spectrum of these observations are shown below.</p><h2 id="Advanced-interactive-plots-of-L1C-spectra"><a class="docs-heading-anchor" href="#Advanced-interactive-plots-of-L1C-spectra">Advanced interactive plots of L1C spectra</a><a id="Advanced-interactive-plots-of-L1C-spectra-1"></a><a class="docs-heading-anchor-permalink" href="#Advanced-interactive-plots-of-L1C-spectra" title="Permalink"></a></h2><p>This example shows how the IASI spectra can be shown interactively on a responsive map. The example relies on <a href="https://makieorg.github.io/Tyler.jl/v0.2.0/">Tyler.jl</a> and <a href="https://docs.makie.org/stable/explanations/backends/glmakie#glmakie">GLMakie.jl</a>. It is recommend to first try some examples from the Tyler documentation if you are new to this package. </p><pre><code class="nohighlight hljs">[e9467ef8] GLMakie v0.10.16
+[e170d443] Tyler v0.2.0</code></pre><p>This example will use Tyler to create an interactive background map similar to google maps in the top panel of the figure. Then all the locations of the observation will be plotted on the map colored based on the cloud cover. The bottom panel will display the spectrum of a single observation. Clicking an observation in the top panel will load that spectrum and plot it in the bottom panel. The loading of the spectrum will be done lazily to conserve memory.</p><pre><code class="language-julia hljs">using Tyler, GLMakie, MetopDatasets
+
+ds = MetopDataset(&quot;IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat&quot;, maskingvalue=NaN);
+
+# read geolocation points and data shape
+pts, pts_original_size = let
+    lon_lat = ds[&quot;ggeosondloc&quot;][:,:,:,:]
+
+    # make sure longitude is from -180 to 180
+    lon_lat[1, :,:,:][ lon_lat[1,:,:,:] .&gt;180] .-= 360
+
+    # convert the points to tuples
+    lon_lat = tuple.(lon_lat[1, :,:,:],lon_lat[2, :,:,:])
+
+    # store the original shape of the points
+    pts_original_size = size(lon_lat)
+
+    # Flatten the points and convert them to web_mercator (the coordinate system used by Tyler)
+    MT = Tyler.MapTiles
+    pts = [Point2f(MT.project(lon_lat[i], MT.wgs84, MT.web_mercator)) 
+            for i in eachindex(lon_lat)]
+    
+    pts, pts_original_size
+end;
+
+# read cloud fraction
+cloud_fraction = Float32.(ds[&quot;geumavhrr1bcldfrac&quot;][:]);
+
+# helper function to read the spectrum for a single point
+function read_spectrum_pts(ds, index::CartesianIndex)
+    # read spectrum and wavenumber
+    spectrum = ds[&quot;gs1cspect&quot;][:,Tuple(index)...]
+    wavenumber = ds[&quot;spectra_wavenumber&quot;][:, Tuple(index)[end]]
+
+    # covert to brightness temperature
+    T_B = brightness_temperature.(spectrum, wavenumber)
+    wavenumber_cm = wavenumber./100
+
+    # join brightness temperature and wavenumber to points
+    spectrum_pts = Point2f.(tuple.(wavenumber_cm, T_B))
+    return spectrum_pts
+end
+
+# read an initial spectrum
+spectrum_pts = read_spectrum_pts(ds, CartesianIndex(1,1,1));
+
+# create the inter active plot.
+fig = let
+    fig = Figure()
+    
+    # select background map and initial zoom
+    provider = Tyler.TileProviders.Esri(:WorldImagery);
+    extent = Tyler.Extent(X = (-10, 10), Y = (-10, 10));
+
+    # create background map
+    ax1 = Axis(fig[1,1])
+    m = Tyler.Map(extent; provider, figure=fig, axis=ax1);
+    wait(m);
+
+    # Plot observation points with cloud cover
+    objscatter = scatter!(ax1, pts, color = cloud_fraction, 
+        colorrange = (0,100), colormap=:grays, markersize=15)
+    # hack from https://github.com/MakieOrg/Tyler.jl/issues/109
+    translate!(objscatter, 0, 0, 10) 
+
+    # Plot a red cross on top of the selected point
+    selected_point = Observable(pts[1:1])
+    selected_scatter = scatter!(ax1, selected_point, 
+        color = :red, markersize=10, marker =:xcross)
+    # hack from https://github.com/MakieOrg/Tyler.jl/issues/109
+    translate!(selected_scatter, 0, 0, 11)
+
+    # Add colorbar
+    Colorbar(fig[1, 2], limits = (0.0,100.0), colormap =:grays, label = &quot;Cloud Fraction&quot;)
+    hidedecorations!(ax1)
+
+    # Create the second plot for the spectrum
+    ax2 = Axis(fig[2, 1],
+        title = &quot;Observation spectrum&quot;,
+        xlabel = &quot;Wavenumber (cm-1)&quot;,
+        ylabel = &quot;Brightness Temperature (K)&quot;)
+
+    # plot the spectrum
+    spectrum_observable = Observable(spectrum_pts)
+    lines!(ax2, spectrum_observable)
+    
+    # Add event handler to update the plot when the user click on a new observation 
+    obs_func = on(events(m.axis).mousebutton) do event
+        if event.button == Mouse.left &amp;&amp; event.action == Mouse.press
+            plt, i = pick(m.axis)
+            if plt == objscatter # check if an observation was clicked
+                # get the CartesianIndex
+                cartesian_i = CartesianIndices(pts_original_size)[i]
+                # load the selected spectrum and update the spectrum plot
+                spectrum_observable[] = read_spectrum_pts(ds, cartesian_i)
+                # update the red x
+                selected_point[] = pts[i:i]
+            end
+        end
+    end
+
+    fig
+end</code></pre><p><img src="../interactive_IASI.png" alt="Interactive IASI spectrum"/> It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context. </p><h2 id="Level-2-Combined-Sounding-Products"><a class="docs-heading-anchor" href="#Level-2-Combined-Sounding-Products">Level 2 Combined Sounding Products</a><a id="Level-2-Combined-Sounding-Products-1"></a><a class="docs-heading-anchor-permalink" href="#Level-2-Combined-Sounding-Products" title="Permalink"></a></h2><p>The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gases. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size are padded with fill values (default to <code>missing</code>) to generate an array that fits with the <code>MetopDataset</code> interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses <code>maskingvalue = NaN</code> for selected variables to avoid <code>missing</code> values. We read the &quot;first guess&quot; variables (fg_atmospheric_water_vapour, fg_atmospheric_temperature), because they contain the data from the statistical all-sky retrieval. The 1DVar algorithm that generates the &quot;non-first guess&quot; profiles will be phased out in favor of the statistical retrieval in the future.</p><pre><code class="language-julia hljs">using MetopDatasets
+using CairoMakie, GeoMakie
+
+ds = MetopDataset(&quot;IASI_SND_02_M03_20250120105357Z_20250120123253Z_N_O_20250120123416Z.nat&quot;);
+
+# Select color to plot temperature and humidity profile
+selected_color = :red
+
+# Select a single data record
+data_record_index = 105
+
+# Read temperature and humidity profiles;
+# we read the profiles from the statistical retrieval with associated quality indicators
+temperature, humidity, selected_point  = let
+    temp_var = cfvariable(ds, &quot;fg_atmospheric_temperature&quot;, maskingvalue = NaN)
+    qi_temp_var = cfvariable(ds, &quot;fg_qi_atmospheric_temperature&quot;, maskingvalue = NaN)
+    humidity_var = cfvariable(ds, &quot;fg_atmospheric_water_vapour&quot;, maskingvalue = NaN)
+    qi_humidity_var = cfvariable(ds, &quot;fg_qi_atmospheric_water_vapour&quot;, maskingvalue = NaN)
+    # keep only soundings where the quality indicators are low
+    # thresholds can be relaxed to increase data yield
+    # only look at selected data_record_index to save time
+    good_retrievals = findall(qi_temp_var[:,data_record_index] .&lt; 2 
+                               .&amp;&amp; qi_humidity_var[:,data_record_index] .&lt; 4)
+    # we select the 60th retrieval for plotting
+    selected_point = good_retrievals[60]
+    
+    temp_var[:, selected_point, data_record_index], 
+    humidity_var[:, selected_point, data_record_index], selected_point
+end
+
+# Read the geolocation of the data record
+longitude, latitude = let 
+    lat_lon_var = cfvariable(ds, &quot;earth_location&quot;, maskingvalue = NaN)
+    lat_lon = lat_lon_var[:,:,data_record_index]
+    lat_lon[2,:], lat_lon[1,:]
+end
+
+# Read the pressure levels 
+temp_pressure_levels = cfvariable(ds, &quot;pressure_levels_temp&quot;, maskingvalue = NaN)[:]
+hum_pressure_levels  = cfvariable(ds, &quot;pressure_levels_humidity&quot;, maskingvalue = NaN)[:]
+
+# Plot figure
+fig = let
+
+    fig = Figure()
+
+    # axis to plot geolocation
+    ax = GeoAxis(fig[1, 1:2],
+        title = &quot;Observations&quot;,
+        xlabel = &quot;longitude&quot;,
+        ylabel = &quot;latitude&quot;,
+        limits = (extrema(longitude), extrema(latitude)))
+
+    # plot all observations from data record in gray
+    scatter!(ax, longitude[:], latitude[:], color=:gray)
+    # plot selected observations in color
+    scatter!(ax, longitude[[selected_point]], latitude[[selected_point]], 
+        color=[selected_color], marker=:xcross, markersize = 15)
+
+    # Add coastlines
+    lines!(ax, GeoMakie.coastlines()) 
+
+    # Plot the temperature profile 
+    y_limits = (0.001,1900.0)
+
+    ax2 = Axis(fig[2, 1],
+        title = &quot;Temperature profile&quot;,
+        ylabel = &quot;Pressure (hPa)&quot;,
+        xlabel = &quot;(K)&quot;, yreversed = true,
+        limits = (nothing, y_limits),
+	yscale= log10)
+
+    lines!(ax2,  temperature, temp_pressure_levels/100, color = selected_color)
+    
+    # Plot the temperature profile 
+    ax3 = Axis(fig[2, 2],
+        title = &quot;Water vapour  profile&quot;,
+        ylabel = &quot;Pressure (hPa)&quot;,
+        xlabel = &quot;(kg/kg)&quot;, yreversed = true,
+        limits = (nothing, y_limits),
+	yscale = log10)
+
+    lines!(ax3,  humidity, hum_pressure_levels/100, color = selected_color)
+    hideydecorations!(ax3, grid=false)
+
+    fig
+end</code></pre><p><img src="../IASI_L2_profile.png" alt="IASI L2 profile"/> The top plot shows a row of observations west of the west African coast. One observation has been marked with a colored X. The corresponding temperature and water vapour profile of the observation are shown below.</p><h2 id="Level-2-Carbon-monoxide"><a class="docs-heading-anchor" href="#Level-2-Carbon-monoxide">Level 2 Carbon monoxide</a><a id="Level-2-Carbon-monoxide-1"></a><a class="docs-heading-anchor-permalink" href="#Level-2-Carbon-monoxide" title="Permalink"></a></h2><p>This example shows how to plot retrieved carbon monoxide for the IASI L2 products. </p><pre><code class="language-julia hljs">using MetopDatasets
+using CairoMakie, GeoMakie, Statistics
+
+iasi_file = &quot;IASI_SND_02_M03_20250120105357Z_20250120123253Z_N_O_20250120123416Z.nat&quot;
+ds = MetopDataset(iasi_file , maskingvalue=NaN);
+
+# select the layer for the carbon monoxide
+layer_index = 15
+height_in_km = Int.(ds[&quot;forli_layer_heights_co&quot;][layer_index])/1000
+
+# get locations
+longitude, latitude = let 
+    lat_lon = ds[&quot;earth_location&quot;][:,:,:]
+    lat_lon[2,:,:], lat_lon[1,:,:]
+end
+
+# read carbon monoxide data
+co_integrated = ds[&quot;integrated_co&quot;][:,:].*1000 # convert to g/m2
+co_at_height = ds[&quot;co_cp_co_a&quot;][layer_index,:,:] .* ds[&quot;co_x_co&quot;][layer_index,:,:]
+
+# get color range for plotting
+get_quantiles(a) = quantile(a,0.02), quantile(a,0.98)
+co_range = get_quantiles(co_at_height[.!isnan.(co_at_height)])
+co_integrated_range = get_quantiles(co_integrated[.!isnan.(co_integrated)])
+
+# plot the data
+fig = let
+
+    # Create figure and axis
+    fig = Figure()
+    ax1 = GeoAxis(fig[1, 1],
+        title = &quot;Carbon monoxide at $height_in_km km&quot;,
+        xlabel = &quot;longitude&quot;,
+        ylabel = &quot;latitude&quot;)
+    ax2 = GeoAxis(fig[2, 1],
+        title = &quot;Carbon monoxide integrated&quot;,
+        xlabel = &quot;longitude&quot;,
+        ylabel = &quot;latitude&quot;)
+
+    # Add coastlines
+    lines!(ax1, GeoMakie.coastlines(), color=:black)
+    lines!(ax2, GeoMakie.coastlines(), color=:black) 
+
+    # plot observations
+    scatter!(ax1, longitude[:], latitude[:],
+        color = co_at_height[:], colorrange = co_range, markersize = 2)
+    scatter!(ax2, longitude[:], latitude[:],
+        color = co_integrated[:], colorrange = co_integrated_range, markersize = 2)
+
+    # Add colorbar
+    c1 = Colorbar(fig[1,2],colorrange = co_range .*10^-16, label=&quot;molecules/cm2 x 10^16&quot;)
+    c2 = Colorbar(fig[2,2],colorrange = co_integrated_range, label=&quot;g/m2&quot;)
+
+    # hide ticks
+    hidedecorations!(ax1, grid = false)
+    hidedecorations!(ax2, grid = false)
+
+    fig
+end</code></pre><p><img src="../IASI_L2_Carbon_monoxide.png" alt="IASI Carbon monoxide"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../ASCAT/">« ASCAT</a><a class="docs-footer-nextpage" href="../ATOVS/">ATOVS (AMSU-A, HIRS, MHS) »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Monday 9 February 2026 10:51">Monday 9 February 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

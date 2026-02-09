@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>MetopDataset · MetopDatasets.jl</title><meta name="title" content="MetopDataset · MetopDatasets.jl"/><meta property="og:title" content="MetopDataset · MetopDatasets.jl"/><meta property="twitter:title" content="MetopDataset · MetopDatasets.jl"/><meta name="description" content="Documentation for MetopDatasets.jl."/><meta property="og:description" content="Documentation for MetopDatasets.jl."/><meta property="twitter:description" content="Documentation for MetopDatasets.jl."/><meta property="og:url" content="https://eumetsat.github.io/MetopDatasets.jl/MetopDataset/"/><meta property="twitter:url" content="https://eumetsat.github.io/MetopDatasets.jl/MetopDataset/"/><link rel="canonical" href="https://eumetsat.github.io/MetopDatasets.jl/MetopDataset/"/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MetopDatasets.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Introduction</a></li><li class="is-active"><a class="tocitem" href>MetopDataset</a><ul class="internal"><li><a class="tocitem" href="#MetopDataset"><span>MetopDataset</span></a></li></ul></li><li><a class="tocitem" href="../python/">Use with Python</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../ASCAT/">ASCAT</a></li><li><a class="tocitem" href="../IASI/">IASI</a></li><li><a class="tocitem" href="../ATOVS/">ATOVS (AMSU-A, HIRS, MHS)</a></li></ul></li><li><a class="tocitem" href="../full_api/">Full API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>MetopDataset</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>MetopDataset</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/eumetsat/MetopDatasets.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/eumetsat/MetopDatasets.jl/blob/main/docs/src/MetopDataset.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h2 id="MetopDataset"><a class="docs-heading-anchor" href="#MetopDataset">MetopDataset</a><a id="MetopDataset-1"></a><a class="docs-heading-anchor-permalink" href="#MetopDataset" title="Permalink"></a></h2><article><details class="docstring" open="true"><summary id="MetopDatasets.MetopDataset"><a class="docstring-binding" href="#MetopDatasets.MetopDataset"><code>MetopDatasets.MetopDataset</code></a> — <span class="docstring-category">Type</span></summary><section><div><pre><code class="language-julia hljs">MetopDataset(file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool=false, maskingvalue = missing)
+MetopDataset(file_pointer::IO; auto_convert::Bool = true, high_precision::Bool=false, maskingvalue = missing)
+MetopDataset(f::Function, file_path::AbstractString; auto_convert::Bool = true, high_precision::Bool=false, maskingvalue = missing)</code></pre><p>Load a MetopDataset from a Metop Native binary file or from a <code>IO</code> to a Native binary file. Only the meta data is loaded upon creation and all variables are lazy loaded.  The variables corresponds to the different fields of the data records in the file. The attributes have all the information from the main product header in the file.</p><p><code>auto_convert=true</code> will automatically convert <code>MetopDatasets</code> specific types such as <code>VInteger</code> to common netCDF complaint types such as <code>Float64</code>. This will also automatically scale variable where the  scaling can&#39;t be expressed through a simple scale factor e.g. the IASI spectrum where different bands of  the spectrum have different scaling factors.</p><p>Selected fields are converted to <code>Float32</code> to save memory. Normally <code>Float32</code> is more than sufficient to represent the instrument accuracy.  Setting <code>high_precision=true</code> will in some case convert these variables to <code>Float64</code>. </p><p><code>maskingvalue = NaN</code> will replace <code>missing</code> values with NaN. This normally floats but can create issues for integers. See documentation page for more information.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; file_path = &quot;test/testData/ASCA_SZR_1B_M03_20230329063300Z_20230329063558Z_N_C_20230329081417Z&quot;
+julia&gt; ds = MetopDataset(file_path);
+julia&gt;
+julia&gt; # display metadata of a variable
+julia&gt; ds[&quot;latitude&quot;]
+latitude (82 × 96)
+  Datatype:    Union{Missing, Float64} (Int32)
+  Dimensions:  xtrack × atrack
+  Attributes:
+   description          = Latitude (-90 to 90 deg)
+   missing_value        = Int32[-2147483648]
+   scale_factor         = 1.0e-6
+julia&gt;
+julia&gt; # load a subset of a variable  
+julia&gt; lat_subset = ds[&quot;latitude&quot;][1:2,1:3] # load a small subset of latitudes.
+2×3 Matrix{Union{Missing,Float64}}:
+    -33.7308  -33.8399  -33.949
+    -33.7139  -33.823   -33.9322
+julia&gt;
+julia&gt; # load entire variable  
+julia&gt; lat = ds[&quot;latitude&quot;][:,:]
+julia&gt;
+julia&gt; # close data set
+julia&gt; close(ds);</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/eumetsat/MetopDatasets.jl/blob/5449804d487acb5ab1afba269a8961e7d083c301/src/InterfaceDataModel/Dataset.jl#L14-L62">source</a></section></details></article><h3 id="Keys,-attributes-and-dimensions."><a class="docs-heading-anchor" href="#Keys,-attributes-and-dimensions.">Keys, attributes and dimensions.</a><a id="Keys,-attributes-and-dimensions.-1"></a><a class="docs-heading-anchor-permalink" href="#Keys,-attributes-and-dimensions." title="Permalink"></a></h3><p>These methods can help to explore the dataset without printing out everything. </p><p>Use keys list the names of all variables without meta data</p><pre><code class="language-julia hljs">@show keys(ds)
+
+# loop over all variables
+for (varname,var) in ds
+    # all variables
+    @show (varname,size(var))
+end</code></pre><p>Access the attributes via the .attrib</p><pre><code class="language-julia hljs">@show ds.attrib
+
+# attributes of a variable
+example_var_name = keys(ds)[end]
+example_var = ds[example_var_name]
+@show example_var.attrib</code></pre><p>Access the dimensions via the .dim and dimnames</p><pre><code class="language-julia hljs">@show ds.dim
+
+# attributes of a variable
+example_var_name = keys(ds)[end]
+example_var = ds[example_var_name]
+@show dimnames(example_var)</code></pre><p>Note that <code>MetopDataset</code> is not implement any groups. Hence <code>isempty(ds.group)</code> is always true.</p><h3 id="Auto-conversion-and-native-types"><a class="docs-heading-anchor" href="#Auto-conversion-and-native-types">Auto conversion and native types</a><a id="Auto-conversion-and-native-types-1"></a><a class="docs-heading-anchor-permalink" href="#Auto-conversion-and-native-types" title="Permalink"></a></h3><p>The Metop native binary formats uses some custom data types. Theres are converted to standard netCDF compatible types by default. This conversion can be disable with the keyword argument <code>auto_convert=false</code>. Here is an example</p><pre><code class="language-julia hljs">ds = MetopDataset(&quot;IASI_xxx_1C_M01_20240925202059Z_20240925220258Z_N_O_20240925211316Z.nat&quot;)
+
+function show_example(ds, var_name)
+    val = ds[var_name][1]
+    @show var_name
+    @show typeof(val)
+    @show val
+    println()
+end
+
+
+MetopDataset(iasi_file, auto_convert=false) do ds
+    println(&quot;With auto_convert=false&quot;)
+    println()
+    show_example(ds,&quot;record_start_time&quot;);
+    show_example(ds,&quot;gepsiasimode&quot;);
+    show_example(ds,&quot;gepslociasiavhrr_iasi&quot;);
+end</code></pre><p>Output</p><pre><code class="nohighlight hljs">With auto_convert=false
+
+var_name = &quot;record_start_time&quot;
+typeof(val) = MetopDatasets.ShortCdsTime
+val = MetopDatasets.ShortCdsTime(0x234a, 0x045dd976)
+
+var_name = &quot;gepsiasimode&quot;
+typeof(val) = MetopDatasets.BitString{4}
+val = 00000000000000000000000010100001
+
+
+var_name = &quot;gepslociasiavhrr_iasi&quot;
+typeof(val) = MetopDatasets.VInteger{Int32}
+val = MetopDatasets.VInteger{Int32}(6, -1965000000)</code></pre><p>If we run the same example with auto convert on.</p><pre><code class="language-julia hljs">MetopDataset(iasi_file, auto_convert=true) do ds
+    println(&quot;With auto_convert=true&quot;)
+    println()
+    show_example(ds,&quot;record_start_time&quot;);
+    show_example(ds,&quot;gepsiasimode&quot;);
+    show_example(ds,&quot;gepslociasiavhrr_iasi&quot;);
+end</code></pre><p>Output</p><pre><code class="nohighlight hljs">With auto_convert=true
+
+var_name = &quot;record_start_time&quot;
+typeof(val) = Dates.DateTime
+val = Dates.DateTime(&quot;2024-09-25T20:20:59.382&quot;)
+
+var_name = &quot;gepsiasimode&quot;
+typeof(val) = UInt32
+val = 0x000000a1
+
+var_name = &quot;gepslociasiavhrr_iasi&quot;
+typeof(val) = Float64
+val = -1965.0</code></pre><p>Note that the <code>auto_convert</code> argument also controls if the IASI L1 spectrum &quot;gs1cspect&quot; is automatically scaled. Multiple scale factors are needed to scale the spectrum and therefore the scaling of the spectrum is handled different from other variables. The spectrum is automatically scaled to <code>Float32</code> to save memory. Use the <code>high_precision=true</code> argument to change this to <code>Float64</code>.</p><h3 id="Missing-values"><a class="docs-heading-anchor" href="#Missing-values">Missing values</a><a id="Missing-values-1"></a><a class="docs-heading-anchor-permalink" href="#Missing-values" title="Permalink"></a></h3><p>Note that the datasets can contain missing values. This is especially true for product formats with flexible dimensions like the IASI L2 products. Here is an example.</p><pre><code class="language-julia hljs">using MetopDatasets
+ds = MetopDataset(&quot;IASI_SND_02_M01_20241215173256Z_20241215173552Z_N_C_20241215182326Z&quot;);
+
+ds[&quot;atmospheric_temperature&quot;][:,:,6]</code></pre><p>Output</p><pre><code class="nohighlight hljs">101×120 Matrix{Union{Missing, Float64}}:    
+ 190.85      189.27      …  missing  missing
+ 195.62      193.93         missing  missing     
+ 204.47      202.59         missing  missing     
+ 212.82      210.87         missing  missing     
+   ⋮                     ⋱
+    missing     missing     missing  missing     
+    missing     missing     missing  missing     
+    missing     missing  …  missing  missing  </code></pre><p>Here the output variable is <code>Union{Missing, Float64}</code> which can be difficult to work with. Sometimes it can be and advantage to replace the <code>missing</code> values with <code>NaN</code> values. This can be done on the variable level.</p><pre><code class="language-julia hljs">var_no_missing = cfvariable(ds, &quot;atmospheric_temperature&quot;, maskingvalue = NaN)
+var_no_missing[:,:,6]</code></pre><p>Output</p><pre><code class="nohighlight hljs">101×120 Matrix{Float64}:
+ 190.85  189.27  189.0   …  NaN  NaN  NaN  NaN   
+ 195.62  193.93  193.69     NaN  NaN  NaN  NaN   
+ 204.47  202.59  202.49     NaN  NaN  NaN  NaN   
+ 212.82  210.87  210.99     NaN  NaN  NaN  NaN   
+   ⋮                     ⋱
+ NaN     NaN     NaN        NaN  NaN  NaN  NaN   
+ NaN     NaN     NaN        NaN  NaN  NaN  NaN   
+ NaN     NaN     NaN     …  NaN  NaN  NaN  NaN</code></pre><p>Note that this is not recommend for integer fields since it results in an automatic conversion to float. This is especially and issue in the cases where the integer value is a representation of an underlying bit string.</p><pre><code class="language-julia hljs">var_temp_error = cfvariable(ds, &quot;temperature_error&quot;, maskingvalue = NaN)
+
+val_as_scalar = var_temp_error[1,1,1]
+val_as_array = var_temp_error[1:1,1,1]
+
+@show val_as_scalar, bitstring(val_as_scalar);
+@show val_as_array, bitstring.(val_as_array); #wrong bitstring due to conversion</code></pre><p>Output</p><pre><code class="nohighlight hljs">(val_as_scalar, bitstring(val_as_scalar)) = (0x4277d0a4, &quot;01000010011101111101000010100100&quot;)
+(val_as_array, bitstring.(val_as_array)) = ([1.115148452e9], [&quot;0100000111010000100111011111010000101001000000000000000000000000&quot;])</code></pre><p>It is also possible to set the <code>maskingvalue</code> for an entire dataset. This is convenient but can lead to issues regarding integers as illustrated above. Here is an example:</p><pre><code class="language-julia hljs">ds_no_missing = MetopDataset(&quot;IASI_SND_02_M01_20241215173256Z_20241215173552Z_N_C_20241215182326Z&quot;, maskingvalue = NaN);
+ds_no_missing[&quot;atmospheric_temperature&quot;][:,:,6]</code></pre><p>Output</p><pre><code class="nohighlight hljs">101×120 Matrix{Float64}:
+ 190.85  189.27  189.0   …  NaN  NaN  NaN  NaN   
+ 195.62  193.93  193.69     NaN  NaN  NaN  NaN   
+ 204.47  202.59  202.49     NaN  NaN  NaN  NaN   
+ 212.82  210.87  210.99     NaN  NaN  NaN  NaN   
+   ⋮                     ⋱
+ NaN     NaN     NaN        NaN  NaN  NaN  NaN   
+ NaN     NaN     NaN        NaN  NaN  NaN  NaN   
+ NaN     NaN     NaN     …  NaN  NaN  NaN  NaN</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Introduction</a><a class="docs-footer-nextpage" href="../python/">Use with Python »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Monday 9 February 2026 10:51">Monday 9 February 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Introduction · MetopDatasets.jl</title><meta name="title" content="Introduction · MetopDatasets.jl"/><meta property="og:title" content="Introduction · MetopDatasets.jl"/><meta property="twitter:title" content="Introduction · MetopDatasets.jl"/><meta name="description" content="Documentation for MetopDatasets.jl."/><meta property="og:description" content="Documentation for MetopDatasets.jl."/><meta property="twitter:description" content="Documentation for MetopDatasets.jl."/><meta property="og:url" content="https://eumetsat.github.io/MetopDatasets.jl/"/><meta property="twitter:url" content="https://eumetsat.github.io/MetopDatasets.jl/"/><link rel="canonical" href="https://eumetsat.github.io/MetopDatasets.jl/"/><script data-outdated-warner src="assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="search_index.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href>MetopDatasets.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Introduction</a><ul class="internal"><li><a class="tocitem" href="#Quick-start"><span>Quick start</span></a></li><li><a class="tocitem" href="#Supported-formats"><span>Supported formats</span></a></li><li><a class="tocitem" href="#Development-status-and-versioning"><span>Development status and versioning</span></a></li></ul></li><li><a class="tocitem" href="MetopDataset/">MetopDataset</a></li><li><a class="tocitem" href="python/">Use with Python</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="ASCAT/">ASCAT</a></li><li><a class="tocitem" href="IASI/">IASI</a></li><li><a class="tocitem" href="ATOVS/">ATOVS (AMSU-A, HIRS, MHS)</a></li></ul></li><li><a class="tocitem" href="full_api/">Full API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Introduction</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Introduction</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/eumetsat/MetopDatasets.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/eumetsat/MetopDatasets.jl/blob/main/docs/src/index.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="MetopDatasets.jl"><a class="docs-heading-anchor" href="#MetopDatasets.jl">MetopDatasets.jl</a><a id="MetopDatasets.jl-1"></a><a class="docs-heading-anchor-permalink" href="#MetopDatasets.jl" title="Permalink"></a></h1><p>MetopDatasets.jl is a package for reading products from the <a href="https://www.eumetsat.int/our-satellites/metop-series">METOP satellites</a> using the native binary format specified for each product. The METOP satellites are part of the EUMETSAT-POLAR-SYSTEM (EPS) and have produced near real-time, global weather and climate observation since 2007. Learn more and access the products on <a href="https://user.eumetsat.int/dashboard">EUMETSATs user-portal</a>.</p><p>MetopDatasets.jl exports the <code>MetopDataset</code> API which is an implementation of the <a href="https://github.com/JuliaGeo/CommonDataModel.jl">CommonDataModel.jl</a> interface and thus provides data access similar to e.g. <a href="https://github.com/JuliaGeo/NCDatasets.jl">NCDatasets.jl</a> and <a href="https://github.com/JuliaGeo/GRIBDatasets.jl">GRIBDatasets.jl</a>.</p><p>Only a subset of the METOP native formats are supported currently, but we are continuously adding formats. The goal is to support all publicly available <a href="https://data.eumetsat.int/extended?query=&amp;filter=satellite__Metop&amp;filter=availableFormats__EPS%20Native">native METOP products</a>. See <a href="#Supported-formats">Supported formats</a> for more information.</p><p>It is also possible to use MetopDatasets.jl from Python. See <a href="python/#Use-with-Python">Use with Python</a> for more information.</p><h2 id="Quick-start"><a class="docs-heading-anchor" href="#Quick-start">Quick start</a><a id="Quick-start-1"></a><a class="docs-heading-anchor-permalink" href="#Quick-start" title="Permalink"></a></h2><p>This section gives a very short overview of the core functionalities. The <a href="MetopDataset/#MetopDataset">MetopDataset</a> page is recommend for more information and more specific examples are given in the Example section e.g. <a href="ASCAT/#ASCAT">ASCAT</a>. The <a href="https://juliageo.org/NCDatasets.jl/stable/">NCDatasets documentation</a> is also a great resource for information on how to use the datasets. </p><h3 id="Installation"><a class="docs-heading-anchor" href="#Installation">Installation</a><a id="Installation-1"></a><a class="docs-heading-anchor-permalink" href="#Installation" title="Permalink"></a></h3><p>MetopDatasets.jl can be installed via Pkg.</p><pre><code class="language-julia hljs">import Pkg
+Pkg.add(&quot;MetopDatasets&quot;)</code></pre><h3 id="Read-data-from-a-Metop-Native-binary-file"><a class="docs-heading-anchor" href="#Read-data-from-a-Metop-Native-binary-file">Read data from a Metop Native binary file</a><a id="Read-data-from-a-Metop-Native-binary-file-1"></a><a class="docs-heading-anchor-permalink" href="#Read-data-from-a-Metop-Native-binary-file" title="Permalink"></a></h3><p>Read a Metop Native binary file and display meta data:</p><pre><code class="language-julia hljs">using MetopDatasets
+ds = MetopDataset(&quot;ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z&quot;)</code></pre><p>REPL output:</p><pre><code class="nohighlight hljs">Dataset: 
+Group: /
+
+Dimensions
+   num_band = 3
+   xtrack = 42
+   atrack = 48
+
+Variables
+  record_start_time   (48)
+    Datatype:    Dates.DateTime (Float64)
+    Dimensions:  atrack
+    Attributes:
+     description          = Record header start time
+     units                = seconds since 2000-1-1 0:0:0
+
+  record_stop_time   (48)
+    Datatype:    Dates.DateTime (Float64)
+    Dimensions:  atrack
+    Attributes:
+     description          = Record header stop time
+     units                = seconds since 2000-1-1 0:0:0
+
+  degraded_inst_mdr   (48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
+    Dimensions:  atrack
+    Attributes:
+     description          = Quality of MDR has been degraded from nominal due to an instrument degradation.
+     missing_value        = UInt8[0xff]
+
+  degraded_proc_mdr   (48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
+    Dimensions:  atrack
+    Attributes:
+     description          = Quality of MDR has been degraded from nominal due to a processing degradation. 
+     missing_value        = UInt8[0xff]
+
+  utc_line_nodes   (48)
+    Datatype:    Dates.DateTime (Float64)
+    Dimensions:  atrack
+    Attributes:
+     description          = UTC time of line of nodes
+     units                = seconds since 2000-1-1 0:0:0
+
+  abs_line_number   (48)
+    Datatype:    Union{Missing, Int32} (Int32)
+    Dimensions:  atrack
+    Attributes:
+     description          = Absolute (unique) counter for the line of nodes (from format version 12.0 onwards only)
+     missing_value        = Int32[-2147483648]
+
+  sat_track_azi   (48)
+    Datatype:    Union{Missing, Float64} (UInt16)
+    Dimensions:  atrack
+    Attributes:
+     description          = Azimuth angle bearing (range: 0 to 360) of nadir track velocity
+     missing_value        = UInt16[0xffff]
+     scale_factor         = 0.010000000000000002
+
+  as_des_pass   (48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
+    Dimensions:  atrack
+    Attributes:
+     description          = Ascending/descending pass indicator (0=DESC, 1=ASC)
+     missing_value        = UInt8[0xff]
+
+  swath_indicator   (42 × 48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
+    Dimensions:  xtrack × atrack
+    Attributes:
+     description          = Swath (0=LEFT, 1=RIGHT)
+     missing_value        = UInt8[0xff]
+
+  latitude   (42 × 48)
+    Datatype:    Union{Missing, Float64} (Int32)
+    Dimensions:  xtrack × atrack
+    Attributes:
+     description          = Latitude (-90 to 90 deg)
+     missing_value        = Int32[-2147483648]
+     scale_factor         = 1.0e-6
+
+  longitude   (42 × 48)
+    Datatype:    Union{Missing, Float64} (Int32)
+    Dimensions:  xtrack × atrack
+    Attributes:
+     description          = Longitude (0 to 360 deg)
+     missing_value        = Int32[-2147483648]
+     scale_factor         = 1.0e-6
+
+  sigma0_trip   (3 × 42 × 48)
+    Datatype:    Union{Missing, Float64} (Int32)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Sigma0 triplet, re-sampled to swath grid, for 3 beams (fore, mid, aft) 
+     missing_value        = Int32[-2147483648]
+     scale_factor         = 1.0e-6
+
+  kp   (3 × 42 × 48)
+    Datatype:    Union{Missing, Float64} (UInt16)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Kp for re-sampled sigma0 triplet. Values between 0 and 1
+     missing_value        = UInt16[0xffff]
+     scale_factor         = 0.0001
+
+  inc_angle_trip   (3 × 42 × 48)
+    Datatype:    Union{Missing, Float64} (UInt16)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Incidence angle for re-sampled sigma0 triplet.
+     missing_value        = UInt16[0xffff]
+     scale_factor         = 0.010000000000000002
+
+  azi_angle_trip   (3 × 42 × 48)
+    Datatype:    Union{Missing, Float64} (Int16)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Azimuth angle of the up-wind direction for a given measurement triplet (range: -180 to +180, where minus is west and plus is east with respect to North)
+     missing_value        = Int16[-32768]
+     scale_factor         = 0.010000000000000002
+
+  num_val_trip   (3 × 42 × 48)
+    Datatype:    Union{Missing, UInt32} (UInt32)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Number of full resolution sigma0 values contributing to the re-sampled sigma0 triplet.
+     missing_value        = UInt32[0xffffffff]
+
+  f_kp   (3 × 42 × 48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Flag related to the quality of the Kp estimate (0=NOMINAL, 1=NON-NOMINAL)
+     missing_value        = UInt8[0xff]
+
+  f_usable   (3 × 42 × 48)
+    Datatype:    Union{Missing, UInt8} (UInt8)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Flag related to the usability of the sigma0 triplet (0=GOOD, 1=USABLE, 2=NOT USABLE)        
+     missing_value        = UInt8[0xff]
+
+  f_land   (3 × 42 × 48)
+    Datatype:    Union{Missing, Float64} (UInt16)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Flag related to presence of land in the re-sampled sigma0 triplet (based on land mask; value between 0 and 1 shows the fraction of original samples affected)
+     missing_value        = UInt16[0xffff]
+     scale_factor         = 0.001
+
+  lcr   (3 × 42 × 48)
+    Datatype:    Union{Missing, Float64} (UInt16)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Land Contamination Ratio estimate (based on SRF)
+     missing_value        = UInt16[0xffff]
+     scale_factor         = 0.0001
+
+  flagfield   (3 × 42 × 48)
+    Datatype:    Union{Missing, UInt32} (UInt32)
+    Dimensions:  num_band × xtrack × atrack
+    Attributes:
+     description          = Flag field containing quality information
+     missing_value        = UInt32[0xffffffff]
+
+Global attributes
+  product_name         = ASCA_SZO_1B_M03_20230329063300Z_20230329063556Z_N_C_20230329081417Z
+  parent_product_name_1 = ASCA_xxx_1A_M03_20230329063300Z_20230329063559Z_N_C_20230329081221Z
+  parent_product_name_2 = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  parent_product_name_3 = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  parent_product_name_4 = xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  instrument_id        = ASCA
+  instrument_model     = 1
+  product_type         = SZO
+  processing_level     = 1B
+  spacecraft_id        = M03
+  sensing_start        = 2023-03-29T06:33:00
+  sensing_end          = 2023-03-29T06:35:56
+  sensing_start_theoretical = 2023-03-29T06:06:00
+  sensing_end_theoretical = 2023-03-29T07:48:00
+  processing_centre    = CGS2
+  processor_major_version = 11
+  processor_minor_version = 3
+  format_major_version = 13
+  format_minor_version = 1
+  processing_time_start = 2023-03-29T08:14:17
+  processing_time_end  = 2023-03-29T08:14:25
+  processing_mode      = N
+  disposition_mode     = C
+  receiving_ground_station = SVL
+  receive_time_start   = 2023-03-29T07:41:22
+  receive_time_end     = 2023-03-29T07:42:22
+  orbit_start          = 22777
+  orbit_end            = 22778
+  actual_product_size  = 171868
+  state_vector_time    = 2023-03-29T05:33:10.999
+  semi_major_axis      = 7204607302
+  eccentricity         = 1053
+  inclination          = 98685
+  perigee_argument     = 57931
+  right_ascension      = 149006
+  mean_anomaly         = 302003
+  x_position           = -3668934509
+  y_position           = -6195727325
+  z_position           = -20970818
+  x_velocity           = -1426267
+  y_velocity           = 827418
+  z_velocity           = 7356929
+  earth_sun_distance_ratio = 998227
+  location_tolerance_radial = 0
+  location_tolerance_crosstrack = 0
+  location_tolerance_alongtrack = 0
+  yaw_error            = 0
+  roll_error           = 0
+  pitch_error          = 0
+  subsat_latitude_start = -32200
+  subsat_longitude_start = 38892
+  subsat_latitude_end  = -42446
+  subsat_longitude_end = 35658
+  leap_second          = 0
+  leap_second_utc      =
+  total_records        = 67
+  total_mphr           = 1
+  total_sphr           = 1
+  total_ipr            = 9
+  total_geadr          = 1
+  total_giadr          = 0
+  total_veadr          = 5
+  total_viadr          = 2
+  total_mdr            = 48
+  count_degraded_inst_mdr = 0
+  count_degraded_proc_mdr = 0
+  count_degraded_inst_mdr_blocks = 0
+  count_degraded_proc_mdr_blocks = 0
+  duration_of_product  = 176250
+  milliseconds_of_data_present = 176250
+  milliseconds_of_data_missing = 0
+  subsetted_product    = F</code></pre><p>The variables can be loaded from MetopDataset by indexing the dataset. The variable then works as a lazy array loading the data on indexing:</p><pre><code class="language-julia hljs">ds[&quot;latitude&quot;][2,4]</code></pre><p>REPL output:</p><pre><code class="nohighlight hljs">-34.351729</code></pre><p>It is also possible to load the complete array</p><pre><code class="language-julia hljs">ds[&quot;latitude&quot;][:,:]</code></pre><p>REPL output:</p><pre><code class="nohighlight hljs">42×48 Matrix{Union{Missing, Float64}}:
+ -33.7308  -33.949   …  -43.7545  -43.9721
+ -33.6969  -33.9152     -43.7252  -43.9429
+ -33.6624  -33.8808     -43.695   -43.9127
+ -33.6274  -33.8458     -43.6639  -43.8818
+   ⋮                 ⋱                    
+ -30.1606  -30.3748     -39.9343  -40.1446
+ -30.0909  -30.3049  …  -39.8538  -40.0638
+ -30.0206  -30.2344     -39.7726  -39.9823</code></pre><p>Data from the main product header is accessed as attributes.</p><pre><code class="language-julia hljs">ds.attrib[&quot;instrument_id&quot;]</code></pre><p>REPL output:</p><pre><code class="nohighlight hljs">&quot;ASCA&quot;</code></pre><h3 id="Convert-a-Metop-Native-binary-file-to-netCDF"><a class="docs-heading-anchor" href="#Convert-a-Metop-Native-binary-file-to-netCDF">Convert a Metop Native binary file to netCDF</a><a id="Convert-a-Metop-Native-binary-file-to-netCDF-1"></a><a class="docs-heading-anchor-permalink" href="#Convert-a-Metop-Native-binary-file-to-netCDF" title="Permalink"></a></h3><p>A Metop Native binary file can be converted to netCDF using the <a href="https://github.com/JuliaGeo/NCDatasets.jl">NCDatasets.jl</a> package. This  is possible because both MetopDatasets.jl and NCDatasets.jl implement the <a href="https://github.com/JuliaGeo/CommonDataModel.jl">CommonDataModel.jl</a> interface.</p><pre><code class="language-julia hljs">using MetopDatasets
+using NCDatasets
+
+input_file = &quot;ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat&quot;
+output_file = &quot;ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nc&quot;
+
+ds_native = MetopDataset(input_file)
+ds_nc = NCDataset(output_file, &quot;c&quot;) 
+NCDatasets.write(ds_nc, ds_native)
+
+close(ds_native)
+close(ds_nc)</code></pre><p>It is also possible to use the safe <code>do</code> syntax that ensures the files are closed correctly even in the case of exceptions.</p><pre><code class="language-julia hljs">using MetopDatasets
+using NCDatasets
+
+input_file = &quot;ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nat&quot;
+output_file = &quot;ASCA_SZR_1B_M01_20190109125700Z_20190109143858Z_N_O_20190109134816Z.nc&quot;
+
+MetopDataset(input_file) do ds_native
+  NCDataset(output_file, &quot;c&quot;) do ds_nc
+    NCDatasets.write(ds_nc, ds_native)
+  end
+end</code></pre><h2 id="Supported-formats"><a class="docs-heading-anchor" href="#Supported-formats">Supported formats</a><a id="Supported-formats-1"></a><a class="docs-heading-anchor-permalink" href="#Supported-formats" title="Permalink"></a></h2><ul><li>AMSU-A Level 1B</li><li>ASCAT Level 1B</li><li>ASCAT Level 2 Soil Moisture</li><li>HIRS Level 1B</li><li>IASI Level 1C</li><li>IASI Level 2 Combined Sounding</li><li>MHS Level 1B </li></ul><h3 id="Formats-not-yet-supported"><a class="docs-heading-anchor" href="#Formats-not-yet-supported">Formats not yet supported</a><a id="Formats-not-yet-supported-1"></a><a class="docs-heading-anchor-permalink" href="#Formats-not-yet-supported" title="Permalink"></a></h3><ul><li>AVHRR Level 1B</li><li>GOME-2 Level 1B</li><li>IASI Level 1C Principal Component Scores</li></ul><h3 id="Reference-documents"><a class="docs-heading-anchor" href="#Reference-documents">Reference documents</a><a id="Reference-documents-1"></a><a class="docs-heading-anchor-permalink" href="#Reference-documents" title="Permalink"></a></h3><ul><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_gen_pfs_13e3f0feb7.pdf">EPS Generic Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_amsu_a_l1_pfs_c89fa9d9ea.pdf">AMSU-A Level 1 Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/ASCAT_Level_1_Product_Format_V12_Annexe_50fe72d349.pdf">ASCAT Level 1: Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_0343_eps_ascatl2_pfs_f509981295.pdf">ASCAT Level 2 Soil Moisture: Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_97230_eps_hirs4l1_pfs_0ddaefcb74.pdf">HIRS Level 1 Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_iasi_level_1_pfs_2105bc9ccf.pdf">IASI Level 1 Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_980760_eps_iasi_l2_f9511c26d2.pdf">IASI Level 2: Product Format Specification</a></li><li><a href="https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_97229_eps_mhs_pfs_2069b45efc.pdf">MHS Level 1 Product Format Specification</a></li></ul><h2 id="Development-status-and-versioning"><a class="docs-heading-anchor" href="#Development-status-and-versioning">Development status and versioning</a><a id="Development-status-and-versioning-1"></a><a class="docs-heading-anchor-permalink" href="#Development-status-and-versioning" title="Permalink"></a></h2><p>The package was previously named <strong>MetopNative.jl</strong> and was hosted on the <a href="https://gitlab.eumetsat.int/eumetlab/cross-cutting-tools/MetopNative.jl">EUMETSAT GitLab</a>.</p><p>The aim is to follow the <a href="https://semver.org/">semantic versioning</a> system. Note that the package is still 0.x.y to signal that breaking changes are to be expected. This is done to allow for more rapid development and because major dependencies like the <a href="https://github.com/JuliaGeo/CommonDataModel.jl">CommonDataModel.jl</a> are not at the version 1.0 milestone yet. It is therefore recommended to use <a href="https://pkgdocs.julialang.org/v1/compatibility/">Pkg environments</a> for projects with MetopDatasets.jl to handle comparability and ensure reproducibility. Please note that many of the &quot;breaking changes&quot; will be small and only affect specific use cases. This could for example be the correction of a single variable name. All breaking changes are marked in the <a href="https://github.com/eumetsat/MetopDatasets.jl/blob/main/CHANGELOG.md">changelog</a>.</p></article><nav class="docs-footer"><a class="docs-footer-nextpage" href="MetopDataset/">MetopDataset »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Monday 9 February 2026 10:51">Monday 9 February 2026</span>. Using Julia version 1.12.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
