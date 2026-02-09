@@ -1,4 +1,5 @@
 # MetopDatasets.jl
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://eumetsat.github.io/MetopDatasets.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://eumetsat.github.io/MetopDatasets.jl/dev/)
 [![Build Status](https://github.com/eumetsat/MetopDatasets.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/eumetsat/MetopDatasets.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
@@ -7,9 +8,9 @@ MetopDatasets.jl is a package for reading products from the [METOP satellites](h
 
 MetopDatasets.jl exports the `MetopDataset` API which is an implementation of the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/JuliaGeo/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl).
 
-Only a subset of the METOP native formats are supported currently but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__EPS%20Native). See [supported formats](https://eumetsat.github.io/MetopDatasets.jl/dev/#Supported-formats) for more information
+Only a subset of the METOP native formats are supported currently but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__EPS%20Native). See [supported formats](https://eumetsat.github.io/MetopDatasets.jl/stable/#Supported-formats) for more information
 
-MetopDatasets.jl can also be used from Python. The recommend way is to use the [MetopPy](https://github.com/eumetsat/MetopPy) package which is a python wrapper for MetopDatasets.jl. For other alternatives, see the [python section](https://eumetsat.github.io/MetopDatasets.jl/dev/python) in documentation page.
+MetopDatasets.jl can also be used from Python. The recommend way is to use the [MetopPy](https://github.com/eumetsat/MetopPy) package which is a python wrapper for MetopDatasets.jl. For other alternatives, see the [python section](https://eumetsat.github.io/MetopDatasets.jl/stable/python) in documentation page.
 
 ## Copyright and License
 This code is licensed under MIT license. See file LICENSE for details on the usage and distribution terms.
@@ -69,7 +70,7 @@ REPL output:
  -30.0909  -30.3049  …  -39.8538  -40.0638
  -30.0206  -30.2344     -39.7726  -39.9823
 ```
-See [documentation page ](https://eumetsat.github.io/MetopDatasets.jl/dev/) for more information.
+See [documentation page ](https://eumetsat.github.io/MetopDatasets.jl/stable/) for more information.
 
 ## SW Bill of Materials (SBoM)
  
