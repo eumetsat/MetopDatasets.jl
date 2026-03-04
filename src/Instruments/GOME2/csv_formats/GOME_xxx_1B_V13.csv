@@ -1,0 +1,65 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,,,1,1,1,rec_head,20,20,0
+DEGRADED_INST_MDR,Quality of MDR has been degraded from nominal due to an instrument degradation.,,,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation.,,,1,1,1,boolean,1,1,21
+OUTPUT_SELECTION,Calibrated radiance or sun-normalised radiance,,,1,1,1,enumerated,1,1,22
+F_NN_DT,Flag indicating non-nominal detector temperature per channel,,,1,1,1,bitst(8),1,1,23
+F_NN_PDP,Flag indicating non-nominal detector pre-disperser temperature per channel,,,1,1,1,boolean,1,1,24
+F_NN_RAD,Flag indicating non-nominal radiator temperature,,,1,1,1,boolean,1,1,25
+F_NN_WLS_U,Flag indicating non-nominal WLS voltage,,,1,1,1,boolean,1,1,26
+F_NN_WLS_I,Flag indicating non-nominal WLS current,,,1,1,1,boolean,1,1,27
+F_NN_SLS_U,Flag indicating non-nominal SLS voltage,,,1,1,1,boolean,1,1,28
+F_NN_SLS_I,Flag indicating non-nominal SLS current,,,1,1,1,boolean,1,1,29
+F_INV_UTC,Flag indicating invalid UTC,,,1,1,1,boolean,1,1,30
+F_MISS,Flag indicating missing data packets,,,1,1,1,boolean,1,1,31
+F_SAT,Flag indicating saturated pixels per 10 bands and 32 read-outs,,,10,1,1,bitst(32),4,40,32
+F_HOT,Flag indicating hot pixels per 10 bands and 32 read-outs,,,10,1,1,bitst(32),4,40,72
+F_SAA,Flag indicating whether scan is in the SAA per 32 read-outs,,,1,1,1,bitst(32),4,4,112
+F_SUNGLINT_RISK,Flag indicating danger of sun-glint per 32 read-outs,,,1,1,1,bitst(32),4,4,116
+F_SUNGLINT_HIGH_RISK,Flag indicating high danger of sun-glint per 32 read-outs,,,1,1,1,bitst(32),4,4,120
+F_RAINBOW,Flag indicating danger of rainbow per 32 read-outs,,,1,1,1,bitst(32),4,4,124
+F_MODE_GEOLOCATION,Flag indicating possible mismatch between observation mode and geolocation,,,1,1,1,boolean,1,1,128
+F_MIN,Flag indicating that mean raw signal is below a specified threshold per 10 bands and 32 read-outs,,,10,1,1,bitst(32),4,40,129
+MEAN_UC,Mean raw signal per 10 bands,,,10,1,1,integer4,4,40,169
+F_OLD_CAL_DATA,Flag to indicate that old in-flight auxiliary calibration data is in use,,,1,1,1,bitst(32),4,4,209
+APPLIED_SPECCAL,Flag indicating which spectral calibration has been applied,,,1,1,1,enumerated,1,1,213
+F_MISS_STOKES,Flag indicating missing Stokes fractions per PMD band,,,15,1,1,boolean,1,15,214
+F_BAD_STOKES,Flag indicating bad Stokes fractions per PMD band and main channel readout,,,15,32,1,boolean,1,480,229
+SIGMA_SCENE,Scene variability within a 187.5 ms groundpixel,6,,32,1,1,integer4,4,128,709
+FIT_MODE,Cloud fitting mode corresponding to main channel BAND_4 Readouts,,,32,1,1,enumerated,1,32,837
+FAIL_FLAG,Fail flag corresponding to main channel BAND_4 readouts,,,32,1,1,enumerated,1,32,869
+FIT_1,Cloud fitting parameter 1 corresponding to main channel BAND_4 readouts,3,hPa,32,1,1,integer4,4,128,901
+FIT_2,Cloud fitting parameter 2 corresponding to main channel BAND_4 readouts,6,,32,1,1,integer4,4,128,1029
+E_FIT_1,Error in Cloud fitting parameter 1 corresponding to main channel BAND_4 readouts,1,hPa,32,1,1,u-integer2,2,64,1157
+E_FIT_2,Error in Cloud fitting parameter 2 corresponding to main channel BAND_4 readouts,4,,32,1,1,u-integer2,2,64,1221
+FINAL_CHI_SQUARE,Final Chi-Square from cloud parameter fitting corresponding to main channel BAND_4 readouts,5,,32,1,1,u-integer4,4,128,1285
+CLOUD_ALBEDO,Cloud albedo corresponding to main channel BAND_4 readouts,6,,32,1,1,integer4,4,128,1413
+SURFACE_ALBEDO,Surface albedo used in the retrieval at 758 and 772 nm corresponding to main channel BAND_4 readouts,6,,32,2,1,integer4,4,256,1541
+SURFACE_PRESSURE,Surface pressure corresponding to main channel BAND_4 readouts,3,hPa,32,1,1,integer4,4,128,1797
+AVHRR_INHOMOGENEITY,AVHRR scene inhomogeneity corresponding to BAND_PP PMD readouts,6,,256,1,1,u-integer2,2,512,1925
+AVHRR_CLOUD_FRAC,AVHRR cloud fraction corresponding to BAND_PP PMD readouts,6,,256,1,1,u-integer2,2,512,2437
+AVHRR_SNOW_ICE_FRAC,AVHRR snow/ice fraction corresponding to BAND_PP PMD readouts,6,,256,1,1,u-integer2,2,512,2949
+OBSERVATION_MODE,Observation mode,,,1,1,1,enumerated,1,1,3461
+PMD_TRANSFER,PMD transfer mode,,,1,1,1,enumerated,1,1,3462
+PMD_READOUT,PMD readout mode,,,1,1,1,enumerated,1,1,3463
+SCANNER_ANGLE,Scanner viewing angle with additional element at end of scan,6,deg,65,1,1,integer4,4,260,3464
+UTC_TIME,UTC time associated with every second scanner position,,,32,1,1,short cds time,6,192,3724
+SUB_SATELLITE_POINT,Geodetic latitude and geocentric longitude of sub-satellite point,6,deg,32,2,1,integer4,4,256,3916
+SATELLITE_ALTITUDE,Geodetic altitude of satellite,3,m,32,1,1,integer4,4,128,4172
+SOLAR_ZENITH_ANGLE,Solar zenith angle (Satellite Relative Actual CS),6,deg,32,1,1,integer4,4,128,4300
+SOLAR_AZIMUTH_ANGLE,Solar azimuth angle (Satellite Relative Actual CS),6,deg,32,1,1,integer4,4,128,4428
+SCAN_CORNER,Geodetic latitude and geocentric longitude for the complete scan at ground points ABCD,6,deg,4,2,1,integer4,4,32,4556
+SCAN_CENTRE,Geodetic latitude and geocentric longitude at ground,6,deg,2,1,1,integer4,4,8,4588
+CORNER,Geodetic latitude and geocentric longitude at ground points ABCD,6,deg,32,4,2,integer4,4,1024,4596
+CENTRE,Geodetic latitude and geocentric longitude at ground point F,6,deg,32,2,1,integer4,4,256,5620
+SOLAR_ZENITH,Solar zenith angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,5876
+SOLAR_AZIMUTH,Solar azimuth angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,6260
+SAT_ZENITH,Satellite zenith angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,6644
+SAT_AZIMUTH,Satellite azimuth angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,7028
+SCAT_ANGLE,Scattering angle at height h0 point F,6,deg,32,1,1,integer4,4,128,7412
+MISPOINT_CORR,Mispointing correction angles,6,deg,3,1,1,integer4,4,12,7540
+SURFACE_ELEVATION,Land/sea floor elevation above sea level point F,3,m,32,1,1,integer4,4,128,7552
+EARTH_RADIUS,Radius of the earth,,m,1,1,1,integer4,4,4,7680
+N_UNIQUE_INT,Number of unique integration times in scan,,,1,1,1,u-byte,1,1,7684
+UNIQUE_INT,Unique integration times in scan,6,s,10,1,1,integer4,4,40,7685
+GEO_REC_LENGTH,Number of geo-record per unique integration time,,,N_GEO_BANDS,1,1,u-integer2,2,20,7725

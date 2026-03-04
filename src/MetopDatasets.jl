@@ -30,6 +30,7 @@ include("InterfaceDataModel/InterfaceDataModel.jl")
 include("Instruments/ASCAT/ASCAT.jl")
 include("Instruments/IASI/IASI.jl")
 include("Instruments/ATOVS/ATOVS.jl")
+include("Instruments/GOME2/GOME2.jl")
 
 """
     get_test_data_artifact()
