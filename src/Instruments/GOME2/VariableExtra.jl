@@ -23,6 +23,16 @@ end
 
 const GOME2_SPECTRAL_VARNAMES = _gome2_spectral_varnames()
 const GOME2_EXTRA_VARNAMES = (:latitude, :longitude, GOME2_SPECTRAL_VARNAMES...)
+const GOME2_GEO_PAIR_FIELDS = (
+    :centre, :corner, :scan_centre, :scan_corner, :sub_satellite_point)
+const GOME2_FLOAT_SPECTRAL_COMPONENTS = (
+    :wavelength, :radiance, :radiance_error, :stokes_fraction,
+    :uncorrected_radiance, :uncorrected_radiance_error)
+const GOME2_OUTPUT_SELECTION_COMPONENTS = (
+    :radiance, :radiance_error, :uncorrected_radiance, :uncorrected_radiance_error)
+const GOME2_OUTPUT_SELECTION_UNITS = Dict{Symbol, String}(
+    :abs_rad => "photon s-1 cm-2 nm-1 sr-1",
+    :norm_rad => "1")
 
 function _is_gome2_extra_var(varname::Symbol)
     return varname in GOME2_EXTRA_VARNAMES
@@ -32,20 +42,52 @@ end
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = default_varnames(ds)
-    extra_names = string.(GOME2_EXTRA_VARNAMES)
+    extra_symbols = ds.auto_convert ? GOME2_EXTRA_VARNAMES : (:latitude, :longitude)
+    extra_names = string.(extra_symbols)
     return (extra_names..., base_names...)
 end
 
 # --- Spectral info caching ---
-const _GOME2_SPECTRAL_CACHE = Dict{UInt64, GomeSpectralInfo}()
+const GOME2_SPECTRAL_CACHE_KEY = :gome2_spectral_info
+const GOME2_OUTPUT_SELECTION_CACHE_KEY = :gome2_output_selection_info
 
 function _get_spectral_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
-    key = objectid(ds.file_pointer)
-    if !haskey(_GOME2_SPECTRAL_CACHE, key)
-        _GOME2_SPECTRAL_CACHE[key] = compute_spectral_info(
+    info = get!(ds.cache, GOME2_SPECTRAL_CACHE_KEY) do
+        compute_spectral_info(
             ds.file_pointer, ds.data_record_layouts, R)
     end
-    return _GOME2_SPECTRAL_CACHE[key]
+    return info::GomeSpectralInfo
+end
+
+function _get_output_selection_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
+    output_selection_info = get!(ds.cache, GOME2_OUTPUT_SELECTION_CACHE_KEY) do
+        output_selection_da = construct_disk_array(
+            ds.file_pointer, ds.data_record_layouts, :output_selection; auto_convert = false)
+        values = collect(output_selection_da[1:ds.data_record_count])
+
+        fill_value = get_missing_value(R, :output_selection)
+        if !isnothing(fill_value)
+            filter!(x -> x != fill_value, values)
+        end
+
+        unique_values = sort(unique(values))
+        mode = if isempty(unique_values)
+            :unknown
+        elseif length(unique_values) == 1
+            if unique_values[1] == 0x00
+                :abs_rad
+            elseif unique_values[1] == 0x01
+                :norm_rad
+            else
+                :unknown
+            end
+        else
+            :mixed
+        end
+
+        (mode, unique_values)
+    end
+    return output_selection_info::Tuple{Symbol, Vector{UInt8}}
 end
 
 # --- Parse spectral variable name ---
@@ -97,6 +139,9 @@ function CDM.variable(
     if isnothing(parsed)
         return default_variable(ds, varname)
     end
+    if !ds.auto_convert
+        return default_variable(ds, varname)
+    end
 
     band_index, component, _ = parsed
     spectral_info = _get_spectral_info(ds)
@@ -127,6 +172,65 @@ _lon_index(::Type{GOME_XXX_1B_V13}) = 1  # 1-indexed: first component
 _lat_index(::Type{GOME_XXX_1B_V12}) = 1  # 1-indexed: first component
 _lon_index(::Type{GOME_XXX_1B_V12}) = 2  # 1-indexed: second component
 
+_geo_component_order(::Type{GOME_XXX_1B_V13}) = "longitude, latitude"
+_geo_component_order(::Type{GOME_XXX_1B_V12}) = "latitude, longitude"
+
+function _output_selection_mode_attribute(mode::Symbol)
+    if mode == :abs_rad
+        return "0"
+    elseif mode == :norm_rad
+        return "1"
+    elseif mode == :mixed
+        return "mixed"
+    end
+    return "unknown"
+end
+
+function _output_selection_values_attribute(values::Vector{UInt8})
+    if isempty(values)
+        return ""
+    end
+    return join(Int.(values), ",")
+end
+
+function _output_selection_comment(mode::Symbol, values::Vector{UInt8})
+    if mode == :abs_rad
+        return "OUTPUT_SELECTION=0 (AbsRad): calibrated radiance mode."
+    elseif mode == :norm_rad
+        return "OUTPUT_SELECTION=1 (NormRad): sun-normalized radiance mode."
+    elseif mode == :mixed
+        return "Mixed OUTPUT_SELECTION values ($(join(Int.(values), ", "))) across records."
+    end
+    return "Unknown OUTPUT_SELECTION values ($(join(Int.(values), ", ")))."
+end
+
+function _spectral_units(component::Symbol, mode::Symbol)
+    if component == :wavelength
+        return "nm"
+    elseif component in (:stokes_fraction, :rec_length, :num_recs)
+        return "1"
+    elseif component in GOME2_OUTPUT_SELECTION_COMPONENTS
+        return get(GOME2_OUTPUT_SELECTION_UNITS, mode, nothing)
+    end
+    return nothing
+end
+
+function _gome2_geo_pair_description(::Type{R}, field::Symbol) where {R <: GOME_XXX_1B}
+    order = _geo_component_order(R)
+    if field == :centre
+        return "Geodetic coordinates at ground point F (geo_component order: $order)"
+    elseif field == :corner
+        return "Geodetic coordinates at ground points A, B, C, D (geo_component order: $order)"
+    elseif field == :scan_centre
+        return "Geodetic coordinates at scan centre (geo_component order: $order)"
+    elseif field == :scan_corner
+        return "Geodetic coordinates for scan corner points A, B, C, D (geo_component order: $order)"
+    elseif field == :sub_satellite_point
+        return "Geodetic coordinates of sub-satellite point (geo_component order: $order)"
+    end
+    return get_description(R, field)
+end
+
 """
     GomeLatLonDiskArray <: AbstractMetopDiskArray{Float64, 2}
 
@@ -155,7 +259,9 @@ function DiskArrays.readblock!(
         disk_array::GomeLatLonDiskArray, aout,
         i_scan::OrdinalRange, i_record::OrdinalRange)
     raw = disk_array.centre_disk_array[i_scan, disk_array.component_index:disk_array.component_index, i_record]
-    aout .= dropdims(raw, dims = 2) .* 1e-6  # SF=6
+    component = dropdims(raw, dims = 2)
+    aout .= component .* 1e-6 # SF=6
+    aout[component .== typemin(Int32)] .= NaN
     return nothing
 end
 
@@ -184,8 +290,7 @@ function CDM.dimnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = collect(keys(get_dimensions(ds)))
     push!(base_names, RECORD_DIM_NAME)
 
-    # Add spectral dimension names
-    spectral_info = _get_spectral_info(ds)
+    # Add spectral dimension names without forcing a full MDR spectral scan.
     for bname in GOME2_BAND_NAMES
         push!(base_names, "wavelength_$bname")
         push!(base_names, "readout_$bname")
@@ -194,20 +299,31 @@ function CDM.dimnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     return base_names
 end
 
+function _parse_spectral_dim_name(name::AbstractString)
+    for (i, bname) in enumerate(GOME2_BAND_NAMES)
+        if name == "wavelength_$bname"
+            return (i, :wavelength)
+        elseif name == "readout_$bname"
+            return (i, :readout)
+        end
+    end
+    return nothing
+end
+
 function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R <: GOME_XXX_1B}
     name = string(name)
     if RECORD_DIM_NAME == name
         return ds.data_record_count
     end
 
-    # Check spectral dimensions
-    spectral_info = _get_spectral_info(ds)
-    for (i, bname) in enumerate(GOME2_BAND_NAMES)
-        if name == "wavelength_$bname"
+    spectral_dim = _parse_spectral_dim_name(name)
+    if !isnothing(spectral_dim)
+        i, kind = spectral_dim
+        spectral_info = _get_spectral_info(ds)
+        if kind == :wavelength
             return Int(spectral_info.max_rec_lengths[i])
-        elseif name == "readout_$bname"
-            return Int(spectral_info.max_num_recs[i])
         end
+        return Int(spectral_info.max_num_recs[i])
     end
 
     return get_dimensions(ds)[name]
@@ -239,14 +355,18 @@ end
 
 function CDM.attrib(
         v::MetopVariable{T, N, R}, name::CDM.SymbolOrString) where {T, N, R <: GOME_XXX_1B}
-    if string(name) == "description" && _is_gome2_extra_var(v.field_name)
-        return _gome2_extra_description(v.field_name)
+    if string(name) == "description"
+        if _is_gome2_extra_var(v.field_name)
+            return _gome2_extra_description(v.parent, v.field_name)
+        elseif v.field_name in GOME2_GEO_PAIR_FIELDS
+            return _gome2_geo_pair_description(R, v.field_name)
+        end
     end
 
     return default_attrib(v, name)
 end
 
-function _gome2_extra_description(field::Symbol)
+function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <: GOME_XXX_1B}
     if field == :latitude
         return "Latitude extracted from CENTRE field (-90 to 90 deg)"
     elseif field == :longitude
@@ -256,18 +376,47 @@ function _gome2_extra_description(field::Symbol)
     parsed = _parse_spectral_varname(field)
     if !isnothing(parsed)
         _, component, bname = parsed
+        mode, values = _get_output_selection_info(ds)
         if component == :wavelength
             return "Wavelength for band $bname (nm)"
         elseif component == :radiance
-            return "Calibrated radiance for band $bname"
+            if mode == :abs_rad
+                return "Calibrated radiance for band $bname"
+            elseif mode == :norm_rad
+                return "Sun-normalized radiance for band $bname"
+            elseif mode == :mixed
+                return "Radiance for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
+            end
+            return "Radiance for band $bname (unknown OUTPUT_SELECTION mode)"
         elseif component == :radiance_error
-            return "Radiance error for band $bname"
+            if mode == :abs_rad
+                return "Calibrated radiance error for band $bname"
+            elseif mode == :norm_rad
+                return "Sun-normalized radiance error for band $bname"
+            elseif mode == :mixed
+                return "Radiance error for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
+            end
+            return "Radiance error for band $bname (unknown OUTPUT_SELECTION mode)"
         elseif component == :stokes_fraction
             return "Stokes fraction for band $bname"
         elseif component == :uncorrected_radiance
-            return "Uncorrected radiance for band $bname"
+            if mode == :abs_rad
+                return "Uncorrected calibrated radiance for band $bname"
+            elseif mode == :norm_rad
+                return "Uncorrected sun-normalized radiance for band $bname"
+            elseif mode == :mixed
+                return "Uncorrected radiance for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
+            end
+            return "Uncorrected radiance for band $bname (unknown OUTPUT_SELECTION mode)"
         elseif component == :uncorrected_radiance_error
-            return "Uncorrected radiance error for band $bname"
+            if mode == :abs_rad
+                return "Uncorrected calibrated radiance error for band $bname"
+            elseif mode == :norm_rad
+                return "Uncorrected sun-normalized radiance error for band $bname"
+            elseif mode == :mixed
+                return "Uncorrected radiance error for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
+            end
+            return "Uncorrected radiance error for band $bname (unknown OUTPUT_SELECTION mode)"
         elseif component == :rec_length
             return "Number of spectral elements per record for band $bname"
         elseif component == :num_recs
@@ -283,19 +432,41 @@ end
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
         auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: GOME_XXX_1B}
     if field == :latitude
-        return Dict{Symbol, Any}(:units => "degrees_north")
+        return Dict{Symbol, Any}(
+            :units => "degrees_north",
+            :missing_value => NaN,
+            :_FillValue => NaN)
     elseif field == :longitude
-        return Dict{Symbol, Any}(:units => "degrees_east")
+        return Dict{Symbol, Any}(
+            :units => "degrees_east",
+            :missing_value => NaN,
+            :_FillValue => NaN)
     end
 
     parsed = _parse_spectral_varname(field)
     if !isnothing(parsed)
         _, component, _ = parsed
-        if component == :wavelength
-            return Dict{Symbol, Any}(:units => "nm")
-        else
-            return Dict{Symbol, Any}()
+        mode, values = _get_output_selection_info(ds)
+        attrs = Dict{Symbol, Any}()
+
+        units = _spectral_units(component, mode)
+        if !isnothing(units)
+            attrs[:units] = units
         end
+
+        if component in GOME2_FLOAT_SPECTRAL_COMPONENTS
+            attrs[:missing_value] = NaN
+            attrs[:_FillValue] = NaN
+        end
+
+        attrs[:output_selection_mode] = _output_selection_mode_attribute(mode)
+        attrs[:output_selection_values] = _output_selection_values_attribute(values)
+        attrs[:comment] = _output_selection_comment(mode, values)
+        return attrs
+    elseif field in GOME2_GEO_PAIR_FIELDS
+        cf_attributes = Dict{Symbol, Any}(default_cf_attributes(R, field, auto_convert))
+        cf_attributes[:geo_component_order] = _geo_component_order(R)
+        return cf_attributes
     end
 
     return default_cf_attributes(R, field, auto_convert)

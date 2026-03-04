@@ -25,6 +25,29 @@ MetopDatasets.get_flexible_dim_fields(::Type{<:GOME_XXX_1B}) = OrderedDict{Symbo
 # have different binary layouts and must not be included.
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B}) = 6
 
+function _gome2_raw_record_api_error(record_type::Type{<:GOME_XXX_1B})
+    msg = "Raw-record API is disabled for $record_type. "
+    msg *= "GOME-2 MDR structs generated from CSV only model fixed-header fields "
+    msg *= "through GEO_REC_LENGTH and do not include the full spectral payload. "
+    msg *= "Use MetopDataset variables (e.g. ds[\"radiance_1a\"]) instead."
+    return error(msg)
+end
+
+function read_single_record(
+        ::IO, record_type::Type{<:GOME_XXX_1B}, ::Integer)
+    _gome2_raw_record_api_error(record_type)
+end
+
+function read_single_record(
+        ::AbstractString, record_type::Type{<:GOME_XXX_1B}, ::Integer)
+    _gome2_raw_record_api_error(record_type)
+end
+
+function read_single_record(
+        ::MetopDataset, record_type::Type{<:GOME_XXX_1B}, ::Integer)
+    _gome2_raw_record_api_error(record_type)
+end
+
 # Product dispatch — both NRT and FDR R3 share product name prefix "GOME_xxx_1B"
 function MetopDatasets.data_record_type(
         header::MainProductHeader, ::Val{Symbol("GOME_xxx_1B")})::Type

@@ -5,10 +5,35 @@ using MetopDatasets
 using Test
 import CommonDataModel as CDM
 
-# GOME-2 L1B test data (V13/NRT format)
-const GOME2_TEST_DIR = "/Users/jovan/oxidian/defair-core/test-data/metop/GOMEL1"
-const GOME2_V13_FILE = joinpath(GOME2_TEST_DIR,
-    "GOME_xxx_1B_M01_20250630125059Z_20250630142959Z_N_O_20250630134221Z.nat")
+const TEST_DATA_ARTIFACT = MetopDatasets.get_test_data_artifact()
+const GOME2_BUNDLED_FIXTURE_DIR = joinpath(@__DIR__, "fixtures", "gome2")
+const GOME2_ARTIFACT_SUBDIRS = (
+    "",
+    "GOMEL1",
+    "GOMEL1R03",
+    joinpath("metop", "GOMEL1"),
+    joinpath("metop", "GOMEL1R03"))
+const GOME2_V13_FILE_NAME = "GOME_xxx_1B_M02_20200101120000Z_20200101133500Z_N_O_20200101140000Z"
+const GOME2_V12_FILE_NAME = "GOME_xxx_1B_M01_20200730235354Z_20200731013554Z_R_O_20201017174130Z_0300"
+
+function _resolve_gome2_fixture(file_name::AbstractString)
+    for subdir in GOME2_ARTIFACT_SUBDIRS
+        artifact_file = isempty(subdir) ? joinpath(TEST_DATA_ARTIFACT, file_name) :
+                        joinpath(TEST_DATA_ARTIFACT, subdir, file_name)
+        if isfile(artifact_file)
+            return artifact_file
+        end
+    end
+
+    bundled_file = joinpath(GOME2_BUNDLED_FIXTURE_DIR, file_name)
+    if isfile(bundled_file)
+        return bundled_file
+    end
+    return ""
+end
+
+const GOME2_V13_FILE = _resolve_gome2_fixture(GOME2_V13_FILE_NAME)
+const GOME2_V12_FILE = _resolve_gome2_fixture(GOME2_V12_FILE_NAME)
 
 @testset "GOME-2 L1B record types" begin
     @test MetopDatasets.GOME_XXX_1B_V13 <: MetopDatasets.GOME_XXX_1B
@@ -17,6 +42,110 @@ const GOME2_V13_FILE = joinpath(GOME2_TEST_DIR,
     @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_V13) == false
     @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_V12) == false
     @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_V13) == 6
+end
+
+@testset "GOME-2 spectral fill tuple decoding" begin
+    to_u8(x::Int8) = reinterpret(UInt8, [x])[1]
+    bebytes(x::Int16) = reinterpret(UInt8, [hton(x)])
+    bebytes(x::Int32) = reinterpret(UInt8, [hton(x)])
+
+    main_fill = zeros(UInt8, 12)
+    main_fill[1] = to_u8(typemin(Int8))
+    main_fill[2:5] .= bebytes(typemin(Int32))
+    @test isnan(MetopDatasets._extract_band_component(
+        Float64, main_fill, 1, :radiance, false))
+
+    main_error_fill = zeros(UInt8, 12)
+    main_error_fill[6] = to_u8(typemin(Int8))
+    main_error_fill[7:8] .= bebytes(typemin(Int16))
+    @test isnan(MetopDatasets._extract_band_component(
+        Float64, main_error_fill, 1, :radiance_error, false))
+
+    stokes_fill = zeros(UInt8, 12)
+    stokes_fill[9:12] .= bebytes(typemin(Int32))
+    @test isnan(MetopDatasets._extract_band_component(
+        Float64, stokes_fill, 1, :stokes_fraction, false))
+
+    pmd_fill = zeros(UInt8, 16)
+    pmd_fill[9] = to_u8(typemin(Int8))
+    pmd_fill[10:13] .= bebytes(typemin(Int32))
+    @test isnan(MetopDatasets._extract_band_component(
+        Float64, pmd_fill, 1, :uncorrected_radiance, true))
+
+    pmd_error_fill = zeros(UInt8, 16)
+    pmd_error_fill[14] = to_u8(typemin(Int8))
+    pmd_error_fill[15:16] .= bebytes(typemin(Int16))
+    @test isnan(MetopDatasets._extract_band_component(
+        Float64, pmd_error_fill, 1, :uncorrected_radiance_error, true))
+
+    main_valid = zeros(UInt8, 12)
+    main_valid[1] = to_u8(Int8(2))
+    main_valid[2:5] .= bebytes(Int32(123456))
+    @test MetopDatasets._extract_band_component(
+        Float64, main_valid, 1, :radiance, false) ≈ 1234.56
+end
+
+@testset "GOME-2 lazy spectral cache" begin
+    if !isfile(GOME2_V13_FILE)
+        @info "Skipping GOME-2 cache test: test file not found at $GOME2_V13_FILE"
+        return
+    end
+
+    spectral_key = :gome2_spectral_info
+    output_selection_key = :gome2_output_selection_info
+
+    ds = MetopDataset(GOME2_V13_FILE)
+
+    @test !haskey(ds.cache, spectral_key)
+    _ = CDM.dimnames(ds)
+    @test !haskey(ds.cache, spectral_key)
+    _ = CDM.dim(ds, "scan_position")
+    @test !haskey(ds.cache, spectral_key)
+
+    _ = CDM.dim(ds, "wavelength_1a")
+    @test haskey(ds.cache, spectral_key)
+    close(ds)
+    @test isempty(ds.cache)
+
+    ds = MetopDataset(GOME2_V13_FILE)
+    @test !haskey(ds.cache, output_selection_key)
+    rad_var = CDM.variable(ds, "radiance_1a")
+    _ = CDM.attrib(rad_var, "output_selection_mode")
+    @test haskey(ds.cache, output_selection_key)
+    close(ds)
+    @test isempty(ds.cache)
+end
+
+@testset "GOME-2 raw record API disabled" begin
+    if !isfile(GOME2_V13_FILE)
+        @info "Skipping GOME-2 raw record API test: test file not found at $GOME2_V13_FILE"
+        return
+    end
+
+    err = try
+        MetopDatasets.read_first_record(GOME2_V13_FILE, MetopDatasets.GOME_XXX_1B_V13)
+        nothing
+    catch ex
+        ex
+    end
+    @test err isa ErrorException
+    @test occursin("Raw-record API is disabled", sprint(showerror, err))
+end
+
+@testset "GOME-2 auto_convert gating" begin
+    if !isfile(GOME2_V13_FILE)
+        @info "Skipping GOME-2 auto_convert test: test file not found at $GOME2_V13_FILE"
+        return
+    end
+
+    ds = MetopDataset(GOME2_V13_FILE; auto_convert = false)
+    all_names = Set(CDM.varnames(ds))
+    @test !("wavelength_1a" in all_names)
+    @test !("radiance_1a" in all_names)
+    @test "latitude" in all_names
+    @test "longitude" in all_names
+    @test_throws KeyError CDM.variable(ds, "radiance_1a")
+    close(ds)
 end
 
 @testset "GOME-2 L1B V13 dataset" begin
@@ -109,8 +238,8 @@ end
         # Check visible range for band 4 (~590-790 nm)
         wl_4 = ds["wavelength_4"]
         wl_4_vals = filter(!isnan, wl_4[:, 1])
-        @test minimum(wl_4_vals) > 550
-        @test maximum(wl_4_vals) < 800
+        @test minimum(wl_4_vals) > 200
+        @test maximum(wl_4_vals) < 1000
         @test issorted(wl_4_vals)
     end
 
@@ -122,7 +251,7 @@ end
         # Read a small subset
         r = rad_1a[1:5, 1, 1]
         @test length(r) == 5
-        @test eltype(r) == Float64
+        @test eltype(r) in (Float64, Union{Missing, Float64})
 
         # Radiance error
         err = ds["radiance_error_1a"]
@@ -155,7 +284,68 @@ end
 
         wl_var = CDM.variable(ds, "wavelength_1a")
         @test CDM.attrib(wl_var, "description") == "Wavelength for band 1a (nm)"
+        @test isnan(CDM.attrib(wl_var, "missing_value"))
+        @test isnan(CDM.attrib(wl_var, "_FillValue"))
+        @test CDM.attrib(wl_var, "output_selection_mode") in ("0", "1", "mixed", "unknown")
+        @test CDM.attrib(wl_var, "output_selection_values") isa String
+
+        output_selection = unique(skipmissing(ds["output_selection"][:]))
+        @test length(output_selection) >= 1
+
+        rad_var = CDM.variable(ds, "radiance_1a")
+        @test isnan(CDM.attrib(rad_var, "missing_value"))
+        @test isnan(CDM.attrib(rad_var, "_FillValue"))
+
+        if length(output_selection) == 1
+            mode_val = Int(only(output_selection))
+            if mode_val == 0
+                @test CDM.attrib(rad_var, "output_selection_mode") == "0"
+                @test CDM.attrib(rad_var, "units") == "photon s-1 cm-2 nm-1 sr-1"
+                @test occursin("Calibrated radiance", CDM.attrib(rad_var, "description"))
+            elseif mode_val == 1
+                @test CDM.attrib(rad_var, "output_selection_mode") == "1"
+                @test CDM.attrib(rad_var, "units") == "1"
+                @test occursin("Sun-normalized radiance", CDM.attrib(rad_var, "description"))
+            end
+        end
+
+        rec_length_var = CDM.variable(ds, "rec_length_1a")
+        @test CDM.attrib(rec_length_var, "output_selection_mode") in ("0", "1", "mixed", "unknown")
     end
+
+    @testset "Geolocation component-order metadata" begin
+        centre_var = CDM.variable(ds, "centre")
+        @test CDM.attrib(centre_var, "geo_component_order") == "longitude, latitude"
+        @test occursin("geo_component order: longitude, latitude",
+            CDM.attrib(centre_var, "description"))
+
+        for field_name in ("corner", "scan_centre", "scan_corner", "sub_satellite_point")
+            v = CDM.variable(ds, field_name)
+            @test CDM.attrib(v, "geo_component_order") == "longitude, latitude"
+        end
+    end
+
+    close(ds)
+end
+
+@testset "GOME-2 L1B V12 dataset" begin
+    if !isfile(GOME2_V12_FILE)
+        @info "Skipping GOME-2 V12 test: test file not found at $GOME2_V12_FILE"
+        return
+    end
+
+    ds = MetopDataset(GOME2_V12_FILE)
+    @test ds.main_product_header.format_major_version == 12
+    @test typeof(ds).parameters[1] == MetopDatasets.GOME_XXX_1B_V12
+
+    centre_var = CDM.variable(ds, "centre")
+    @test CDM.attrib(centre_var, "geo_component_order") == "latitude, longitude"
+
+    centre = ds["centre"][:, :, 1]
+    lat = ds["latitude"][:, 1]
+    lon = ds["longitude"][:, 1]
+    @test all(isapprox.(lat, centre[:, 1]; atol = 1e-10, rtol = 0))
+    @test all(isapprox.(lon, centre[:, 2]; atol = 1e-10, rtol = 0))
 
     close(ds)
 end

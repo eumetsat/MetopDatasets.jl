@@ -16,6 +16,31 @@ struct GomeWavelengthDiskArray{T} <: AbstractMetopDiskArray{T, 2}
     dim_size::Tuple{Int64, Int64}
 end
 
+const GOME2_VINTEGER_FILL_SCALE = typemin(Int8)
+const GOME2_INT16_FILL_VALUE = typemin(Int16)
+const GOME2_INT32_FILL_VALUE = typemin(Int32)
+
+@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::Int16) where {T}
+    if sf == GOME2_VINTEGER_FILL_SCALE || val == GOME2_INT16_FILL_VALUE
+        return T(NaN)
+    end
+    return _auto_convert(T, VInteger{Int16}(sf, val))
+end
+
+@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::Int32) where {T}
+    if sf == GOME2_VINTEGER_FILL_SCALE || val == GOME2_INT32_FILL_VALUE
+        return T(NaN)
+    end
+    return _auto_convert(T, VInteger{Int32}(sf, val))
+end
+
+@inline function _decode_scaled_int_or_nan(::Type{T}, val::Int32, scale_factor::Int) where {T}
+    if val == GOME2_INT32_FILL_VALUE
+        return T(NaN)
+    end
+    return T(val) * T(10)^(-scale_factor)
+end
+
 function GomeWavelengthDiskArray(
         file_pointer::IOStream,
         spectral_info::GomeSpectralInfo,
@@ -40,18 +65,23 @@ function DiskArrays.readblock!(
     for (k, rec_idx) in enumerate(i_record)
         rl = si.rec_lengths[bi, rec_idx]
         wl_offsets,
-        _ = _compute_spectral_section_offsets(
-            disk_array.file_pointer, si, rec_idx)
+        _ = _compute_spectral_section_offsets(si, rec_idx)
 
-        # Read full wavelength array for this band
-        seek(disk_array.file_pointer, wl_offsets[bi])
-        raw = Vector{Int32}(undef, rl)
-        read!(disk_array.file_pointer, raw)
-        raw .= ntoh.(raw)
+        wl_start = first(i_wavelength)
+        wl_end = min(last(i_wavelength), rl)
+        raw_subset = Int32[]
+        if wl_start <= wl_end
+            n_read = wl_end - wl_start + 1
+            seek(disk_array.file_pointer, wl_offsets[bi] + 4 * (wl_start - 1))
+            raw_subset = Vector{Int32}(undef, n_read)
+            read!(disk_array.file_pointer, raw_subset)
+            raw_subset .= ntoh.(raw_subset)
+        end
 
         for (j, wi) in enumerate(i_wavelength)
-            if wi <= rl
-                aout[j, k] = T(raw[wi]) * 1e-6  # SF=6
+            if wl_start <= wi <= wl_end
+                raw_idx = wi - wl_start + 1
+                aout[j, k] = _decode_scaled_int_or_nan(T, raw_subset[raw_idx], 6) # SF=6
             else
                 aout[j, k] = T(NaN)
             end
@@ -115,27 +145,28 @@ function DiskArrays.readblock!(
         rl = si.rec_lengths[bi, rec_idx]
         nr = si.num_recs[bi, rec_idx]
         _,
-        data_offsets = _compute_spectral_section_offsets(
-            disk_array.file_pointer, si, rec_idx)
+        data_offsets = _compute_spectral_section_offsets(si, rec_idx)
 
-        # Read all band records for this record: nr × rl records
-        total_pixels = rl * nr
-        seek(disk_array.file_pointer, data_offsets[bi])
-        raw_bytes = Vector{UInt8}(undef, total_pixels * record_size)
-        readbytes!(disk_array.file_pointer, raw_bytes, total_pixels * record_size)
+        wl_start = first(i_wavelength)
+        wl_end = min(last(i_wavelength), rl)
+        has_valid_wavelength = wl_start <= wl_end
+        n_wavelengths_row = has_valid_wavelength ? (wl_end - wl_start + 1) : 0
+        row_buffer = Vector{UInt8}(undef, n_wavelengths_row * record_size)
 
         for (jr, ri) in enumerate(i_readout)
-            for (jw, wi) in enumerate(i_wavelength)
-                if wi <= rl && ri <= nr
-                    # Band data layout is: for each readout r, for each wavelength w
-                    # pixel index = w + (r-1)*rl (column-major in file: wavelength varies fastest)
-                    # Actually in defair the layout is (rec_length × num_recs), meaning
-                    # wavelength varies fastest, readouts vary slowest
-                    pixel_idx = (ri - 1) * rl + wi
-                    byte_offset = (pixel_idx - 1) * record_size + 1  # 1-indexed
+            if has_valid_wavelength && ri <= nr
+                first_pixel_idx = (ri - 1) * rl + wl_start
+                first_byte = data_offsets[bi] + (first_pixel_idx - 1) * record_size
+                seek(disk_array.file_pointer, first_byte)
+                readbytes!(disk_array.file_pointer, row_buffer, length(row_buffer))
+            end
 
+            for (jw, wi) in enumerate(i_wavelength)
+                if has_valid_wavelength && ri <= nr && wl_start <= wi <= wl_end
+                    local_pixel_idx = wi - wl_start + 1
+                    byte_offset = (local_pixel_idx - 1) * record_size + 1
                     aout[jw, jr, k] = _extract_band_component(
-                        T, raw_bytes, byte_offset, comp, is_pmd)
+                        T, row_buffer, byte_offset, comp, is_pmd)
                 else
                     aout[jw, jr, k] = T(NaN)
                 end
@@ -157,22 +188,22 @@ function _extract_band_component(
     if component == :radiance
         sf = reinterpret(Int8, raw[offset])[1]
         val = ntoh(reinterpret(Int32, @view(raw[(offset + 1):(offset + 4)]))[1])
-        return T(val) * T(10)^(-Int(sf))
+        return _decode_vinteger_or_nan(T, sf, val)
     elseif component == :radiance_error
         sf = reinterpret(Int8, raw[offset + 5])[1]
         val = ntoh(reinterpret(Int16, @view(raw[(offset + 6):(offset + 7)]))[1])
-        return T(val) * T(10)^(-Int(sf))
+        return _decode_vinteger_or_nan(T, sf, val)
     elseif component == :stokes_fraction && !is_pmd
         val = ntoh(reinterpret(Int32, @view(raw[(offset + 8):(offset + 11)]))[1])
-        return T(val) * T(1e-6)  # SF=6
+        return _decode_scaled_int_or_nan(T, val, 6) # SF=6
     elseif component == :uncorrected_radiance && is_pmd
         sf = reinterpret(Int8, raw[offset + 8])[1]
         val = ntoh(reinterpret(Int32, @view(raw[(offset + 9):(offset + 12)]))[1])
-        return T(val) * T(10)^(-Int(sf))
+        return _decode_vinteger_or_nan(T, sf, val)
     elseif component == :uncorrected_radiance_error && is_pmd
         sf = reinterpret(Int8, raw[offset + 13])[1]
         val = ntoh(reinterpret(Int16, @view(raw[(offset + 14):(offset + 15)]))[1])
-        return T(val) * T(10)^(-Int(sf))
+        return _decode_vinteger_or_nan(T, sf, val)
     else
         return T(NaN)
     end
