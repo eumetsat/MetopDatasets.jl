@@ -88,6 +88,12 @@ end
     @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_V13) == false
     @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_V12) == false
     @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_V13) == 6
+    @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_V13) ==
+          (12, 12, 12, 12, 12, 12, 16, 16, 16, 16)
+    @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_V12) ==
+          (12, 12, 12, 12, 12, 12, 16, 16, 16, 16)
+    @test MetopDatasets.has_uncorrected_pmd(MetopDatasets.GOME_XXX_1B_V13)
+    @test MetopDatasets.has_uncorrected_pmd(MetopDatasets.GOME_XXX_1B_V12)
 end
 
 @testset "GOME-2 spectral fill tuple decoding" begin
@@ -191,6 +197,11 @@ end
     @test "latitude" in all_names
     @test "longitude" in all_names
     @test_throws KeyError CDM.variable(ds, "radiance_1a")
+    @test !("wavelength_1a" in CDM.dimnames(ds))
+    @test !("readout_1a" in CDM.dimnames(ds))
+    @test !haskey(ds.cache, :gome2_spectral_info)
+    _ = CDM.dims(ds)
+    @test !haskey(ds.cache, :gome2_spectral_info)
     close(ds)
 end
 

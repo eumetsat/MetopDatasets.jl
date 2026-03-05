@@ -33,6 +33,7 @@ function compute_spectral_info(
     record_offsets = _layouts_to_offsets(record_layouts)
     n_records = length(record_offsets)
     geo_offset = gome2_geo_rec_length_offset(record_type)
+    band_record_sizes = gome2_band_record_sizes(record_type)
 
     geo_data_sizes = Vector{Int64}(undef, n_records)
     rec_lengths = Matrix{Int64}(undef, GOME2_N_BANDS, n_records)
@@ -76,7 +77,7 @@ function compute_spectral_info(
         end
         for j in 1:GOME2_N_BANDS
             data_offsets[j, i] = cursor
-            cursor += nr_decoded[j] * rl_decoded[j] * GOME2_BAND_RECORD_SIZES[j]
+            cursor += nr_decoded[j] * rl_decoded[j] * band_record_sizes[j]
         end
     end
 

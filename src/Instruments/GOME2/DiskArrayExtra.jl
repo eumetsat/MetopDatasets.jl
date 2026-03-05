@@ -139,7 +139,9 @@ function DiskArrays.readblock!(
     bi = disk_array.band_index
     comp = disk_array.component
     is_pmd = bi >= 7  # bands 7-10 are PMD
-    record_size = GOME2_BAND_RECORD_SIZES[bi]
+    band_record_sizes = gome2_band_record_sizes(disk_array.record_type)
+    record_size = band_record_sizes[bi]
+    allow_uncorrected = has_uncorrected_pmd(disk_array.record_type)
 
     for (k, rec_idx) in enumerate(i_record)
         rl = si.rec_lengths[bi, rec_idx]
@@ -166,7 +168,7 @@ function DiskArrays.readblock!(
                     local_pixel_idx = wi - wl_start + 1
                     byte_offset = (local_pixel_idx - 1) * record_size + 1
                     aout[jw, jr, k] = _extract_band_component(
-                        T, row_buffer, byte_offset, comp, is_pmd)
+                        T, row_buffer, byte_offset, comp, is_pmd, allow_uncorrected)
                 else
                     aout[jw, jr, k] = T(NaN)
                 end
@@ -184,7 +186,12 @@ Main band record (12 bytes): rad_sf(1) + rad(4) + err_sf(1) + err(2) + stokes(4)
 PMD band record (16 bytes): rad_sf(1) + rad(4) + err_sf(1) + err(2) + uncorr_rad_sf(1) + uncorr_rad(4) + uncorr_err_sf(1) + uncorr_err(2)
 """
 function _extract_band_component(
-        ::Type{T}, raw::Vector{UInt8}, offset::Int, component::Symbol, is_pmd::Bool) where {T}
+        ::Type{T},
+        raw::Vector{UInt8},
+        offset::Int,
+        component::Symbol,
+        is_pmd::Bool,
+        allow_uncorrected::Bool) where {T}
     if component == :radiance
         sf = reinterpret(Int8, raw[offset])[1]
         val = ntoh(reinterpret(Int32, @view(raw[(offset + 1):(offset + 4)]))[1])
@@ -196,17 +203,23 @@ function _extract_band_component(
     elseif component == :stokes_fraction && !is_pmd
         val = ntoh(reinterpret(Int32, @view(raw[(offset + 8):(offset + 11)]))[1])
         return _decode_scaled_int_or_nan(T, val, 6) # SF=6
-    elseif component == :uncorrected_radiance && is_pmd
+    elseif component == :uncorrected_radiance && is_pmd && allow_uncorrected
         sf = reinterpret(Int8, raw[offset + 8])[1]
         val = ntoh(reinterpret(Int32, @view(raw[(offset + 9):(offset + 12)]))[1])
         return _decode_vinteger_or_nan(T, sf, val)
-    elseif component == :uncorrected_radiance_error && is_pmd
+    elseif component == :uncorrected_radiance_error && is_pmd && allow_uncorrected
         sf = reinterpret(Int8, raw[offset + 13])[1]
         val = ntoh(reinterpret(Int16, @view(raw[(offset + 14):(offset + 15)]))[1])
         return _decode_vinteger_or_nan(T, sf, val)
     else
         return T(NaN)
     end
+end
+
+# Backward-compatible method used by existing tests/helpers.
+function _extract_band_component(
+        ::Type{T}, raw::Vector{UInt8}, offset::Int, component::Symbol, is_pmd::Bool) where {T}
+    return _extract_band_component(T, raw, offset, component, is_pmd, true)
 end
 
 """

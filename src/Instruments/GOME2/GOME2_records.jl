@@ -64,10 +64,25 @@ end
 const GOME2_N_SCAN_POSITIONS = 32
 const GOME2_N_BANDS = 10
 const GOME2_BAND_NAMES = ("1a", "1b", "2a", "2b", "3", "4", "pp", "ps", "swpp", "swps")
-const GOME2_MAIN_BAND_RECORD_SIZE = 12  # bytes per pixel for bands 1a-4
-const GOME2_PMD_BAND_RECORD_SIZE = 16   # bytes per pixel for PMD bands pp, ps, swpp, swps
-const GOME2_BAND_RECORD_SIZES = (12, 12, 12, 12, 12, 12, 16, 16, 16, 16)
+const GOME2_MAIN_BAND_RECORD_SIZE = 12
+const GOME2_PMD_BAND_RECORD_SIZE_V13 = 16
+const GOME2_PMD_BAND_RECORD_SIZE_V12 = 16
 const GOME2_GEO_EARTH_ACTUAL_RECORD_SIZE = 99
+
+gome2_main_band_record_size(::Type{<:GOME_XXX_1B}) = GOME2_MAIN_BAND_RECORD_SIZE
+gome2_pmd_band_record_size(::Type{GOME_XXX_1B_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
+gome2_pmd_band_record_size(::Type{GOME_XXX_1B_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
+
+has_uncorrected_pmd(::Type{GOME_XXX_1B_V13}) = true
+has_uncorrected_pmd(::Type{GOME_XXX_1B_V12}) = true
+
+function gome2_band_record_sizes(::Type{R}) where {R <: GOME_XXX_1B}
+    main_size = gome2_main_band_record_size(R)
+    pmd_size = gome2_pmd_band_record_size(R)
+    return (
+        main_size, main_size, main_size, main_size, main_size, main_size,
+        pmd_size, pmd_size, pmd_size, pmd_size)
+end
 
 # Dynamic section layout constants (fixed across all records)
 const GOME2_DYNAMIC_PREFIX_SIZE = 58356

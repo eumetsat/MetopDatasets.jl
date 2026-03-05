@@ -3,7 +3,7 @@
 
 # --- Variable name generation ---
 
-function _gome2_spectral_varnames()
+function _gome2_spectral_varnames(::Type{R}) where {R <: GOME_XXX_1B}
     names = Symbol[]
     for (i, bname) in enumerate(GOME2_BAND_NAMES)
         push!(names, Symbol("wavelength_$bname"))
@@ -11,7 +11,7 @@ function _gome2_spectral_varnames()
         push!(names, Symbol("radiance_error_$bname"))
         if i <= 6  # main bands
             push!(names, Symbol("stokes_fraction_$bname"))
-        else  # PMD bands
+        elseif has_uncorrected_pmd(R)  # PMD bands with uncorrected components
             push!(names, Symbol("uncorrected_radiance_$bname"))
             push!(names, Symbol("uncorrected_radiance_error_$bname"))
         end
@@ -21,7 +21,19 @@ function _gome2_spectral_varnames()
     return names
 end
 
-const GOME2_SPECTRAL_VARNAMES = _gome2_spectral_varnames()
+function _gome2_spectral_varnames_all()
+    names = Symbol[]
+    append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V13))
+    append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V12))
+    return unique(names)
+end
+
+function _gome2_extra_varnames(::Type{R}) where {R <: GOME_XXX_1B}
+    return (
+        :latitude, :longitude, _gome2_spectral_varnames(R)...)
+end
+
+const GOME2_SPECTRAL_VARNAMES = _gome2_spectral_varnames_all()
 const GOME2_EXTRA_VARNAMES = (:latitude, :longitude, GOME2_SPECTRAL_VARNAMES...)
 const GOME2_GEO_PAIR_FIELDS = (
     :centre, :corner, :scan_centre, :scan_corner, :sub_satellite_point)
@@ -42,7 +54,7 @@ end
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = default_varnames(ds)
-    extra_symbols = ds.auto_convert ? GOME2_EXTRA_VARNAMES : (:latitude, :longitude)
+    extra_symbols = ds.auto_convert ? _gome2_extra_varnames(R) : (:latitude, :longitude)
     extra_names = string.(extra_symbols)
     return (extra_names..., base_names...)
 end
@@ -117,6 +129,16 @@ function _parse_spectral_varname(varname::Symbol)
     return nothing
 end
 
+function _is_supported_spectral_component(
+        ::Type{R}, band_index::Int, component::Symbol) where {R <: GOME_XXX_1B}
+    if component == :stokes_fraction
+        return band_index <= 6
+    elseif component in (:uncorrected_radiance, :uncorrected_radiance_error)
+        return band_index >= 7 && has_uncorrected_pmd(R)
+    end
+    return true
+end
+
 # --- CDM.variable ---
 
 function CDM.variable(
@@ -144,6 +166,9 @@ function CDM.variable(
     end
 
     band_index, component, _ = parsed
+    if !_is_supported_spectral_component(R, band_index, component)
+        return default_variable(ds, varname)
+    end
     spectral_info = _get_spectral_info(ds)
 
     disk_array = if component == :wavelength
@@ -310,10 +335,12 @@ function CDM.dimnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = collect(keys(get_dimensions(ds)))
     push!(base_names, RECORD_DIM_NAME)
 
-    # Add spectral dimension names without forcing a full MDR spectral scan.
-    for bname in GOME2_BAND_NAMES
-        push!(base_names, "wavelength_$bname")
-        push!(base_names, "readout_$bname")
+    if ds.auto_convert
+        # Add spectral dimension names without forcing a full MDR spectral scan.
+        for bname in GOME2_BAND_NAMES
+            push!(base_names, "wavelength_$bname")
+            push!(base_names, "readout_$bname")
+        end
     end
 
     return base_names
@@ -337,7 +364,7 @@ function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R <: GOME
     end
 
     spectral_dim = _parse_spectral_dim_name(name)
-    if !isnothing(spectral_dim)
+    if ds.auto_convert && !isnothing(spectral_dim)
         i, kind = spectral_dim
         spectral_info = _get_spectral_info(ds)
         if kind == :wavelength
