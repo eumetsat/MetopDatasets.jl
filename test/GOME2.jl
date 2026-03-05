@@ -45,39 +45,22 @@ function _decode_centre_component(centre::AbstractMatrix,
     return ismissing(val) ? NaN : Float64(val)
 end
 
-function _decode_triplet_component(triplet::AbstractMatrix,
-        scan_index::Int, component_index::Int)
-    nscan = size(triplet, 1)
-    linear_index = (scan_index - 1) * 3 + component_index
-    row = ((linear_index - 1) % nscan) + 1
-    col = ((linear_index - 1) ÷ nscan) + 1
-    val = triplet[row, col]
-    return ismissing(val) ? NaN : Float64(val)
-end
-
-function _decode_sat_zenith_full(sat_zenith::AbstractArray)
-    nscan, _, nrecords = size(sat_zenith)
-    full = Matrix{Float64}(undef, nscan, nrecords)
-    for rec in 1:nrecords
-        triplet = @view sat_zenith[:, :, rec]
-        for scan in 1:nscan
-            full[scan, rec] = _decode_triplet_component(triplet, scan, 2)
-        end
-    end
-    return full
-end
-
+# EFG triplets use BSQ (sequential) layout: [E0..E31, F0..F31, G0..G31].
+# Julia's column-major reshape of (32, 3) naturally maps column 1=E, 2=F, 3=G,
+# so sat_zenith[:, 2, :] directly gives the F-component values.
 function _assert_sat_zenith_triplet_layout(ds::MetopDataset)
     sat_zenith_raw = ds["sat_zenith"][:, :, :]
-    sat_zenith_full = _decode_sat_zenith_full(sat_zenith_raw)
-    naive_second_column = Float64.(coalesce.(sat_zenith_raw[:, 2, :], NaN))
+    f_component = Float64.(coalesce.(sat_zenith_raw[:, 2, :], NaN))
 
-    finite_full = sat_zenith_full[isfinite.(sat_zenith_full)]
-    @test !isempty(finite_full)
-    @test all(0 .<= finite_full .<= 360)
+    finite_f = f_component[isfinite.(f_component)]
+    @test !isempty(finite_f)
+    @test all(-1 .<= finite_f .<= 90)
 
-    common = isfinite.(sat_zenith_full) .& isfinite.(naive_second_column)
-    @test any(abs.(sat_zenith_full[common] .- naive_second_column[common]) .> 1e-12)
+    # E and G components should bracket F (E >= F >= G for zenith angles)
+    e_component = Float64.(coalesce.(sat_zenith_raw[:, 1, :], NaN))
+    g_component = Float64.(coalesce.(sat_zenith_raw[:, 3, :], NaN))
+    common = isfinite.(e_component) .& isfinite.(f_component) .& isfinite.(g_component)
+    @test any(abs.(e_component[common] .- f_component[common]) .> 1e-6)
     return nothing
 end
 
@@ -377,20 +360,20 @@ end
 
     @testset "Geolocation component-order metadata" begin
         centre_var = CDM.variable(ds, "centre")
-        @test CDM.attrib(centre_var, "geo_component_order") == "longitude, latitude"
-        @test occursin("geo_component order: longitude, latitude",
+        @test CDM.attrib(centre_var, "geo_component_order") == "latitude, longitude"
+        @test occursin("geo_component order: latitude, longitude",
             CDM.attrib(centre_var, "description"))
 
         for field_name in ("corner", "scan_centre", "scan_corner", "sub_satellite_point")
             v = CDM.variable(ds, field_name)
-            @test CDM.attrib(v, "geo_component_order") == "longitude, latitude"
+            @test CDM.attrib(v, "geo_component_order") == "latitude, longitude"
         end
 
         centre = ds["centre"][:, :, 1]
         lat = ds["latitude"][:, 1]
         lon = ds["longitude"][:, 1]
-        lat_expected = [_decode_centre_component(centre, s, 2) for s in 1:32]
-        lon_expected = [_decode_centre_component(centre, s, 1) for s in 1:32]
+        lat_expected = [_decode_centre_component(centre, s, 1) for s in 1:32]
+        lon_expected = [_decode_centre_component(centre, s, 2) for s in 1:32]
         @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
         @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
     end

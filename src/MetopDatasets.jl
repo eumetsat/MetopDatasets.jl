@@ -1,5 +1,6 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
+# Fix: corrected V13 GEO field offsets and CENTRE component order
 
 module MetopDatasets
 

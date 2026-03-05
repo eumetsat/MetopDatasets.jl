@@ -48,16 +48,16 @@ SUB_SATELLITE_POINT,Geodetic latitude and geocentric longitude of sub-satellite 
 SATELLITE_ALTITUDE,Geodetic altitude of satellite,3,m,32,1,1,integer4,4,128,4172
 SOLAR_ZENITH_ANGLE,Solar zenith angle (Satellite Relative Actual CS),6,deg,32,1,1,integer4,4,128,4300
 SOLAR_AZIMUTH_ANGLE,Solar azimuth angle (Satellite Relative Actual CS),6,deg,32,1,1,integer4,4,128,4428
-SCAN_CORNER,Geodetic latitude and geocentric longitude for the complete scan at ground points ABCD,6,deg,4,2,1,integer4,4,32,4556
-SCAN_CENTRE,Geodetic latitude and geocentric longitude at ground,6,deg,2,1,1,integer4,4,8,4588
-CORNER,Geodetic latitude and geocentric longitude at ground points ABCD,6,deg,32,4,2,integer4,4,1024,4596
-CENTRE,Geodetic latitude and geocentric longitude at ground point F,6,deg,32,2,1,integer4,4,256,5620
-SOLAR_ZENITH,Solar zenith angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,5876
-SOLAR_AZIMUTH,Solar azimuth angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,6260
-SAT_ZENITH,Satellite zenith angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,6644
-SAT_AZIMUTH,Satellite azimuth angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,7028
-SCAT_ANGLE,Scattering angle at height h0 point F,6,deg,32,1,1,integer4,4,128,7412
-MISPOINT_CORR,Mispointing correction angles,6,deg,3,1,1,integer4,4,12,7540
+MISPOINT_CORR,Mispointing correction angles,6,deg,3,1,1,integer4,4,12,4556
+SCAN_CORNER,Geodetic latitude and geocentric longitude for the complete scan at ground points ABCD,6,deg,4,2,1,integer4,4,32,4568
+SCAN_CENTRE,Geodetic latitude and geocentric longitude at ground,6,deg,2,1,1,integer4,4,8,4600
+CORNER,Geodetic latitude and geocentric longitude at ground points ABCD,6,deg,32,4,2,integer4,4,1024,4608
+CENTRE,Geodetic latitude and geocentric longitude at ground point F,6,deg,32,2,1,integer4,4,256,5632
+SOLAR_ZENITH,Solar zenith angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,5888
+SOLAR_AZIMUTH,Solar azimuth angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,6272
+SAT_ZENITH,Satellite zenith angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,6656
+SAT_AZIMUTH,Satellite azimuth angle at height h0 points EFG,6,deg,32,3,1,integer4,4,384,7040
+SCAT_ANGLE,Scattering angle at height h0 point F,6,deg,32,1,1,integer4,4,128,7424
 SURFACE_ELEVATION,Land/sea floor elevation above sea level point F,3,m,32,1,1,integer4,4,128,7552
 EARTH_RADIUS,Radius of the earth,,m,1,1,1,integer4,4,4,7680
 N_UNIQUE_INT,Number of unique integration times in scan,,,1,1,1,u-byte,1,1,7684

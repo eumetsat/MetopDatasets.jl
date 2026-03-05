@@ -188,16 +188,14 @@ end
 
 # --- Latitude/Longitude extraction ---
 
-# CRITICAL: lat/lon component order differs between v5 and v6
-# v6 (V13): CENTRE field is [lon, lat] — lat_component=1, lon_component=0 (0-indexed)
-# v5 (V12): CENTRE field is [lat, lon] — lat_component=0, lon_component=1 (0-indexed)
-
-_lat_index(::Type{GOME_XXX_1B_V13}) = 2  # 1-indexed: second component
-_lon_index(::Type{GOME_XXX_1B_V13}) = 1  # 1-indexed: first component
+# Both V13 and V12 store CENTRE as [latitude, longitude], matching the
+# descriptor CSV and CODA library specification.
+_lat_index(::Type{GOME_XXX_1B_V13}) = 1  # 1-indexed: first component
+_lon_index(::Type{GOME_XXX_1B_V13}) = 2  # 1-indexed: second component
 _lat_index(::Type{GOME_XXX_1B_V12}) = 1  # 1-indexed: first component
 _lon_index(::Type{GOME_XXX_1B_V12}) = 2  # 1-indexed: second component
 
-_geo_component_order(::Type{GOME_XXX_1B_V13}) = "longitude, latitude"
+_geo_component_order(::Type{GOME_XXX_1B_V13}) = "latitude, longitude"
 _geo_component_order(::Type{GOME_XXX_1B_V12}) = "latitude, longitude"
 
 function _output_selection_mode_attribute(mode::Symbol)
