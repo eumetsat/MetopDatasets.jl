@@ -53,7 +53,7 @@ const GOME2_OUTPUT_SELECTION_CACHE_KEY = :gome2_output_selection_info
 
 function _get_spectral_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     info = get!(ds.cache, GOME2_SPECTRAL_CACHE_KEY) do
-        compute_spectral_info(
+        return compute_spectral_info(
             ds.file_pointer, ds.data_record_layouts, R)
     end
     return info::GomeSpectralInfo
@@ -85,7 +85,7 @@ function _get_output_selection_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B
             :mixed
         end
 
-        (mode, unique_values)
+        return (mode, unique_values)
     end
     return output_selection_info::Tuple{Symbol, Vector{UInt8}}
 end
@@ -255,13 +255,33 @@ end
 
 Base.size(da::GomeLatLonDiskArray) = da.dim_size
 
+@inline function _decode_centre_component(raw_centre::AbstractMatrix{<:Integer},
+        scan_index::Int, component_index::Int)
+    # Binary payload stores 32 pairs as [comp1_scan1, comp2_scan1, comp1_scan2, ...].
+    # Generic array reshape in MetopDiskArray is column-major, so values are interleaved
+    # within each 32-element column. Decode by reconstructing the original pair index.
+    half_scans = Int(GOME2_N_SCAN_POSITIONS ÷ 2)
+    local_scan = scan_index <= half_scans ? scan_index : (scan_index - half_scans)
+    col = scan_index <= half_scans ? 1 : 2
+    row = 2 * local_scan - (component_index == 1 ? 1 : 0)
+    return raw_centre[row, col]
+end
+
 function DiskArrays.readblock!(
         disk_array::GomeLatLonDiskArray, aout,
         i_scan::OrdinalRange, i_record::OrdinalRange)
-    raw = disk_array.centre_disk_array[i_scan, disk_array.component_index:disk_array.component_index, i_record]
-    component = dropdims(raw, dims = 2)
-    aout .= component .* 1e-6 # SF=6
-    aout[component .== typemin(Int32)] .= NaN
+    raw = disk_array.centre_disk_array[:, :, i_record]
+    for (k, rec_idx) in enumerate(i_record)
+        raw_centre = @view raw[:, :, k]
+        for (j, scan_idx) in enumerate(i_scan)
+            val = _decode_centre_component(raw_centre, scan_idx, disk_array.component_index)
+            if val == typemin(Int32)
+                aout[j, k] = NaN
+            else
+                aout[j, k] = val * 1e-6
+            end
+        end
+    end
     return nothing
 end
 
@@ -366,7 +386,8 @@ function CDM.attrib(
     return default_attrib(v, name)
 end
 
-function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <: GOME_XXX_1B}
+function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <:
+                                                                             GOME_XXX_1B}
     if field == :latitude
         return "Latitude extracted from CENTRE field (-90 to 90 deg)"
     elseif field == :longitude

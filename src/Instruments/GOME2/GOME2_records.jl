@@ -35,17 +35,17 @@ end
 
 function read_single_record(
         ::IO, record_type::Type{<:GOME_XXX_1B}, ::Integer)
-    _gome2_raw_record_api_error(record_type)
+    return _gome2_raw_record_api_error(record_type)
 end
 
 function read_single_record(
         ::AbstractString, record_type::Type{<:GOME_XXX_1B}, ::Integer)
-    _gome2_raw_record_api_error(record_type)
+    return _gome2_raw_record_api_error(record_type)
 end
 
 function read_single_record(
         ::MetopDataset, record_type::Type{<:GOME_XXX_1B}, ::Integer)
-    _gome2_raw_record_api_error(record_type)
+    return _gome2_raw_record_api_error(record_type)
 end
 
 # Product dispatch — both NRT and FDR R3 share product name prefix "GOME_xxx_1B"

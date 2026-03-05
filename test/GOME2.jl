@@ -35,6 +35,52 @@ end
 const GOME2_V13_FILE = _resolve_gome2_fixture(GOME2_V13_FILE_NAME)
 const GOME2_V12_FILE = _resolve_gome2_fixture(GOME2_V12_FILE_NAME)
 
+function _decode_centre_component(centre::AbstractMatrix,
+        scan_index::Int, component_index::Int)
+    half_scans = 16
+    local_scan = scan_index <= half_scans ? scan_index : (scan_index - half_scans)
+    col = scan_index <= half_scans ? 1 : 2
+    row = 2 * local_scan - (component_index == 1 ? 1 : 0)
+    val = centre[row, col]
+    return ismissing(val) ? NaN : Float64(val)
+end
+
+function _decode_triplet_component(triplet::AbstractMatrix,
+        scan_index::Int, component_index::Int)
+    nscan = size(triplet, 1)
+    linear_index = (scan_index - 1) * 3 + component_index
+    row = ((linear_index - 1) % nscan) + 1
+    col = ((linear_index - 1) ÷ nscan) + 1
+    val = triplet[row, col]
+    return ismissing(val) ? NaN : Float64(val)
+end
+
+function _decode_sat_zenith_full(sat_zenith::AbstractArray)
+    nscan, _, nrecords = size(sat_zenith)
+    full = Matrix{Float64}(undef, nscan, nrecords)
+    for rec in 1:nrecords
+        triplet = @view sat_zenith[:, :, rec]
+        for scan in 1:nscan
+            full[scan, rec] = _decode_triplet_component(triplet, scan, 2)
+        end
+    end
+    return full
+end
+
+function _assert_sat_zenith_triplet_layout(ds::MetopDataset)
+    sat_zenith_raw = ds["sat_zenith"][:, :, :]
+    sat_zenith_full = _decode_sat_zenith_full(sat_zenith_raw)
+    naive_second_column = Float64.(coalesce.(sat_zenith_raw[:, 2, :], NaN))
+
+    finite_full = sat_zenith_full[isfinite.(sat_zenith_full)]
+    @test !isempty(finite_full)
+    @test all(0 .<= finite_full .<= 360)
+
+    common = isfinite.(sat_zenith_full) .& isfinite.(naive_second_column)
+    @test any(abs.(sat_zenith_full[common] .- naive_second_column[common]) .> 1e-12)
+    return nothing
+end
+
 @testset "GOME-2 L1B record types" begin
     @test MetopDatasets.GOME_XXX_1B_V13 <: MetopDatasets.GOME_XXX_1B
     @test MetopDatasets.GOME_XXX_1B_V12 <: MetopDatasets.GOME_XXX_1B
@@ -188,6 +234,10 @@ end
         @test size(corner, 3) == 2
     end
 
+    @testset "SAT_ZENITH triplet decoding" begin
+        _assert_sat_zenith_triplet_layout(ds)
+    end
+
     @testset "Latitude/Longitude" begin
         lat = ds["latitude"]
         lon = ds["longitude"]
@@ -310,7 +360,8 @@ end
         end
 
         rec_length_var = CDM.variable(ds, "rec_length_1a")
-        @test CDM.attrib(rec_length_var, "output_selection_mode") in ("0", "1", "mixed", "unknown")
+        @test CDM.attrib(rec_length_var, "output_selection_mode") in (
+            "0", "1", "mixed", "unknown")
     end
 
     @testset "Geolocation component-order metadata" begin
@@ -323,6 +374,14 @@ end
             v = CDM.variable(ds, field_name)
             @test CDM.attrib(v, "geo_component_order") == "longitude, latitude"
         end
+
+        centre = ds["centre"][:, :, 1]
+        lat = ds["latitude"][:, 1]
+        lon = ds["longitude"][:, 1]
+        lat_expected = [_decode_centre_component(centre, s, 2) for s in 1:32]
+        lon_expected = [_decode_centre_component(centre, s, 1) for s in 1:32]
+        @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
+        @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
     end
 
     close(ds)
@@ -344,8 +403,12 @@ end
     centre = ds["centre"][:, :, 1]
     lat = ds["latitude"][:, 1]
     lon = ds["longitude"][:, 1]
-    @test all(isapprox.(lat, centre[:, 1]; atol = 1e-10, rtol = 0))
-    @test all(isapprox.(lon, centre[:, 2]; atol = 1e-10, rtol = 0))
+    lat_expected = [_decode_centre_component(centre, s, 1) for s in 1:32]
+    lon_expected = [_decode_centre_component(centre, s, 2) for s in 1:32]
+    @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
+    @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
+
+    _assert_sat_zenith_triplet_layout(ds)
 
     close(ds)
 end
