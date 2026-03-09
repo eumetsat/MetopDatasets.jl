@@ -310,25 +310,8 @@ end
 
 # --- Dataset dimension overrides ---
 
-# Include spectral dimensions in the dataset's dimension list by computing them from
-# the spectral info. This requires reading the file to determine max spectral sizes.
-function get_dimensions(::Type{<:GOME_XXX_1B},
-        data_record_layouts::Vector{<:RecordLayout})::OrderedDict{String, <:Integer}
-    # Start with fixed dimensions from the fixed-header fields
-    dims = OrderedDict{String, Integer}(
-        "geo_component" => 2,
-        "efg" => 3,
-        "corner" => 4,
-        "band" => 10,
-        "stokes_band" => 15,
-        "scan_position" => 32,
-        "scanner" => 65,
-        "pmd_readout" => 256
-    )
-    return dims
-end
-
-# Override CDM.dimnames and CDM.dim to include spectral dimensions dynamically
+# Keep the fixed GOME-2 dimensions in GOME2_dimensions.jl and add the spectral
+# dimensions lazily here so dataset metadata stays aligned with the record definitions.
 function CDM.dimnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = collect(keys(get_dimensions(ds)))
     push!(base_names, RECORD_DIM_NAME)

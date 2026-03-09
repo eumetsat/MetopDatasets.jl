@@ -35,16 +35,6 @@ end
 const GOME2_V13_FILE = _resolve_gome2_fixture(GOME2_V13_FILE_NAME)
 const GOME2_V12_FILE = _resolve_gome2_fixture(GOME2_V12_FILE_NAME)
 
-function _decode_centre_component(centre::AbstractMatrix,
-        scan_index::Int, component_index::Int)
-    half_scans = 16
-    local_scan = scan_index <= half_scans ? scan_index : (scan_index - half_scans)
-    col = scan_index <= half_scans ? 1 : 2
-    row = 2 * local_scan - (component_index == 1 ? 1 : 0)
-    val = centre[row, col]
-    return ismissing(val) ? NaN : Float64(val)
-end
-
 # EFG triplets use BSQ (sequential) layout: [E0..E31, F0..F31, G0..G31].
 # Julia's column-major reshape of (32, 3) naturally maps column 1=E, 2=F, 3=G,
 # so sat_zenith[:, 2, :] directly gives the F-component values.
@@ -118,6 +108,17 @@ end
     main_valid[2:5] .= bebytes(Int32(123456))
     @test MetopDatasets._extract_band_component(
         Float64, main_valid, 1, :radiance, false, true) ≈ 1234.56
+end
+
+@testset "GOME-2 CENTRE interleaved decoding" begin
+    raw_centre = reshape(Int32.(1:64), 32, 2)
+    expected_lat = Int32.(collect(1:2:63))
+    expected_lon = Int32.(collect(2:2:64))
+
+    @test [MetopDatasets._decode_centre_component(raw_centre, s, 1) for s in 1:32] ==
+          expected_lat
+    @test [MetopDatasets._decode_centre_component(raw_centre, s, 2) for s in 1:32] ==
+          expected_lon
 end
 
 @testset "GOME-2 lazy spectral cache" begin
@@ -369,11 +370,13 @@ end
             @test CDM.attrib(v, "geo_component_order") == "latitude, longitude"
         end
 
-        centre = ds["centre"][:, :, 1]
+        centre = CDM.variable(ds, "centre")[:, :, 1]
         lat = ds["latitude"][:, 1]
         lon = ds["longitude"][:, 1]
-        lat_expected = [_decode_centre_component(centre, s, 1) for s in 1:32]
-        lon_expected = [_decode_centre_component(centre, s, 2) for s in 1:32]
+        lat_expected = [
+            MetopDatasets._decode_centre_component(centre, s, 1) * 1e-6 for s in 1:32]
+        lon_expected = [
+            MetopDatasets._decode_centre_component(centre, s, 2) * 1e-6 for s in 1:32]
         @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
         @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
     end
@@ -394,11 +397,13 @@ end
     centre_var = CDM.variable(ds, "centre")
     @test CDM.attrib(centre_var, "geo_component_order") == "latitude, longitude"
 
-    centre = ds["centre"][:, :, 1]
+    centre = CDM.variable(ds, "centre")[:, :, 1]
     lat = ds["latitude"][:, 1]
     lon = ds["longitude"][:, 1]
-    lat_expected = [_decode_centre_component(centre, s, 1) for s in 1:32]
-    lon_expected = [_decode_centre_component(centre, s, 2) for s in 1:32]
+    lat_expected = [
+        MetopDatasets._decode_centre_component(centre, s, 1) * 1e-6 for s in 1:32]
+    lon_expected = [
+        MetopDatasets._decode_centre_component(centre, s, 2) * 1e-6 for s in 1:32]
     @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
     @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
 
