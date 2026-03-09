@@ -53,7 +53,7 @@ function compute_spectral_info(
         # Compute dynamic section start
         geo_data_size = sum(geo_rec_lengths) * GOME2_GEO_EARTH_ACTUAL_RECORD_SIZE
         geo_data_sizes[i] = geo_data_size
-        dynamic_start = record_start + geo_offset + 20 + geo_data_size
+        dynamic_start = record_start + geo_offset + GOME2_GEO_REC_LENGTH_FIELD_SIZE + geo_data_size
 
         # Read REC_LENGTH[10] from dynamic section
         seek(file_pointer, dynamic_start + GOME2_DYNAMIC_REC_LENGTH_REL_OFFSET)

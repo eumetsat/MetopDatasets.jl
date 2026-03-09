@@ -216,12 +216,6 @@ function _extract_band_component(
     end
 end
 
-# Backward-compatible method used by existing tests/helpers.
-function _extract_band_component(
-        ::Type{T}, raw::Vector{UInt8}, offset::Int, component::Symbol, is_pmd::Bool) where {T}
-    return _extract_band_component(T, raw, offset, component, is_pmd, true)
-end
-
 """
     GomeLayoutDiskArray <: AbstractMetopDiskArray{Int64, 1}
 

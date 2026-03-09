@@ -88,36 +88,36 @@ end
     main_fill[1] = to_u8(typemin(Int8))
     main_fill[2:5] .= bebytes(typemin(Int32))
     @test isnan(MetopDatasets._extract_band_component(
-        Float64, main_fill, 1, :radiance, false))
+        Float64, main_fill, 1, :radiance, false, true))
 
     main_error_fill = zeros(UInt8, 12)
     main_error_fill[6] = to_u8(typemin(Int8))
     main_error_fill[7:8] .= bebytes(typemin(Int16))
     @test isnan(MetopDatasets._extract_band_component(
-        Float64, main_error_fill, 1, :radiance_error, false))
+        Float64, main_error_fill, 1, :radiance_error, false, true))
 
     stokes_fill = zeros(UInt8, 12)
     stokes_fill[9:12] .= bebytes(typemin(Int32))
     @test isnan(MetopDatasets._extract_band_component(
-        Float64, stokes_fill, 1, :stokes_fraction, false))
+        Float64, stokes_fill, 1, :stokes_fraction, false, true))
 
     pmd_fill = zeros(UInt8, 16)
     pmd_fill[9] = to_u8(typemin(Int8))
     pmd_fill[10:13] .= bebytes(typemin(Int32))
     @test isnan(MetopDatasets._extract_band_component(
-        Float64, pmd_fill, 1, :uncorrected_radiance, true))
+        Float64, pmd_fill, 1, :uncorrected_radiance, true, true))
 
     pmd_error_fill = zeros(UInt8, 16)
     pmd_error_fill[14] = to_u8(typemin(Int8))
     pmd_error_fill[15:16] .= bebytes(typemin(Int16))
     @test isnan(MetopDatasets._extract_band_component(
-        Float64, pmd_error_fill, 1, :uncorrected_radiance_error, true))
+        Float64, pmd_error_fill, 1, :uncorrected_radiance_error, true, true))
 
     main_valid = zeros(UInt8, 12)
     main_valid[1] = to_u8(Int8(2))
     main_valid[2:5] .= bebytes(Int32(123456))
     @test MetopDatasets._extract_band_component(
-        Float64, main_valid, 1, :radiance, false) ≈ 1234.56
+        Float64, main_valid, 1, :radiance, false, true) ≈ 1234.56
 end
 
 @testset "GOME-2 lazy spectral cache" begin
