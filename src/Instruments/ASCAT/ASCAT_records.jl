@@ -133,8 +133,12 @@ end
 abstract type ASCA_SMR_02 <: DataRecord end
 
 const ASCA_SMR_02_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMR_02_V12.csv")
+const ASCA_SMR_02_V11_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMR_02_V11.csv")
+const ASCA_SMR_02_V10_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMR_02_V10.csv")
 
 eval(record_struct_expression(ASCA_SMR_02_V12_format, ASCA_SMR_02))
+eval(record_struct_expression(ASCA_SMR_02_V11_format, ASCA_SMR_02))
+eval(record_struct_expression(ASCA_SMR_02_V10_format, ASCA_SMR_02))
 
 get_dimensions(T::Type{<:ASCA_SMR_02}) = OrderedDict("num_band" => 3, "xtrack" => 82)
 function get_field_dimensions(T::Type{<:ASCA_SMR_02},
@@ -153,6 +157,10 @@ end
 function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SMR_02})::Type
     if header.format_major_version == 12
         return ASCA_SMR_02_V12
+    elseif header.format_major_version == 11
+        return ASCA_SMR_02_V11
+    elseif header.format_major_version == 10
+        return ASCA_SMR_02_V10
     else
         error("No format found for format major version :$(header.format_major_version)")
     end
@@ -162,8 +170,12 @@ end
 abstract type ASCA_SMO_02 <: DataRecord end
 
 const ASCA_SMO_02_V12_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMO_02_V12.csv")
+const ASCA_SMO_02_V11_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMO_02_V11.csv")
+const ASCA_SMO_02_V10_format = @path joinpath(@__DIR__, "csv_formats/ASCA_SMO_02_V10.csv")
 
 eval(record_struct_expression(ASCA_SMO_02_V12_format, ASCA_SMO_02))
+eval(record_struct_expression(ASCA_SMO_02_V11_format, ASCA_SMO_02))
+eval(record_struct_expression(ASCA_SMO_02_V10_format, ASCA_SMO_02))
 
 get_dimensions(T::Type{<:ASCA_SMO_02}) = OrderedDict("num_band" => 3, "xtrack" => 42)
 function get_field_dimensions(T::Type{<:ASCA_SMO_02},
@@ -182,6 +194,10 @@ end
 function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SMO_02})::Type
     if header.format_major_version == 12
         return ASCA_SMO_02_V12
+     elseif header.format_major_version == 11
+        return ASCA_SMO_02_V11
+    elseif header.format_major_version == 10
+        return ASCA_SMO_02_V10
     else
         error("No format found for format major version :$(header.format_major_version)")
     end
