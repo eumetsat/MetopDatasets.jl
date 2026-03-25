@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.2.3
+- Add historic format version for ASCAT Level 2 Soil Moisture
+
 ## v0.2.2
 - Use `OrderedDict` to ensure that dimensions always have the same order. Fixes: https://github.com/eumetsat/MetopDatasets.jl/issues/21
 - Throw `KeyError` when an invalid variable name is given. Fixes: https://github.com/eumetsat/MetopDatasets.jl/issues/32
