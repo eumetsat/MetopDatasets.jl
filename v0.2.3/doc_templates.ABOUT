@@ -1,0 +1,12 @@
+# Component information
+name: Documentation
+description: Markdown documentation pages for MetopDatasets.jl
+copyright: 2024 EUMETSAT
+license_spdx: MIT
+home_url: https://github.com/eumetsat/MetopDatasets.jl/
+
+# Package IPR documentation
+license_text_file: ./LICENSE
+
+# File(s) associated to this component - Documentation Templates
+about_resource: ./docs/src/*
