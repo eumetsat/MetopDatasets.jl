@@ -1,0 +1,67 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,,,1,1,1,REC_HEAD,20,20,0
+Quality of MDR has been degraded from nominal due to a processing degradation. ,,,,,,,,,,
+LINE OF 25 KM RES NODES and associated data,,,,,,,,,,
+UTC_LINE_NODES,UTC time of line of 25 km nodes,n/a,UTC,1,1,1,short cds time,6,6,20
+SAT_TRACK_AZI,Azimuth angle bearing of nadir track velocity,2,deg,1,1,1,u-integer2,2,2,26
+25 KM RESOLUTION NODE and associated data,,,,,,,,,,
+NODE_NUM,"25 km node number as used in the PGF (ref AD-2]), i.e., (20 to -20) for the left swath in the left-to-right order, (-20 to 20) for the right swath in the left-to-right order, 0 corresponding to the mid swath position in both swaths. ",0,count,82,1,1,integer2,2,164,28
+SWATH INDICATOR,Swath (right or left),n/a,n/a,82,1,1,boolean,1,82,192
+LATITUDE,Latitude (-90 to 90 deg),6,deg,82,1,1,integer4,4,328,274
+LONGITUDE,Longitude (0 to 360 deg),6,deg,82,1,1,integer4,4,328,602
+25 KM RESOLUTION TRIPLET COMPONENT and associated data,,,,,,,,,,
+SIGMA0_TRIP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) sigma zero values",6,dB,3,82,1,integer4,4,984,930
+KP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) kp values (values between 0 and 1)",4,n/a,3,82,1,u-integer2,2,492,1914
+INC_ANGLE_TRIP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) incidence angle values",2,deg,3,82,1,u-integer2,2,492,2406
+AZI_ANGLE_TRIP,"Smoothed to 25 km spatial resolution triplet (fore, mid, aft) azimuth angle values",2,deg,3,82,1,integer2,2,492,2898
+F_KP,Flag related to the quality of the Kp estimate (ref. Ad-2),n/a,n/a,3,82,1,boolean,1,246,3390
+F_USABLE,Flag related to the usability of the averaged value (ref. Ad-2),n/a,n/a,3,82,1,enumerated,1,246,3636
+F_LAND,Flag related to the use of measurements over land in the generation of averaged value (ref. Ad-2)  (value between 0 and 1),3,n/a,3,82,1,u-integer2,2,492,3882
+25 KM RESOLUTION SOIL MOISTURE COMPONENT,,,,,,,,,,
+WARP_NRT_VERSION,WARP-NRT version number,0,n/a,1,1,1,u-integer2,2,2,4374
+PARAM_DB_VERSION,Parameters database version,0,n/a,1,1,1,u-integer2,2,2,4376
+SOIL_MOISTURE,Soil Moisture (0 to 100%),2,%,82,1,1,u-integer2,2,164,4378
+SOIL_MOISTURE_ERROR,Estimated Soil Moisture Error %,2,%,82,1,1,u-integer2,2,164,4542
+SIGMA40,Extrapolated Sigma0 backscatter at 40 degrees incidence angle,6,dB,82,1,1,integer4,4,328,4706
+SIGMA40_ERROR,Estimated Error in Extrapolated Sigma Zero backscatter at 40 degrees incidence angle,6,dB,82,1,1,integer4,4,328,5034
+SLOPE40,Slope at 40 degrees incidence angle,6,dB,82,1,1,integer4,4,328,5362
+SLOPE40_ERROR,Estimated error in the slope at 40 degrees incidence angle,6,dB,82,1,1,integer4,4,328,5690
+SOIL_MOISTURE_SENSETIVITY,Soil Moisture sensitivity ,6,dB,82,1,1,u-integer4,4,328,6018
+DRY_BACKSCATTER,Dry backscatter,6,dB,82,1,1,integer4,4,328,6346
+WET_BACKSCATTER,Wet backscatter,6,dB,82,1,1,integer4,4,328,6674
+MEAN_SURF_SOIL_MOISTURE,Mean surface soil moisture (0 to 100%),2,%,82,1,1,u-integer2,2,164,7002
+RAINFALL_FLAG,"Rainfall contamination flag (0 to 100, zero meaning no rain contamination, 100 meaning full rain contamination)",0,n/a,82,1,1,u-byte,1,82,7166
+CORRECTION_FLAGS,Correction flags,0,n/a,82,1,1,u-byte,1,82,7248
+PROCESSING_FLAGS,Processing flags,0,n/a,82,1,1,u-integer2,2,164,7330
+AGGREGATED_QUALITY_FLAG,"Aggregated quality flag. Equal to the maximum value of fields 36,37,38 & 39",0,n/a,82,1,1,u-byte,1,82,7494
+SNOW_COVER_PROBABILITY,Flag indicating probability of presence of snow cover,0,n/a,82,1,1,u-byte,1,82,7576
+FROZEN_SOIL_PROBABILITY,Flag indicating probability of frozen soil,0,n/a,82,1,1,u-byte,1,82,7658
+INNUDATION_OR_WETLAND,Flag indicating the fraction of inundation and wetland areas. Zero  means no innudation or wetland areas present,0,n/a,82,1,1,u-byte,1,82,7740
+TOPOGRAPHICAL_COMPLEXITY,"Flag indicating the topographical complexity (equal to the normalised standard deviation of the elevation). Zero values mean flat, higher values mean complex topography",0,n/a,82,1,1,u-byte,1,82,7822
+SIZE OF THE RECORD,,,,,,,,,,7904
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,,,,,,,,,,
