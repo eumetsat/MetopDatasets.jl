@@ -14,6 +14,22 @@ function get_dimensions(T::Type{<:GOME_XXX_1B})
     )
 end
 
+const GOME2_SIZE_TO_DIMS = Dict{Any, Vector{String}}(
+    (2,) => ["geo_component"],
+    (3,) => ["efg"],
+    (4, 2) => ["corner", "geo_component"],
+    (10,) => ["band"],
+    (15,) => ["stokes_band"],
+    (15, 32) => ["stokes_band", "scan_position"],
+    (32,) => ["scan_position"],
+    (32, 2) => ["scan_position", "geo_component"],
+    (32, 3) => ["scan_position", "efg"],
+    (32, 4, 2) => ["scan_position", "corner", "geo_component"],
+    (65,) => ["scanner"],
+    (256,) => ["pmd_readout"],
+    (:N_GEO_BANDS,) => ["band"]
+)
+
 function get_field_dimensions(T::Type{<:GOME_XXX_1B},
         field_name::Symbol)::Vector{<:AbstractString}
     if !(fieldtype(T, field_name) <: Array)
@@ -21,34 +37,7 @@ function get_field_dimensions(T::Type{<:GOME_XXX_1B},
     end
 
     array_size = _get_array_size(T, field_name)
-
-    if array_size == (10,)
-        return String["band"]
-    elseif array_size == (15,)
-        return String["stokes_band"]
-    elseif array_size == (15, 32)
-        return String["stokes_band", "scan_position"]
-    elseif array_size == (32,)
-        return String["scan_position"]
-    elseif array_size == (32, 2)
-        return String["scan_position", "geo_component"]
-    elseif array_size == (32, 3)
-        return String["scan_position", "efg"]
-    elseif array_size == (32, 4, 2)
-        return String["scan_position", "corner", "geo_component"]
-    elseif array_size == (4, 2)
-        return String["corner", "geo_component"]
-    elseif array_size == (2,)
-        return String["geo_component"]
-    elseif array_size == (65,)
-        return String["scanner"]
-    elseif array_size == (256,)
-        return String["pmd_readout"]
-    elseif array_size == (3,)
-        return String["efg"]
-    elseif array_size == (:N_GEO_BANDS,)
-        return String["band"]
-    else
+    haskey(GOME2_SIZE_TO_DIMS, array_size) ||
         error("Dimensions not set for field $field_name with size $array_size")
-    end
+    return GOME2_SIZE_TO_DIMS[array_size]
 end

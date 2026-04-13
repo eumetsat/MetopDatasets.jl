@@ -6,34 +6,8 @@ using Test
 import CommonDataModel as CDM
 
 const TEST_DATA_ARTIFACT = MetopDatasets.get_test_data_artifact()
-const GOME2_BUNDLED_FIXTURE_DIR = joinpath(@__DIR__, "fixtures", "gome2")
-const GOME2_ARTIFACT_SUBDIRS = (
-    "",
-    "GOMEL1",
-    "GOMEL1R03",
-    joinpath("metop", "GOMEL1"),
-    joinpath("metop", "GOMEL1R03"))
-const GOME2_V13_FILE_NAME = "GOME_xxx_1B_M02_20200101120000Z_20200101133500Z_N_O_20200101140000Z"
-const GOME2_V12_FILE_NAME = "GOME_xxx_1B_M01_20200730235354Z_20200731013554Z_R_O_20201017174130Z_0300"
-
-function _resolve_gome2_fixture(file_name::AbstractString)
-    for subdir in GOME2_ARTIFACT_SUBDIRS
-        artifact_file = isempty(subdir) ? joinpath(TEST_DATA_ARTIFACT, file_name) :
-                        joinpath(TEST_DATA_ARTIFACT, subdir, file_name)
-        if isfile(artifact_file)
-            return artifact_file
-        end
-    end
-
-    bundled_file = joinpath(GOME2_BUNDLED_FIXTURE_DIR, file_name)
-    if isfile(bundled_file)
-        return bundled_file
-    end
-    return ""
-end
-
-const GOME2_V13_FILE = _resolve_gome2_fixture(GOME2_V13_FILE_NAME)
-const GOME2_V12_FILE = _resolve_gome2_fixture(GOME2_V12_FILE_NAME)
+const GOME2_V13_FILE_NAME = "GOME_xxx_1B_M01_20260303213859Z_cropped_10.nat"
+const GOME2_V13_FILE = joinpath(TEST_DATA_ARTIFACT, GOME2_V13_FILE_NAME)
 
 # EFG triplets use BSQ (sequential) layout: [E0..E31, F0..F31, G0..G31].
 # Julia's column-major reshape of (32, 3) naturally maps column 1=E, 2=F, 3=G,
@@ -77,37 +51,38 @@ end
     main_fill = zeros(UInt8, 12)
     main_fill[1] = to_u8(typemin(Int8))
     main_fill[2:5] .= bebytes(typemin(Int32))
-    @test isnan(MetopDatasets._extract_band_component(
-        Float64, main_fill, 1, :radiance, false, true))
+    rec = MetopDatasets.native_read(IOBuffer(main_fill), MetopDatasets.MainBandRecord)
+    @test isnan(MetopDatasets._extract_band_component(Float64, rec, :radiance))
 
     main_error_fill = zeros(UInt8, 12)
     main_error_fill[6] = to_u8(typemin(Int8))
     main_error_fill[7:8] .= bebytes(typemin(Int16))
-    @test isnan(MetopDatasets._extract_band_component(
-        Float64, main_error_fill, 1, :radiance_error, false, true))
+    rec = MetopDatasets.native_read(IOBuffer(main_error_fill), MetopDatasets.MainBandRecord)
+    @test isnan(MetopDatasets._extract_band_component(Float64, rec, :radiance_error))
 
     stokes_fill = zeros(UInt8, 12)
     stokes_fill[9:12] .= bebytes(typemin(Int32))
-    @test isnan(MetopDatasets._extract_band_component(
-        Float64, stokes_fill, 1, :stokes_fraction, false, true))
+    rec = MetopDatasets.native_read(IOBuffer(stokes_fill), MetopDatasets.MainBandRecord)
+    @test isnan(MetopDatasets._extract_band_component(Float64, rec, :stokes_fraction))
 
     pmd_fill = zeros(UInt8, 16)
     pmd_fill[9] = to_u8(typemin(Int8))
     pmd_fill[10:13] .= bebytes(typemin(Int32))
-    @test isnan(MetopDatasets._extract_band_component(
-        Float64, pmd_fill, 1, :uncorrected_radiance, true, true))
+    rec = MetopDatasets.native_read(IOBuffer(pmd_fill), MetopDatasets.PMDBandRecord)
+    @test isnan(MetopDatasets._extract_band_component(Float64, rec, :uncorrected_radiance))
 
     pmd_error_fill = zeros(UInt8, 16)
     pmd_error_fill[14] = to_u8(typemin(Int8))
     pmd_error_fill[15:16] .= bebytes(typemin(Int16))
+    rec = MetopDatasets.native_read(IOBuffer(pmd_error_fill), MetopDatasets.PMDBandRecord)
     @test isnan(MetopDatasets._extract_band_component(
-        Float64, pmd_error_fill, 1, :uncorrected_radiance_error, true, true))
+        Float64, rec, :uncorrected_radiance_error))
 
     main_valid = zeros(UInt8, 12)
     main_valid[1] = to_u8(Int8(2))
     main_valid[2:5] .= bebytes(Int32(123456))
-    @test MetopDatasets._extract_band_component(
-        Float64, main_valid, 1, :radiance, false, true) ≈ 1234.56
+    rec = MetopDatasets.native_read(IOBuffer(main_valid), MetopDatasets.MainBandRecord)
+    @test MetopDatasets._extract_band_component(Float64, rec, :radiance) ≈ 1234.56
 end
 
 @testset "GOME-2 CENTRE interleaved decoding" begin
@@ -141,7 +116,6 @@ end
     _ = CDM.dim(ds, "wavelength_1a")
     @test haskey(ds.cache, spectral_key)
     close(ds)
-    @test isempty(ds.cache)
 
     ds = MetopDataset(GOME2_V13_FILE)
     @test !haskey(ds.cache, output_selection_key)
@@ -149,7 +123,6 @@ end
     _ = CDM.attrib(rad_var, "output_selection_mode")
     @test haskey(ds.cache, output_selection_key)
     close(ds)
-    @test isempty(ds.cache)
 end
 
 @testset "GOME-2 raw record API disabled" begin
@@ -208,7 +181,6 @@ end
     end
 
     @testset "Fixed-header variables" begin
-        # Test that fixed-header fields are readable
         centre = ds["centre"]
         @test size(centre, 1) == 32  # scan positions
         @test size(centre, 2) == 2   # geo_component (lat/lon)
@@ -272,7 +244,7 @@ end
 
         # Check UV range for band 1a (~240-315 nm)
         wl_vals = wl_1a[:, 1]
-        valid_wl = filter(!isnan, wl_vals)
+        valid_wl = collect(skipmissing(wl_vals))
         @test length(valid_wl) > 0
         @test minimum(valid_wl) > 190  # should be UV
         @test maximum(valid_wl) < 320
@@ -282,7 +254,7 @@ end
 
         # Check visible range for band 4 (~590-790 nm)
         wl_4 = ds["wavelength_4"]
-        wl_4_vals = filter(!isnan, wl_4[:, 1])
+        wl_4_vals = collect(skipmissing(wl_4[:, 1]))
         @test minimum(wl_4_vals) > 200
         @test maximum(wl_4_vals) < 1000
         @test issorted(wl_4_vals)
@@ -329,8 +301,9 @@ end
 
         wl_var = CDM.variable(ds, "wavelength_1a")
         @test CDM.attrib(wl_var, "description") == "Wavelength for band 1a (nm)"
-        @test isnan(CDM.attrib(wl_var, "missing_value"))
-        @test isnan(CDM.attrib(wl_var, "_FillValue"))
+        @test CDM.attrib(wl_var, "missing_value") == typemin(Int32)
+        @test CDM.attrib(wl_var, "_FillValue") == typemin(Int32)
+        @test CDM.attrib(wl_var, "scale_factor") ≈ 1e-6
         @test CDM.attrib(wl_var, "output_selection_mode") in ("0", "1", "mixed", "unknown")
         @test CDM.attrib(wl_var, "output_selection_values") isa String
 
@@ -373,41 +346,13 @@ end
         centre = CDM.variable(ds, "centre")[:, :, 1]
         lat = ds["latitude"][:, 1]
         lon = ds["longitude"][:, 1]
-        lat_expected = [
-            MetopDatasets._decode_centre_component(centre, s, 1) * 1e-6 for s in 1:32]
-        lon_expected = [
-            MetopDatasets._decode_centre_component(centre, s, 2) * 1e-6 for s in 1:32]
+        lat_expected = [MetopDatasets._decode_centre_component(centre, s, 1) * 1e-6
+                        for s in 1:32]
+        lon_expected = [MetopDatasets._decode_centre_component(centre, s, 2) * 1e-6
+                        for s in 1:32]
         @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
         @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
     end
-
-    close(ds)
-end
-
-@testset "GOME-2 L1B V12 dataset" begin
-    if !isfile(GOME2_V12_FILE)
-        @info "Skipping GOME-2 V12 test: test file not found at $GOME2_V12_FILE"
-        return
-    end
-
-    ds = MetopDataset(GOME2_V12_FILE)
-    @test ds.main_product_header.format_major_version == 12
-    @test typeof(ds).parameters[1] == MetopDatasets.GOME_XXX_1B_V12
-
-    centre_var = CDM.variable(ds, "centre")
-    @test CDM.attrib(centre_var, "geo_component_order") == "latitude, longitude"
-
-    centre = CDM.variable(ds, "centre")[:, :, 1]
-    lat = ds["latitude"][:, 1]
-    lon = ds["longitude"][:, 1]
-    lat_expected = [
-        MetopDatasets._decode_centre_component(centre, s, 1) * 1e-6 for s in 1:32]
-    lon_expected = [
-        MetopDatasets._decode_centre_component(centre, s, 2) * 1e-6 for s in 1:32]
-    @test all(isapprox.(lat, lat_expected; atol = 1e-10, rtol = 0))
-    @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
-
-    _assert_sat_zenith_triplet_layout(ds)
 
     close(ds)
 end

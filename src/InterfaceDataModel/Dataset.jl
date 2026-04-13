@@ -165,7 +165,6 @@ end
 CDM.maskingvalue(ds::MetopDataset) = ds.maskingvalue
 
 function Base.close(ds::MetopDataset)
-    empty!(ds.cache)
     return close(ds.file_pointer)
 end
 

@@ -3,7 +3,7 @@
 
 # --- Variable name generation ---
 
-function _gome2_spectral_varnames(::Type{R}) where {R <: GOME_XXX_1B}
+function _gome2_spectral_varnames(::Type{<:GOME_XXX_1B})
     names = Symbol[]
     for (i, bname) in enumerate(GOME2_BAND_NAMES)
         push!(names, Symbol("wavelength_$bname"))
@@ -11,7 +11,7 @@ function _gome2_spectral_varnames(::Type{R}) where {R <: GOME_XXX_1B}
         push!(names, Symbol("radiance_error_$bname"))
         if i <= 6  # main bands
             push!(names, Symbol("stokes_fraction_$bname"))
-        elseif has_uncorrected_pmd(R)  # PMD bands with uncorrected components
+        else  # PMD bands
             push!(names, Symbol("uncorrected_radiance_$bname"))
             push!(names, Symbol("uncorrected_radiance_error_$bname"))
         end
@@ -21,24 +21,17 @@ function _gome2_spectral_varnames(::Type{R}) where {R <: GOME_XXX_1B}
     return names
 end
 
-function _gome2_spectral_varnames_all()
+const GOME2_SPECTRAL_VARNAMES = begin
     names = Symbol[]
     append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V13))
     append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V12))
-    return unique(names)
+    unique(names)
 end
-
-function _gome2_extra_varnames(::Type{R}) where {R <: GOME_XXX_1B}
-    return (
-        :latitude, :longitude, _gome2_spectral_varnames(R)...)
-end
-
-const GOME2_SPECTRAL_VARNAMES = _gome2_spectral_varnames_all()
 const GOME2_EXTRA_VARNAMES = (:latitude, :longitude, GOME2_SPECTRAL_VARNAMES...)
 const GOME2_GEO_PAIR_FIELDS = (
     :centre, :corner, :scan_centre, :scan_corner, :sub_satellite_point)
 const GOME2_FLOAT_SPECTRAL_COMPONENTS = (
-    :wavelength, :radiance, :radiance_error, :stokes_fraction,
+    :radiance, :radiance_error, :stokes_fraction,
     :uncorrected_radiance, :uncorrected_radiance_error)
 const GOME2_OUTPUT_SELECTION_COMPONENTS = (
     :radiance, :radiance_error, :uncorrected_radiance, :uncorrected_radiance_error)
@@ -54,7 +47,7 @@ end
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = default_varnames(ds)
-    extra_symbols = ds.auto_convert ? _gome2_extra_varnames(R) : (:latitude, :longitude)
+    extra_symbols = ds.auto_convert ? GOME2_EXTRA_VARNAMES : (:latitude, :longitude)
     extra_names = string.(extra_symbols)
     return (extra_names..., base_names...)
 end
@@ -190,13 +183,10 @@ end
 
 # Both V13 and V12 store CENTRE as [latitude, longitude], matching the
 # descriptor CSV and CODA library specification.
-_lat_index(::Type{GOME_XXX_1B_V13}) = 1  # 1-indexed: first component
-_lon_index(::Type{GOME_XXX_1B_V13}) = 2  # 1-indexed: second component
-_lat_index(::Type{GOME_XXX_1B_V12}) = 1  # 1-indexed: first component
-_lon_index(::Type{GOME_XXX_1B_V12}) = 2  # 1-indexed: second component
+_lat_index(::Type{<:GOME_XXX_1B}) = 1  # 1-indexed: first component
+_lon_index(::Type{<:GOME_XXX_1B}) = 2  # 1-indexed: second component
 
-_geo_component_order(::Type{GOME_XXX_1B_V13}) = "latitude, longitude"
-_geo_component_order(::Type{GOME_XXX_1B_V12}) = "latitude, longitude"
+_geo_component_order(::Type{<:GOME_XXX_1B}) = "latitude, longitude"
 
 function _output_selection_mode_attribute(mode::Symbol)
     if mode == :abs_rad
@@ -483,7 +473,11 @@ function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
             attrs[:units] = units
         end
 
-        if component in GOME2_FLOAT_SPECTRAL_COMPONENTS
+        if component == :wavelength
+            attrs[:scale_factor] = 1e-6
+            attrs[:missing_value] = GOME2_INT32_FILL_VALUE
+            attrs[:_FillValue] = GOME2_INT32_FILL_VALUE
+        elseif component in GOME2_FLOAT_SPECTRAL_COMPONENTS
             attrs[:missing_value] = NaN
             attrs[:_FillValue] = NaN
         end
