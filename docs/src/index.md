@@ -342,6 +342,7 @@ end
 - AMSU-A Level 1B
 - ASCAT Level 1B
 - ASCAT Level 2 Soil Moisture
+- GOME-2 Level 1B
 - HIRS Level 1B
 - IASI Level 1C
 - IASI Level 2 Combined Sounding
@@ -349,7 +350,6 @@ end
 
 ### Formats not yet supported
 - AVHRR Level 1B
-- GOME-2 Level 1B
 - IASI Level 1C Principal Component Scores
 
 ### Reference documents 
@@ -357,6 +357,7 @@ end
 - [AMSU-A Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_amsu_a_l1_pfs_c89fa9d9ea.pdf)
 - [ASCAT Level 1: Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/ASCAT_Level_1_Product_Format_V12_Annexe_50fe72d349.pdf)
 - [ASCAT Level 2 Soil Moisture: Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_0343_eps_ascatl2_pfs_f509981295.pdf)
+- [GOME-2 Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/GOME_2_Level_1_Product_Format_Specification_2dd39b17be.pdf)
 - [HIRS Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_97230_eps_hirs4l1_pfs_0ddaefcb74.pdf)
 - [IASI Level 1 Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_iasi_level_1_pfs_2105bc9ccf.pdf)
 - [IASI Level 2: Product Format Specification](https://user.eumetsat.int/s3/eup-strapi-media/pdf_ten_980760_eps_iasi_l2_f9511c26d2.pdf)
