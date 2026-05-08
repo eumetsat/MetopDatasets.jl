@@ -1,6 +1,12 @@
+## Experimental
+The support for GOME-2 is experimental for the following reason 
+- Only MDR-1b-Earthshine record are read. Measurements of the sun and the moon are skipped.
+- The logic for the geolocation need to be documented and validated. The different bands have different numbers of measurements per scan line but the scan line always has 32 points with coordinates. 
+- A random test exampled showed weird radiances for band 2a.
+
 ## GOME-2
 
-The Global Ozone Monitoring Experiment-2 (GOME-2) is a nadir-scanning UV/visible spectrometer on the MetOp satellites. It measures Earth-backscattered radiance in the 240–790 nm wavelength range across six main spectral bands (1a, 1b, 2a, 2b, 3, 4) and four PMD bands (pp, ps, swpp, swps). The Level 1B product contains calibrated radiance spectra and associated geolocation data.
+The Global Ozone Monitoring Experiment-2 (GOME-2) is a nadir-scanning UV/visible spectrometer on the MetOp satellites. It measures Earth-backscattered radiance in the 240–790 nm wavelength range across six main spectral bands (1a, 1b, 2a, 2b, 3, 4) and four Polarisation Measurement Device (PMD) bands (pp, ps, swpp, swps). The Level 1B product contains calibrated radiance spectra and associated geolocation data.
 
 GOME-2 data is available from the [EUMETSAT Data Store](https://data.eumetsat.int/extended?query=&filter=instrument__GOME-2&filter=availableFormats__EPS%20Native).
 
@@ -17,13 +23,13 @@ using MetopDatasets
 import CommonDataModel as CDM
 
 ds = MetopDataset("GOME_xxx_1B_M01_20260303213859Z_cropped_10.nat")
-println(ds.main_product_header.format_major_version) # 13
-println(ds.data_record_count) # number of scan lines
+println(ds.attrib["format_major_version"]) # 13
+println(ds.dim["atrack"]) # number of scan lines
 ```
 
 ### Geolocation
 
-Latitude and longitude are extracted from the interleaved CENTRE field. Each scan line has 32 ground pixels.
+Latitude and longitude are extracted from the interleaved CENTRE field. Each scan line has 32 ground pixels. The likely correspond to the second dimension of the band 1b, 2a, 2b, 3 and 4 radiation. The exact use of the geolocation still have to be documented. Note that band 1a and the PMD bands does not have 32 spectra per scan line so there geo location does not match the latitude and longitude variables one to one.
 
 ```julia
 lat = ds["latitude"][:, 1]  # 32 latitudes for first scan
@@ -33,15 +39,15 @@ println("Latitude range: ", extrema(lat))
 println("Longitude range: ", extrema(lon))
 ```
 
-Geolocation fields (`centre`, `corner`, `scan_centre`, `scan_corner`, `sub_satellite_point`) include a `geo_component_order` attribute indicating the component ordering within the `geo_component` dimension.
+Multiple geolocation fields are available in the dataset `centre`, `corner`, `scan_centre`, `scan_corner` and `sub_satellite_point`.
 
 ### Spectral variables
 
-When `auto_convert=true` (default), the dataset exposes spectral variables for each band. For example, band 1a:
+The main observations in the product is the radiances and their wavelength. The first spectrum from band 1b can be loaded the following way:
 
 ```julia
-wl = ds["wavelength_1a"][:, 1]   # wavelength grid (nm) for first scan
-rad = ds["radiance_1a"][:, 1, 1] # radiance for first scan, first readout
+wl = ds["wavelength_1b"][:, 1]   # wavelength grid (nm) for first scan
+rad = ds["radiance_1b"][:, 1, 1] # radiance for first scan, first readout
 ```
 
 Each band provides:
@@ -59,17 +65,17 @@ Each band provides:
 The radiance units depend on the `OUTPUT_SELECTION` field in the product. The spectral variables include attributes that report the mode:
 
 ```julia
-rad_var = CDM.variable(ds, "radiance_1a")
-println(CDM.attrib(rad_var, "output_selection_mode"))  # "0" or "1"
-println(CDM.attrib(rad_var, "units"))  # "photon s-1 cm-2 nm-1 sr-1" or "1"
+rad_var = ds["radiance_1a"]
+println(rad_var.attrib["output_selection_mode"])  # "0" or "1"
+println(rad_var.attrib["units"])  # "photon s-1 cm-2 nm-1 sr-1" or "1"
 ```
 
 - Mode 0 (`abs_rad`): calibrated radiance in photon s-1 cm-2 nm-1 sr-1
 - Mode 1 (`norm_rad`): sun-normalized radiance (dimensionless)
 
-### Fixed-header variables
+### Auxiliary variables
 
-The CSV-defined header fields are also accessible as variables:
+The format also contains a range of auxiliary variables. Here are some examples.
 
 ```julia
 sat_zenith = ds["sat_zenith"][:, :, :]  # (32, 3, n_records) — EFG triplets

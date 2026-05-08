@@ -92,6 +92,10 @@ function MetopDataset(
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
 
+    if record_type <: GOME_XXX_1B
+        @warn "GOME2 support is experimental" maxlog=1
+    end
+
     # skip secondary header if present
     _skip_sphr(file_pointer, main_product_header.total_sphr)
 

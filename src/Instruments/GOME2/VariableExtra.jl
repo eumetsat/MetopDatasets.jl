@@ -144,10 +144,10 @@ function CDM.variable(
 
     if varname == :latitude
         disk_array = _gome2_latlon_disk_array(ds, :latitude)
-        return MetopVariable{Float64, 2, R, typeof(disk_array)}(ds, disk_array, varname)
+        return MetopVariable(ds, disk_array, varname)
     elseif varname == :longitude
         disk_array = _gome2_latlon_disk_array(ds, :longitude)
-        return MetopVariable{Float64, 2, R, typeof(disk_array)}(ds, disk_array, varname)
+        return MetopVariable(ds, disk_array, varname)
     end
 
     parsed = _parse_spectral_varname(varname)
@@ -245,12 +245,12 @@ function _gome2_geo_pair_description(::Type{R}, field::Symbol) where {R <: GOME_
 end
 
 """
-    GomeLatLonDiskArray <: AbstractMetopDiskArray{Float64, 2}
+    GomeLatLonDiskArray <: AbstractMetopDiskArray{Int32, 2}
 
 Extracts latitude or longitude from the CENTRE field (32×2 Int32, SF=6).
 Shape: `(32, n_records)`.
 """
-struct GomeLatLonDiskArray <: AbstractMetopDiskArray{Float64, 2}
+struct GomeLatLonDiskArray <: AbstractMetopDiskArray{Int32, 2}
     centre_disk_array::MetopDiskArray
     component_index::Int  # 1 or 2 — which component of the 2-element geo pair
     field_name::Symbol
@@ -288,11 +288,7 @@ function DiskArrays.readblock!(
         raw_centre = @view raw[:, :, k]
         for (j, scan_idx) in enumerate(i_scan)
             val = _decode_centre_component(raw_centre, scan_idx, disk_array.component_index)
-            if val == typemin(Int32)
-                aout[j, k] = NaN
-            else
-                aout[j, k] = val * 1e-6
-            end
+            aout[j, k] = val
         end
     end
     return nothing
@@ -453,13 +449,14 @@ function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
     if field == :latitude
         return Dict{Symbol, Any}(
             :units => "degrees_north",
-            :missing_value => NaN,
-            :_FillValue => NaN)
+            :missing_value => typemin(Int32),
+            :scale_factor => 1e-6,
+            )
     elseif field == :longitude
         return Dict{Symbol, Any}(
             :units => "degrees_east",
-            :missing_value => NaN,
-            :_FillValue => NaN)
+            :missing_value => typemin(Int32),
+            :scale_factor => 1e-6,)
     end
 
     parsed = _parse_spectral_varname(field)

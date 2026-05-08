@@ -342,7 +342,7 @@ end
 - AMSU-A Level 1B
 - ASCAT Level 1B
 - ASCAT Level 2 Soil Moisture
-- GOME-2 Level 1B
+- (Experimental reader) GOME-2 Level 1B
 - HIRS Level 1B
 - IASI Level 1C
 - IASI Level 2 Combined Sounding

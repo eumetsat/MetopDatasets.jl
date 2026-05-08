@@ -35,9 +35,9 @@ function get_field_dimensions(T::Type{<:GOME_XXX_1B},
     if !(fieldtype(T, field_name) <: Array)
         return String[]
     end
-
+    
     array_size = _get_array_size(T, field_name)
     haskey(GOME2_SIZE_TO_DIMS, array_size) ||
         error("Dimensions not set for field $field_name with size $array_size")
-    return GOME2_SIZE_TO_DIMS[array_size]
+    return deepcopy(GOME2_SIZE_TO_DIMS[array_size])
 end

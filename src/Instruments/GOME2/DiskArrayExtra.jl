@@ -18,21 +18,13 @@ struct GomeWavelengthDiskArray <: AbstractMetopDiskArray{Int32, 2}
 end
 
 const GOME2_VINTEGER_FILL_SCALE = typemin(Int8)
-const GOME2_INT16_FILL_VALUE = typemin(Int16)
 const GOME2_INT32_FILL_VALUE = typemin(Int32)
 
-@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::Int16) where {T}
-    if sf == GOME2_VINTEGER_FILL_SCALE || val == GOME2_INT16_FILL_VALUE
+@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::V) where {T,V <: Integer}
+    if sf == GOME2_VINTEGER_FILL_SCALE || val == typemin(V)
         return T(NaN)
     end
-    return _auto_convert(T, VInteger{Int16}(sf, val))
-end
-
-@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::Int32) where {T}
-    if sf == GOME2_VINTEGER_FILL_SCALE || val == GOME2_INT32_FILL_VALUE
-        return T(NaN)
-    end
-    return _auto_convert(T, VInteger{Int32}(sf, val))
+    return _auto_convert(T, VInteger{V}(sf, val))
 end
 
 @inline function _decode_scaled_int_or_nan(::Type{T}, val::Int32, scale_factor::Int) where {T}
@@ -65,8 +57,8 @@ function DiskArrays.readblock!(
 
     for (k, rec_idx) in enumerate(i_record)
         rl = si.rec_lengths[bi, rec_idx]
-        wl_offsets,
-        _ = _compute_spectral_section_offsets(si, rec_idx)
+        wl_offsets, _ = 
+            _compute_spectral_section_offsets(si, rec_idx)
 
         wl_start = first(i_wavelength)
         wl_end = min(last(i_wavelength), rl)
