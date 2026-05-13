@@ -77,7 +77,7 @@ end
 function default_variable(ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R}
     varname = Symbol(varname)
     if !(string(varname) in CDM.varnames(ds))
-        throw( KeyError( string(varname) ) )
+        throw(KeyError(string(varname)))
     end
     disk_array = construct_disk_array(ds.file_pointer, ds.data_record_layouts,
         varname; auto_convert = ds.auto_convert)
@@ -92,8 +92,7 @@ function default_dimnames(v::MetopVariable{T, N, R}) where {T, N, R}
         return [RECORD_DIM_NAME]
     else
         names = get_field_dimensions(R, v.field_name)
-        push!(names, RECORD_DIM_NAME)
-        return names
+        return vcat(names,[RECORD_DIM_NAME])
     end
 end
 

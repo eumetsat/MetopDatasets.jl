@@ -9,6 +9,7 @@ struct MetopDataset{R <: DataRecord, L <: RecordLayout} <: CDM.AbstractDataset
     auto_convert::Bool
     high_precision::Bool
     maskingvalue::Any
+    cache::Dict{Symbol, Any}
 end
 
 """
@@ -71,13 +72,18 @@ end
 function MetopDataset(f::Function, file_path::AbstractString;
         auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     file_pointer = open(file_path, "r")
+    ds = nothing
     try
         ds = MetopDataset(
             file_pointer; auto_convert = auto_convert,
             high_precision = high_precision, maskingvalue = maskingvalue)
         return f(ds)
     finally
-        close(file_pointer)
+        if isnothing(ds)
+            close(file_pointer)
+        else
+            close(ds)
+        end
     end
 end
 
@@ -85,6 +91,10 @@ function MetopDataset(
         file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
+
+    if record_type <: GOME_XXX_1B
+        @warn "GOME2 support is experimental" maxlog=1
+    end
 
     # skip secondary header if present
     _skip_sphr(file_pointer, main_product_header.total_sphr)
@@ -99,7 +109,8 @@ function MetopDataset(
         data_record_count,
         auto_convert,
         high_precision,
-        maskingvalue)
+        maskingvalue,
+        Dict{Symbol, Any}())
 end
 
 ## Extend CommonDataModel.AbstractDataset interface
@@ -157,7 +168,9 @@ end
 
 CDM.maskingvalue(ds::MetopDataset) = ds.maskingvalue
 
-Base.close(ds::MetopDataset) = close(ds.file_pointer)
+function Base.close(ds::MetopDataset)
+    return close(ds.file_pointer)
+end
 
 """
     read_single_record(ds::MetopDataset, record_type::Type{<:Record})

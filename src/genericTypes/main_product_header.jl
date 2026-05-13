@@ -18,8 +18,8 @@ struct MainProductHeader <: Header
     spacecraft_id::String
     sensing_start::DateTime
     sensing_end::DateTime
-    sensing_start_theoretical::DateTime
-    sensing_end_theoretical::DateTime
+    sensing_start_theoretical::Union{Nothing, DateTime}
+    sensing_end_theoretical::Union{Nothing, DateTime}
     processing_centre::String
     processor_major_version::Int64
     processor_minor_version::Int64

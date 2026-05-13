@@ -27,6 +27,7 @@ makedocs(;
         "Use with Python" => "python.md",
         "Examples" => [
             "ASCAT" => "ASCAT.md",
+            "GOME-2" => "GOME2.md",
             "IASI" => "IASI.md",
             "ATOVS (AMSU-A, HIRS, MHS)" => "ATOVS.md"
         ],

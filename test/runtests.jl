@@ -40,6 +40,10 @@ end
     include("HIRS.jl")
 end
 
+@safetestset "GOME-2" begin
+    include("GOME2.jl")
+end
+
 @safetestset "Main product header" begin
     include("main_product_header.jl")
 end
