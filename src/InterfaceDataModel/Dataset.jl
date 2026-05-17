@@ -62,21 +62,25 @@ julia> close(ds);
 ``` 
 """
 function MetopDataset(file_path::AbstractString; auto_convert::Bool = true,
-        high_precision::Bool = false, maskingvalue = missing)
+        high_precision::Bool = false, maskingvalue = missing,
+        mdr_subclass::Symbol = :earthshine)
     return MetopDataset(
         open(file_path, "r"); auto_convert = auto_convert,
-        high_precision = high_precision, maskingvalue = maskingvalue)
+        high_precision = high_precision, maskingvalue = maskingvalue,
+        mdr_subclass = mdr_subclass)
 end
 
 # method to enable `do` syntax.
 function MetopDataset(f::Function, file_path::AbstractString;
-        auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
+        auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing,
+        mdr_subclass::Symbol = :earthshine)
     file_pointer = open(file_path, "r")
     ds = nothing
     try
         ds = MetopDataset(
             file_pointer; auto_convert = auto_convert,
-            high_precision = high_precision, maskingvalue = maskingvalue)
+            high_precision = high_precision, maskingvalue = maskingvalue,
+            mdr_subclass = mdr_subclass)
         return f(ds)
     finally
         if isnothing(ds)
@@ -88,9 +92,15 @@ function MetopDataset(f::Function, file_path::AbstractString;
 end
 
 function MetopDataset(
-        file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
+        file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false,
+        maskingvalue = missing, mdr_subclass::Symbol = :earthshine)
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
+
+    # GOME-2 only: swap Earthshine (default) for the caller-requested subclass.
+    # `_gome2_subclass_type` is a no-op for non-GOME types and for
+    # mdr_subclass=:earthshine.
+    record_type = _gome2_subclass_type(record_type, mdr_subclass)
 
     if record_type <: GOME_XXX_1B
         @warn "GOME2 support is experimental" maxlog=1
@@ -99,8 +109,13 @@ function MetopDataset(
     # skip secondary header if present
     _skip_sphr(file_pointer, main_product_header.total_sphr)
 
-    record_layouts = read_record_layouts(file_pointer, main_product_header)
+    record_layouts = read_record_layouts(file_pointer, main_product_header;
+        record_type = record_type)
     data_record_layouts = filter(x -> x.record_type == record_type, record_layouts)
+    if isempty(data_record_layouts)
+        error("No records of type $(record_type) found in the product. " *
+              "(GOME-2: the requested mdr_subclass may not be present in this file.)")
+    end
     data_record_count = data_record_layouts[end].record_range[end]
 
     return MetopDataset{record_type, eltype(data_record_layouts)}(file_pointer,

@@ -44,6 +44,10 @@ end
     include("GOME2.jl")
 end
 
+@safetestset "GOME-2 subclasses" begin
+    include("GOME2_subclasses.jl")
+end
+
 @safetestset "Main product header" begin
     include("main_product_header.jl")
 end

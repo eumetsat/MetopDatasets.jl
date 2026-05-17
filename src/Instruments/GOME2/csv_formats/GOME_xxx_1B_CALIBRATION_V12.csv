@@ -1,0 +1,38 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,,,1,1,1,rec_head,20,20,0
+DEGRADED_INSTR_MDR,"Quality of MDR has been degraded from nominal due to an instrument degradation. Occurs if any of F_NN_DT, F_NN_PDP, F_NN_RAD, F_NN_WLS_U, F_NN_WLS_I, F_NN_SLS_U, F_NN_SLS_I, F_SAT, F_MIN in PCD_BASIC has been raised. Up to processor version 3.2.11, F_HOT also counted as instrument degradation",,,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation. Occurs if F_MISS or F_OLD_CAL_DATA in PCD_BASIC have been raised,,,1,1,1,boolean,1,1,21
+F_NN_DT,"Flag indicating non-nominal detector temperature, per channel",,,1,1,1,bitst(8),1,1,22
+F_NN_PDP,Flag indicating non-nominal pre-disperser temperature,,,1,1,1,boolean,1,1,23
+F_NN_RAD,Flag indicating non-nominal radiator temperature,,,1,1,1,boolean,1,1,24
+F_NN_WLS_U,Flag indicating non-nominal WLS voltage,,,1,1,1,boolean,1,1,25
+F_NN_WLS_I,Flag indicating non-nominal WLS current,,,1,1,1,boolean,1,1,26
+F_NN_SLS_U,Flag indicating non-nominal SLS voltage,,,1,1,1,boolean,1,1,27
+F_NN_SLS_I,Flag indicating non-nominal SLS current,,,1,1,1,boolean,1,1,28
+F_INV_UTC,Flag indicating invalid UTC,,,1,1,1,boolean,1,1,29
+F_MISS,Flag indicating missing data packets,,,1,1,1,boolean,1,1,30
+F_SAT,"Flag indicating saturated pixels, per band and read-out",,,N_GEO_BANDS,1,1,bitst(32),4,40,31
+F_HOT,"Flag indicating hot pixels, per band and read-out",,,N_GEO_BANDS,1,1,bitst(32),4,40,71
+F_SAA,Flag indicating whether read-out is in the SAA,,,1,1,1,bitst(32),4,4,111
+F_SUNGLINT_RISK,Flag indicating danger of sun-glint per read-out,,,1,1,1,bitst(32),4,4,115
+F_SUNGLINT_HIGH_RISK,Flag indicating high danger of sun-glint per read-out,,,1,1,1,bitst(32),4,4,119
+F_RAINBOW,Flag indicating danger of rainbow per read-out,,,1,1,1,bitst(32),4,4,123
+F_MODE_GEOLOCATION,Flag indicating possible mismatch between observation mode and geolocation,,,1,1,1,boolean,1,1,127
+F_MIN,"Flag indicating that mean raw signal is below a specified threshold, per band and read-out",,,N_GEO_BANDS,1,1,bitst(32),4,40,128
+MEAN_UC,Mean raw signal per band,3,,N_GEO_BANDS,1,1,integer4,4,40,168
+F_OLD_CAL_DATA,"Flag to indicate that old in-flight auxiliary calibration data is in use (0 = no in-flight auxiliary calibration data is old, 1 = dark signal correction old, 2 = PPG correction old, 4 = spectral calibration parameters old, 8 = etalon correction old, 16 = SMR old)",,,1,1,1,bitst(32),4,4,208
+OBSERVATION_MODE,"Observation mode (0 = nadir, 1 = north pole scanning, 2 = south pole scanning, 3 = other scanning, 4 = nadir static, 5 = other static, 6 = dark, 7 = LED, 8 = WLS, 9 = SLS, 10 = SLS over diffuser, 11 = sun, 12 = moon, 13 = idle, 14 = test, 15 = dump, 16 = invalid)",,,1,1,1,enumerated,1,1,212
+PMD_TRANSFER,"PMD transfer mode (1 = band + raw, 2 = band + mixed, 3 = raw transfer, 4 = various (PMD transfer mode changes within a scan))",,,1,1,1,enumerated,1,1,213
+PMD_READOUT,"PMD readout mode (0 = nominal, 1 = solar, 2 = calibration, 3 = various (PMD readout mode changes within a scan))",,,1,1,1,enumerated,1,1,214
+SCANNER_ANGLE,Scanner viewing angle with additional element at end of scan,6,degrees,65,1,1,integer4,4,260,215
+UTC_TIME,"UTC time associated with every second scanner position (0, 2, ..., 62)",,,32,1,1,short cds time,6,192,475
+SUB_SATELLITE_POINT,Geodetic latitude and geocentric longitude of sub-satellite point (earth-fixed CS),6,,32,2,1,integer4,4,256,667
+SATELLITE_ALTITUDE,Geodetic altitude of satellite (earth-fixed CS),3,m,32,1,1,integer4,4,128,923
+SOLAR_ZENITH_ANGLE,Solar zenith angle (Satellite Relative Actual CS),6,degrees,32,1,1,integer4,4,128,1051
+SOLAR_AZIMUTH_ANGLE,Solar azimuth angle (Satellite Relative Actual CS),6,degrees,32,1,1,integer4,4,128,1179
+PDP_TEMP,Temperature of the pre-disperser prism for reference to the corresponding spectral calibration parameters,3,K,1,1,1,integer4,4,4,1307
+FPA_TEMP,"FPA temperature, per channel",3,K,6,1,1,integer4,4,24,1311
+RAD_TEMP,Radiator temperature,3,K,1,1,1,integer4,4,4,1335
+INTEGRATION_TIMES,Integration times per band,6,s,N_GEO_BANDS,1,1,integer4,4,40,1339
+REC_LENGTH,"Number of elements per band data record for the 10 bands that follow (n1, n2, ..., n10)",,,N_GEO_BANDS,1,1,u-integer2,2,20,1379
+NUM_RECS,"Number of band data records for the 10 bands that follow (m1, m2, ..., m10)",,,N_GEO_BANDS,1,1,u-integer2,2,20,1399

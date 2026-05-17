@@ -6,10 +6,11 @@
 
 Read the appropriate record layout from IO.
 """
-function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader)
-    record_type = data_record_type(main_product_header)
+function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader;
+        record_type::Type = data_record_type(main_product_header))
     return read_record_layouts(
-        file_pointer, main_product_header, Val(fixed_size(record_type)))
+        file_pointer, main_product_header, Val(fixed_size(record_type));
+        record_type = record_type)
 end
 
 """
@@ -52,9 +53,8 @@ struct FixedRecordLayout <: RecordLayout
 end
 
 function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
-        fixed_size::Val{true})::Vector{FixedRecordLayout}
-    record_type = data_record_type(main_product_header)
-
+        fixed_size::Val{true};
+        record_type::Type = data_record_type(main_product_header))::Vector{FixedRecordLayout}
     # read internal pointer records
     internal_pointer_records = Vector{InternalPointerRecord}(undef,
         main_product_header.total_ipr)
@@ -81,6 +81,7 @@ Compute the `record_layouts`
 function _get_data_record_layouts(internal_pointer_records::Vector{InternalPointerRecord},
         total_file_size::Integer, record_type::Type{<:DataRecord})::Vector{FixedRecordLayout}
     record_layouts = FixedRecordLayout[]
+    target_subclass = get_instrument_subclass(record_type)
 
     for i in eachindex(internal_pointer_records)
         pointer = internal_pointer_records[i]
@@ -92,8 +93,19 @@ function _get_data_record_layouts(internal_pointer_records::Vector{InternalPoint
         byte_end = i == length(internal_pointer_records) ? total_file_size :
                    Int64(internal_pointer_records[i + 1].record_offset)
         byte_size = byte_end - offset
-        record_type_i = pointer.instrument_group == get_instrument_group(DummyRecord) ?
-                        DummyRecord : record_type
+        is_dummy = pointer.instrument_group == get_instrument_group(DummyRecord)
+
+        # If the requested record_type pins a specific instrument_subclass
+        # (e.g. GOME-2 L1A Other = 5), filter pointers to that subclass.
+        # Otherwise non-Other MDR blocks of different sizes would be
+        # mis-counted as Other. Dummy records pass through to the
+        # DummyRecord branch unchanged.
+        if !is_dummy && !isnothing(target_subclass) &&
+           pointer.instrument_subclass != target_subclass
+            continue
+        end
+
+        record_type_i = is_dummy ? DummyRecord : record_type
         _add_record_layout!(record_layouts, offset, byte_size, record_type_i)
     end
 
@@ -147,9 +159,8 @@ struct FlexibleRecordLayout <: RecordLayout
 end
 
 function read_record_layouts(file_pointer::IO, main_product_header::MainProductHeader,
-        is_fixed_size::Val{false})::Vector{FlexibleRecordLayout}
-    record_type = data_record_type(main_product_header)
-
+        is_fixed_size::Val{false};
+        record_type::Type = data_record_type(main_product_header))::Vector{FlexibleRecordLayout}
     flexible_dims_file = _get_flexible_dims_file(file_pointer, record_type)
 
     flexible_dims_records = OrderedDict{Symbol, Int64}[]
@@ -157,6 +168,11 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
     record_sizes = Int64[]
 
     record_start_pos, _ = _find_nth_record(file_pointer, record_type, 1)
+    if isnothing(record_start_pos)
+        # No records of this type in the file — return an empty layout so that
+        # MetopDataset can surface a clear error.
+        return FlexibleRecordLayout[]
+    end
     seek(file_pointer, record_start_pos)
 
     # read flexible dimensions and record offsets 

@@ -1,9 +1,8 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-# --- Variable name generation ---
 
-function _gome2_spectral_varnames(::Type{<:GOME_XXX_1B})
+function _gome2_spectral_varnames(R::Type{<:GOME_XXX_1B})
     names = Symbol[]
     for (i, bname) in enumerate(GOME2_BAND_NAMES)
         push!(names, Symbol("wavelength_$bname"))
@@ -11,7 +10,7 @@ function _gome2_spectral_varnames(::Type{<:GOME_XXX_1B})
         push!(names, Symbol("radiance_error_$bname"))
         if i <= 6  # main bands
             push!(names, Symbol("stokes_fraction_$bname"))
-        else  # PMD bands
+        elseif has_uncorrected_pmd(R)
             push!(names, Symbol("uncorrected_radiance_$bname"))
             push!(names, Symbol("uncorrected_radiance_error_$bname"))
         end
@@ -27,6 +26,23 @@ const GOME2_SPECTRAL_VARNAMES = begin
     append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V12))
     unique(names)
 end
+
+# latitude / longitude are synthesised from CENTRE; only Earthshine has that field.
+const GOME2_EARTHSHINE_EXTRA_VARNAMES = (:latitude, :longitude)
+
+_gome2_has_centre_field(::Type) = false
+_gome2_has_centre_field(::Type{<:GOME_XXX_1B_V13}) = true
+_gome2_has_centre_field(::Type{<:GOME_XXX_1B_V12}) = true
+
+function _gome2_extra_varnames(R::Type{<:GOME_XXX_1B})
+    extras = Symbol[]
+    if _gome2_has_centre_field(R)
+        append!(extras, GOME2_EARTHSHINE_EXTRA_VARNAMES)
+    end
+    append!(extras, _gome2_spectral_varnames(R))
+    return Tuple(extras)
+end
+
 const GOME2_EXTRA_VARNAMES = (:latitude, :longitude, GOME2_SPECTRAL_VARNAMES...)
 const GOME2_GEO_PAIR_FIELDS = (
     :centre, :corner, :scan_centre, :scan_corner, :sub_satellite_point)
@@ -36,23 +52,40 @@ const GOME2_FLOAT_SPECTRAL_COMPONENTS = (
 const GOME2_OUTPUT_SELECTION_COMPONENTS = (
     :radiance, :radiance_error, :uncorrected_radiance, :uncorrected_radiance_error)
 const GOME2_OUTPUT_SELECTION_UNITS = Dict{Symbol, String}(
-    :abs_rad => "photon s-1 cm-2 nm-1 sr-1",
-    :norm_rad => "1")
+    :abs_rad           => "photon s-1 cm-2 nm-1 sr-1",   # Earthshine, OUTPUT_SELECTION=0
+    :norm_rad          => "1",                            # Earthshine, OUTPUT_SELECTION=1
+    :solar_irradiance  => "photon s-1 cm-2 nm-1",         # Sun MDR
+    :lunar_radiance    => "photon s-1 cm-2 nm-1 sr-1",    # Moon MDR
+    :calibration_signal => "photon s-1 cm-2 nm-1 sr-1",   # Calibration MDR (calibrated)
+)
+
+# Measurement mode for non-Earthshine MDRs (no OUTPUT_SELECTION field).
+_gome2_default_mode(::Type{<:GOME_XXX_1B}) = :unknown
+_gome2_default_mode(::Type{<:GOME_XXX_1B_SUN_V13}) = :solar_irradiance
+_gome2_default_mode(::Type{<:GOME_XXX_1B_SUN_V12}) = :solar_irradiance
+_gome2_default_mode(::Type{<:GOME_XXX_1B_MOON_V13}) = :lunar_radiance
+_gome2_default_mode(::Type{<:GOME_XXX_1B_MOON_V12}) = :lunar_radiance
+_gome2_default_mode(::Type{<:GOME_XXX_1B_CALIBRATION_V13}) = :calibration_signal
+_gome2_default_mode(::Type{<:GOME_XXX_1B_CALIBRATION_V12}) = :calibration_signal
 
 function _is_gome2_extra_var(varname::Symbol)
     return varname in GOME2_EXTRA_VARNAMES
 end
 
-# --- CDM.varnames ---
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = default_varnames(ds)
-    extra_symbols = ds.auto_convert ? GOME2_EXTRA_VARNAMES : (:latitude, :longitude)
+    if ds.auto_convert
+        extra_symbols = _gome2_extra_varnames(R)
+    else
+        # Without auto_convert, only the synthesised lat/lon are exposed.
+        extra_symbols = _gome2_has_centre_field(R) ?
+                        GOME2_EARTHSHINE_EXTRA_VARNAMES : ()
+    end
     extra_names = string.(extra_symbols)
     return (extra_names..., base_names...)
 end
 
-# --- Spectral info caching ---
 const GOME2_SPECTRAL_CACHE_KEY = :gome2_spectral_info
 const GOME2_OUTPUT_SELECTION_CACHE_KEY = :gome2_output_selection_info
 
@@ -65,6 +98,10 @@ function _get_spectral_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
 end
 
 function _get_output_selection_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
+    # OUTPUT_SELECTION exists only in Earthshine; other subclasses use `_gome2_default_mode`.
+    if !hasfield(R, :output_selection)
+        return (_gome2_default_mode(R), UInt8[])::Tuple{Symbol, Vector{UInt8}}
+    end
     output_selection_info = get!(ds.cache, GOME2_OUTPUT_SELECTION_CACHE_KEY) do
         output_selection_da = construct_disk_array(
             ds.file_pointer, ds.data_record_layouts, :output_selection; auto_convert = false)
@@ -95,7 +132,6 @@ function _get_output_selection_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B
     return output_selection_info::Tuple{Symbol, Vector{UInt8}}
 end
 
-# --- Parse spectral variable name ---
 
 function _parse_spectral_varname(varname::Symbol)
     s = string(varname)
@@ -132,7 +168,6 @@ function _is_supported_spectral_component(
     return true
 end
 
-# --- CDM.variable ---
 
 function CDM.variable(
         ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R <: GOME_XXX_1B}
@@ -142,11 +177,12 @@ function CDM.variable(
         return default_variable(ds, varname)
     end
 
-    if varname == :latitude
-        disk_array = _gome2_latlon_disk_array(ds, :latitude)
-        return MetopVariable(ds, disk_array, varname)
-    elseif varname == :longitude
-        disk_array = _gome2_latlon_disk_array(ds, :longitude)
+    if varname in (:latitude, :longitude)
+        if !_gome2_has_centre_field(R)
+            error("Variable `$varname` is only defined for Earthshine MDRs " *
+                  "(record type $R has no CENTRE field).")
+        end
+        disk_array = _gome2_latlon_disk_array(ds, varname)
         return MetopVariable(ds, disk_array, varname)
     end
 
@@ -179,7 +215,6 @@ function CDM.variable(
     return MetopVariable{T, N, R, typeof(disk_array)}(ds, disk_array, varname)
 end
 
-# --- Latitude/Longitude extraction ---
 
 # Both V13 and V12 store CENTRE as [latitude, longitude], matching the
 # descriptor CSV and CODA library specification.
@@ -195,6 +230,12 @@ function _output_selection_mode_attribute(mode::Symbol)
         return "1"
     elseif mode == :mixed
         return "mixed"
+    elseif mode == :solar_irradiance
+        return "solar_irradiance"
+    elseif mode == :lunar_radiance
+        return "lunar_radiance"
+    elseif mode == :calibration_signal
+        return "calibration_signal"
     end
     return "unknown"
 end
@@ -213,6 +254,13 @@ function _output_selection_comment(mode::Symbol, values::Vector{UInt8})
         return "OUTPUT_SELECTION=1 (NormRad): sun-normalized radiance mode."
     elseif mode == :mixed
         return "Mixed OUTPUT_SELECTION values ($(join(Int.(values), ", "))) across records."
+    elseif mode == :solar_irradiance
+        return "MDR-1b-Sun: calibrated solar irradiance (no OUTPUT_SELECTION field)."
+    elseif mode == :lunar_radiance
+        return "MDR-1b-Moon: calibrated lunar radiance (no OUTPUT_SELECTION field)."
+    elseif mode == :calibration_signal
+        return "MDR-1b-Calibration: calibrated signal from an internal calibration step " *
+               "(dark/LED/WLS/SLS — see OBSERVATION_MODE per record)."
     end
     return "Unknown OUTPUT_SELECTION values ($(join(Int.(values), ", ")))."
 end
@@ -294,7 +342,6 @@ function DiskArrays.readblock!(
     return nothing
 end
 
-# --- Dataset dimension overrides ---
 
 # Keep the fixed GOME-2 dimensions in GOME2_dimensions.jl and add the spectral
 # dimensions lazily here so dataset metadata stays aligned with the record definitions.
@@ -343,7 +390,6 @@ function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R <: GOME
     return get_dimensions(ds)[name]
 end
 
-# --- CDM.dimnames for variables ---
 
 function CDM.dimnames(v::MetopVariable{T, N, R}) where {T, N, R <: GOME_XXX_1B}
     if v.field_name in (:latitude, :longitude)
@@ -365,7 +411,6 @@ function CDM.dimnames(v::MetopVariable{T, N, R}) where {T, N, R <: GOME_XXX_1B}
     return default_dimnames(v)
 end
 
-# --- CDM.attrib ---
 
 function CDM.attrib(
         v::MetopVariable{T, N, R}, name::CDM.SymbolOrString) where {T, N, R <: GOME_XXX_1B}
@@ -399,6 +444,12 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
                 return "Calibrated radiance for band $bname"
             elseif mode == :norm_rad
                 return "Sun-normalized radiance for band $bname"
+            elseif mode == :solar_irradiance
+                return "Calibrated solar irradiance for band $bname (Sun MDR)"
+            elseif mode == :lunar_radiance
+                return "Calibrated lunar radiance for band $bname (Moon MDR)"
+            elseif mode == :calibration_signal
+                return "Calibrated calibration-mode signal for band $bname (Calibration MDR)"
             elseif mode == :mixed
                 return "Radiance for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
             end
@@ -408,6 +459,12 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
                 return "Calibrated radiance error for band $bname"
             elseif mode == :norm_rad
                 return "Sun-normalized radiance error for band $bname"
+            elseif mode == :solar_irradiance
+                return "Calibrated solar irradiance error for band $bname (Sun MDR)"
+            elseif mode == :lunar_radiance
+                return "Calibrated lunar radiance error for band $bname (Moon MDR)"
+            elseif mode == :calibration_signal
+                return "Calibration-mode signal error for band $bname (Calibration MDR)"
             elseif mode == :mixed
                 return "Radiance error for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
             end
@@ -442,7 +499,6 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
     return ""
 end
 
-# --- get_cf_attributes ---
 
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
         auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: GOME_XXX_1B}
