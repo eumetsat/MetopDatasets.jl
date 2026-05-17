@@ -56,7 +56,16 @@ const GOME2_OUTPUT_SELECTION_UNITS = Dict{Symbol, String}(
     :norm_rad          => "1",                            # Earthshine, OUTPUT_SELECTION=1
     :solar_irradiance  => "photon s-1 cm-2 nm-1",         # Sun MDR
     :lunar_radiance    => "photon s-1 cm-2 nm-1 sr-1",    # Moon MDR
-    :calibration_signal => "photon s-1 cm-2 nm-1 sr-1",   # Calibration MDR (calibrated)
+    # Calibration MDR: BAND_* compound carries the same calibrated units as
+    # Earthshine, but the physical meaning per record depends on the
+    # internal source (Dark/LED/WLS/SLS/SLS_diffuser) — see OBSERVATION_MODE.
+    :calibration_signal        => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_dark          => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_LED           => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_WLS           => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_SLS           => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_SLS_diffuser  => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_mixed         => "photon s-1 cm-2 nm-1 sr-1",
 )
 
 # Measurement mode for non-Earthshine MDRs (no OUTPUT_SELECTION field).
@@ -88,6 +97,45 @@ end
 
 const GOME2_SPECTRAL_CACHE_KEY = :gome2_spectral_info
 const GOME2_OUTPUT_SELECTION_CACHE_KEY = :gome2_output_selection_info
+const GOME2_OBSERVATION_MODE_CACHE_KEY = :gome2_observation_mode_info
+
+# OBSERVATION_MODE enumeration from the GOME-2 PFS, restricted to the values
+# that can appear in a non-Earthshine MDR (Calibration / Sun / Moon).
+const GOME2_OBSERVATION_MODE_LABELS = Dict{UInt8, String}(
+    0x06 => "dark",
+    0x07 => "LED",
+    0x08 => "WLS",
+    0x09 => "SLS",
+    0x0a => "SLS_diffuser",
+    0x0b => "sun",
+    0x0c => "moon",
+)
+
+# Cache OBSERVATION_MODE values present in this dataset (one sorted UInt8 vector).
+function _get_observation_mode_values(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
+    return get!(ds.cache, GOME2_OBSERVATION_MODE_CACHE_KEY) do
+        da = construct_disk_array(
+            ds.file_pointer, ds.data_record_layouts, :observation_mode; auto_convert = false)
+        values = collect(da[1:ds.data_record_count])
+        fill_value = get_missing_value(R, :observation_mode)
+        isnothing(fill_value) || filter!(x -> x != fill_value, values)
+        return sort(unique(values))::Vector{UInt8}
+    end
+end
+
+# Map the set of OBSERVATION_MODE values to a refined mode symbol for the
+# Calibration subclass (per-record modes Dark/LED/WLS/SLS/SLS_diffuser).
+function _gome2_calibration_mode(values::Vector{UInt8})
+    isempty(values) && return :calibration_signal
+    length(values) == 1 || return :calibration_mixed
+    v = values[1]
+    v == 0x06 && return :calibration_dark
+    v == 0x07 && return :calibration_LED
+    v == 0x08 && return :calibration_WLS
+    v == 0x09 && return :calibration_SLS
+    v == 0x0a && return :calibration_SLS_diffuser
+    return :calibration_signal
+end
 
 function _get_spectral_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     info = get!(ds.cache, GOME2_SPECTRAL_CACHE_KEY) do
@@ -98,8 +146,14 @@ function _get_spectral_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
 end
 
 function _get_output_selection_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
-    # OUTPUT_SELECTION exists only in Earthshine; other subclasses use `_gome2_default_mode`.
+    # OUTPUT_SELECTION exists only in Earthshine. For Sun/Moon, mode is fixed
+    # by subclass identity. For Calibration, OBSERVATION_MODE distinguishes
+    # Dark/LED/WLS/SLS/SLS_diffuser per record — surface the actual modes.
     if !hasfield(R, :output_selection)
+        if R <: Union{GOME_XXX_1B_CALIBRATION_V13, GOME_XXX_1B_CALIBRATION_V12}
+            obs_modes = _get_observation_mode_values(ds)
+            return (_gome2_calibration_mode(obs_modes), obs_modes)
+        end
         return (_gome2_default_mode(R), UInt8[])::Tuple{Symbol, Vector{UInt8}}
     end
     output_selection_info = get!(ds.cache, GOME2_OUTPUT_SELECTION_CACHE_KEY) do
@@ -230,12 +284,11 @@ function _output_selection_mode_attribute(mode::Symbol)
         return "1"
     elseif mode == :mixed
         return "mixed"
-    elseif mode == :solar_irradiance
-        return "solar_irradiance"
-    elseif mode == :lunar_radiance
-        return "lunar_radiance"
-    elseif mode == :calibration_signal
-        return "calibration_signal"
+    elseif mode in (:solar_irradiance, :lunar_radiance,
+                    :calibration_signal, :calibration_dark, :calibration_LED,
+                    :calibration_WLS, :calibration_SLS, :calibration_SLS_diffuser,
+                    :calibration_mixed)
+        return string(mode)
     end
     return "unknown"
 end
@@ -258,9 +311,16 @@ function _output_selection_comment(mode::Symbol, values::Vector{UInt8})
         return "MDR-1b-Sun: calibrated solar irradiance (no OUTPUT_SELECTION field)."
     elseif mode == :lunar_radiance
         return "MDR-1b-Moon: calibrated lunar radiance (no OUTPUT_SELECTION field)."
+    elseif mode in (:calibration_dark, :calibration_LED, :calibration_WLS,
+                    :calibration_SLS, :calibration_SLS_diffuser)
+        m = match(r"^calibration_(.+)$", string(mode))
+        return "MDR-1b-Calibration: $(m.captures[1]) measurement."
+    elseif mode == :calibration_mixed
+        present = filter(v -> haskey(GOME2_OBSERVATION_MODE_LABELS, v), values)
+        labels = join((GOME2_OBSERVATION_MODE_LABELS[v] for v in present), ", ")
+        return "MDR-1b-Calibration: mixed internal-source modes across records ($labels)."
     elseif mode == :calibration_signal
-        return "MDR-1b-Calibration: calibrated signal from an internal calibration step " *
-               "(dark/LED/WLS/SLS — see OBSERVATION_MODE per record)."
+        return "MDR-1b-Calibration: calibrated internal-source signal."
     end
     return "Unknown OUTPUT_SELECTION values ($(join(Int.(values), ", ")))."
 end
@@ -450,6 +510,12 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
                 return "Calibrated lunar radiance for band $bname (Moon MDR)"
             elseif mode == :calibration_signal
                 return "Calibrated calibration-mode signal for band $bname (Calibration MDR)"
+            elseif mode in (:calibration_dark, :calibration_LED, :calibration_WLS,
+                            :calibration_SLS, :calibration_SLS_diffuser)
+                m = match(r"^calibration_(.+)$", string(mode))
+                return "Calibration-mode signal ($(m.captures[1])) for band $bname (Calibration MDR)"
+            elseif mode == :calibration_mixed
+                return "Calibration-mode signal (mixed internal sources) for band $bname (Calibration MDR)"
             elseif mode == :mixed
                 return "Radiance for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
             end
@@ -464,6 +530,9 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
             elseif mode == :lunar_radiance
                 return "Calibrated lunar radiance error for band $bname (Moon MDR)"
             elseif mode == :calibration_signal
+                return "Calibration-mode signal error for band $bname (Calibration MDR)"
+            elseif mode in (:calibration_dark, :calibration_LED, :calibration_WLS,
+                            :calibration_SLS, :calibration_SLS_diffuser, :calibration_mixed)
                 return "Calibration-mode signal error for band $bname (Calibration MDR)"
             elseif mode == :mixed
                 return "Radiance error for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"

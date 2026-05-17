@@ -142,16 +142,25 @@ gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_V13}) = GOME2_GEO_REC_LENGTH_OFFS
 gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_V12}) = GOME2_GEO_REC_LENGTH_OFFSET_V12
 
 # Non-Earthshine REC_LENGTH and NUM_RECS sit at a constant offset inside the fixed header.
-# Values come from the last two rows of each CSV. Fixed-header size = NUM_RECS offset + 20.
-const GOME2_NON_EARTHSHINE_OFFSETS = Dict{Type, Tuple{Int, Int}}(
-    GOME_XXX_1B_SUN_V13         => (1399, 1419),
-    GOME_XXX_1B_SUN_V12         => (1387, 1407),
-    GOME_XXX_1B_MOON_V13        => (1447, 1467),
-    GOME_XXX_1B_MOON_V12        => (1435, 1455),
-    GOME_XXX_1B_CALIBRATION_V13 => (1391, 1411),
-    GOME_XXX_1B_CALIBRATION_V12 => (1379, 1399),
-)
+# The offsets are computed from the auto-generated struct so they track the CSV layout
+# automatically — no hardcoded byte positions to drift out of sync.
 
-gome2_rec_length_offset(T::Type{<:GOME_XXX_1B}) = GOME2_NON_EARTHSHINE_OFFSETS[T][1]
-gome2_num_recs_offset(T::Type{<:GOME_XXX_1B})   = GOME2_NON_EARTHSHINE_OFFSETS[T][2]
+function _gome2_field_offset(T::Type, target::Symbol)
+    offset = 0
+    for f in fieldnames(T)
+        f == target && return offset
+        ft = fieldtype(T, f)
+        if ft <: AbstractArray
+            dims = get_raw_format_dim(T)[f]
+            n = prod(d isa Integer ? d : 10 for d in dims)
+            offset += n * native_sizeof(eltype(ft))
+        else
+            offset += native_sizeof(ft)
+        end
+    end
+    error("Field `$target` not found in $T")
+end
+
+gome2_rec_length_offset(T::Type{<:GOME_XXX_1B}) = _gome2_field_offset(T, :rec_length)
+gome2_num_recs_offset(T::Type{<:GOME_XXX_1B})   = _gome2_field_offset(T, :num_recs)
 gome2_fixed_header_size(T::Type{<:GOME_XXX_1B}) = gome2_num_recs_offset(T) + GOME2_GEO_REC_LENGTH_FIELD_SIZE

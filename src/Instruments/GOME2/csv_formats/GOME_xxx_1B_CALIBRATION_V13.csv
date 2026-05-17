@@ -1,6 +1,6 @@
 FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
 RECORD_HEADER,Generic Record Header,,,1,1,1,rec_head,20,20,0
-DEGRADED_INSTR_MDR,"Quality of MDR has been degraded from nominal due to an instrument degradation. Occurs if any of F_NN_DT, F_NN_PDP, F_NN_RAD, F_NN_WLS_U, F_NN_WLS_I, F_NN_SLS_U, F_NN_SLS_I, F_SAT, F_MIN in PCD_BASIC has been raised. Up to processor version 3.2.11, F_HOT also counted as instrument degradation",,,1,1,1,boolean,1,1,20
+DEGRADED_INST_MDR,"Quality of MDR has been degraded from nominal due to an instrument degradation. Occurs if any of F_NN_DT, F_NN_PDP, F_NN_RAD, F_NN_WLS_U, F_NN_WLS_I, F_NN_SLS_U, F_NN_SLS_I, F_SAT, F_MIN in PCD_BASIC has been raised. Up to processor version 3.2.11, F_HOT also counted as instrument degradation",,,1,1,1,boolean,1,1,20
 DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation. Occurs if F_MISS or F_OLD_CAL_DATA in PCD_BASIC have been raised,,,1,1,1,boolean,1,1,21
 F_NN_DT,"Flag indicating non-nominal detector temperature, per channel",,,1,1,1,bitst(8),1,1,22
 F_NN_PDP,Flag indicating non-nominal pre-disperser temperature,,,1,1,1,boolean,1,1,23

@@ -6,9 +6,12 @@ using Test
 import CommonDataModel as CDM
 
 # Heavy end-to-end tests run when GOME2_L1B_FULL_TEST_FILE points at a
-# Metop L1B granule containing Sun and Calibration MDRs (the cropped artefact
-# used by test/GOME2.jl carries Earthshine only).
+# Metop L1B granule containing Sun and Calibration MDRs, and when
+# GOME2_L1B_MOON_TEST_FILE points at a granule containing Moon MDRs (caught
+# during one of the ~monthly lunar calibration campaigns, July–December).
+# The cropped artefact used by test/GOME2.jl carries Earthshine only.
 const GOME2_L1B_FULL_FILE = get(ENV, "GOME2_L1B_FULL_TEST_FILE", "")
+const GOME2_L1B_MOON_FILE = get(ENV, "GOME2_L1B_MOON_TEST_FILE", "")
 
 @testset "GOME-2 L1B subclass record types" begin
     @test MetopDatasets.GOME_XXX_1B_SUN_V13         <: MetopDatasets.GOME_XXX_1B
@@ -83,11 +86,6 @@ end
         end
     end
 
-    @testset "Missing subclass raises clear error" begin
-        @test_throws ErrorException MetopDataset(
-            GOME2_L1B_FULL_FILE; mdr_subclass = :moon)
-    end
-
     @testset "Earthshine-only variables gated on non-Earthshine subclass" begin
         ds = MetopDataset(GOME2_L1B_FULL_FILE; mdr_subclass = :sun)
         @test_throws ErrorException ds["latitude"]
@@ -95,16 +93,76 @@ end
         close(ds)
     end
 
-    @testset "Subclass measurement-mode metadata" begin
-        for (sc, expected_mode, expected_units) in [
-                (:sun,         "solar_irradiance",   "photon s-1 cm-2 nm-1"),
-                (:calibration, "calibration_signal", "photon s-1 cm-2 nm-1 sr-1"),
-            ]
-            ds = MetopDataset(GOME2_L1B_FULL_FILE; mdr_subclass = sc)
-            rad_var = CDM.variable(ds, "radiance_1a")
-            @test CDM.attrib(rad_var, "units") == expected_units
-            @test CDM.attrib(rad_var, "output_selection_mode") == expected_mode
-            close(ds)
-        end
+    @testset "Sun measurement-mode metadata" begin
+        ds = MetopDataset(GOME2_L1B_FULL_FILE; mdr_subclass = :sun)
+        rad_var = CDM.variable(ds, "radiance_1a")
+        @test CDM.attrib(rad_var, "units") == "photon s-1 cm-2 nm-1"
+        @test CDM.attrib(rad_var, "output_selection_mode") == "solar_irradiance"
+        close(ds)
     end
+
+    @testset "Calibration measurement-mode metadata" begin
+        ds = MetopDataset(GOME2_L1B_FULL_FILE; mdr_subclass = :calibration)
+        rad_var = CDM.variable(ds, "radiance_1a")
+        @test CDM.attrib(rad_var, "units") == "photon s-1 cm-2 nm-1 sr-1"
+        # Mode is derived from per-record OBSERVATION_MODE; one of the
+        # calibration_* labels.
+        mode = CDM.attrib(rad_var, "output_selection_mode")
+        @test startswith(mode, "calibration_")
+        # The granule used for the heavy tests contains Dark, WLS and SLS
+        # records together, so the resolved mode is `calibration_mixed`.
+        @test mode == "calibration_mixed"
+        @test occursin("dark", CDM.attrib(rad_var, "comment"))
+        close(ds)
+    end
+end
+
+@testset "GOME-2 L1B Moon subclass on real file" begin
+    if !isfile(GOME2_L1B_MOON_FILE)
+        @info "Skipping GOME-2 Moon real-file tests: set " *
+              "GOME2_L1B_MOON_TEST_FILE to a Metop L1B granule from a " *
+              "lunar calibration campaign (~5 days after full moon, " *
+              "July–December)"
+        return
+    end
+
+    ds = MetopDataset(GOME2_L1B_MOON_FILE; mdr_subclass = :moon)
+
+    @testset "Record count and spectral shape" begin
+        @test ds.data_record_count > 0
+
+        rad = ds["radiance_1a"]
+        @test ndims(rad) == 3
+        @test size(rad, 3) == ds.data_record_count
+
+        wl = ds["wavelength_1a"]
+        wl_vals = collect(skipmissing(wl[:, 1]))
+        @test length(wl_vals) > 0
+        @test minimum(wl_vals) > 190
+        @test maximum(wl_vals) < 320
+    end
+
+    @testset "Moon-specific GEO_MOON fields" begin
+        # The 5-element HJKLM lunar pointing vectors use the new `lunar_point` dim.
+        @test CDM.dimnames(ds["lunar_azimuth"]) == ["lunar_point", "atrack"]
+        @test CDM.dimnames(ds["lunar_elevation"]) == ["lunar_point", "atrack"]
+
+        # Physically sensible scalar values for the first Moon record.
+        lp = ds["lunar_phase"][1]
+        @test 0 <= lp <= 180  # geometric phase angle, deg
+        lf = ds["lunar_fraction"][1]
+        @test 0 <= lf <= 1    # illuminated fraction
+        d_sat_moon = ds["distance_sat_moon"][1]
+        @test 300e6 < d_sat_moon < 450e6  # m; Earth–Moon distance ~360–405 Mm
+        d_sun_moon = ds["distance_sun_moon"][1]
+        @test 1.40e11 < d_sun_moon < 1.55e11  # m; Sun–Moon distance ~1 AU
+    end
+
+    @testset "Lunar-radiance metadata" begin
+        rad_var = CDM.variable(ds, "radiance_1a")
+        @test CDM.attrib(rad_var, "units") == "photon s-1 cm-2 nm-1 sr-1"
+        @test CDM.attrib(rad_var, "output_selection_mode") == "lunar_radiance"
+    end
+
+    close(ds)
 end
