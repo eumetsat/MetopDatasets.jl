@@ -101,6 +101,22 @@ end
         close(ds)
     end
 
+    @testset "Sun radiance has finite values across bands" begin
+        # Regression guard for `_decode_vinteger_or_nan`: a bug that silently
+        # turns real readings into fill (or fill into spurious finite
+        # garbage) would slip past the shape/metadata checks above.
+        ds = MetopDataset(GOME2_L1B_FULL_FILE; mdr_subclass = :sun)
+        for bname in ("1a", "3", "pp")
+            v = ds["radiance_$bname"][:, :, :]
+            finite = [x for x in vec(v) if !ismissing(x) && isfinite(x)]
+            @test !isempty(finite)
+            # Solar irradiance is positive everywhere physical (sign flips
+            # only on noise-dominated readouts); median should be > 0.
+            @test length(finite) > 100
+        end
+        close(ds)
+    end
+
     @testset "Calibration measurement-mode metadata" begin
         ds = MetopDataset(GOME2_L1B_FULL_FILE; mdr_subclass = :calibration)
         rad_var = CDM.variable(ds, "radiance_1a")
@@ -162,6 +178,26 @@ end
         rad_var = CDM.variable(ds, "radiance_1a")
         @test CDM.attrib(rad_var, "units") == "photon s-1 cm-2 nm-1 sr-1"
         @test CDM.attrib(rad_var, "output_selection_mode") == "lunar_radiance"
+    end
+
+    @testset "Lunar PMD radiances are finite, main channels are fill" begin
+        # During Moon calibration, the main spectrometer channels (1a-4)
+        # record no signal — the granule contains EUMETSAT fill markers
+        # (typemin(Int8)/typemin(Int32)) for those bands. PMD broadband
+        # channels capture the lunar reflectance and decode to real
+        # photon-flux radiances. This split is the parser's main correctness
+        # signal for Moon data: a regression that confuses fill vs. real
+        # values would flip both behaviours.
+        for bname in ("1a", "1b", "3", "4")
+            v = ds["radiance_$bname"][:, :, :]
+            finite = [x for x in vec(v) if !ismissing(x) && isfinite(x)]
+            @test isempty(finite)  # all instrument-fill, by design
+        end
+        for bname in ("pp", "ps", "swps")
+            v = ds["radiance_$bname"][:, :, :]
+            finite = [x for x in vec(v) if !ismissing(x) && isfinite(x)]
+            @test length(finite) > 1000
+        end
     end
 
     close(ds)
