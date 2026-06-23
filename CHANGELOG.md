@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add `mdr_subclass` keyword to `MetopDataset` for GOME-2 L1B (earthshine default, plus calibration, sun, moon). Earthshine-only synthesised variables (latitude, longitude) remain gated to Earthshine. New record-layout CSVs were derived from [stcorp/codadef-eps](https://github.com/stcorp/codadef-eps).
+
 ## v0.2.3
 - Add historic format version for ASCAT Level 2 Soil Moisture
 
