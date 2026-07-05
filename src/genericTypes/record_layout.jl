@@ -93,20 +93,16 @@ function _get_data_record_layouts(internal_pointer_records::Vector{InternalPoint
         byte_end = i == length(internal_pointer_records) ? total_file_size :
                    Int64(internal_pointer_records[i + 1].record_offset)
         byte_size = byte_end - offset
-        is_dummy = pointer.instrument_group == get_instrument_group(DummyRecord)
 
-        # If the requested record_type pins a specific instrument_subclass
-        # (e.g. GOME-2 L1A Other = 5), filter pointers to that subclass.
-        # Otherwise non-Other MDR blocks of different sizes would be
-        # mis-counted as Other. Dummy records pass through to the
-        # DummyRecord branch unchanged.
-        if !is_dummy && !isnothing(target_subclass) &&
-           pointer.instrument_subclass != target_subclass
-            continue
+        # If the requested record_type pins a specific instrument_subclass,
+        # pointers to other subclasses are skipped. Otherwise MDR blocks of a
+        # different subclass (and size) would be mis-counted as record_type.
+        if pointer.instrument_group == get_instrument_group(DummyRecord)
+            _add_record_layout!(record_layouts, offset, byte_size, DummyRecord)
+        elseif isnothing(target_subclass) ||
+               pointer.instrument_subclass == target_subclass
+            _add_record_layout!(record_layouts, offset, byte_size, record_type)
         end
-
-        record_type_i = is_dummy ? DummyRecord : record_type
-        _add_record_layout!(record_layouts, offset, byte_size, record_type_i)
     end
 
     return record_layouts

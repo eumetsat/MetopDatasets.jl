@@ -9,6 +9,13 @@ const TEST_DATA_ARTIFACT = MetopDatasets.get_test_data_artifact()
 const GOME2_V13_FILE_NAME = "GOME_xxx_1B_M01_20260303213859Z_cropped_10.nat"
 const GOME2_V13_FILE = joinpath(TEST_DATA_ARTIFACT, GOME2_V13_FILE_NAME)
 
+# GOME-2 L1B products open as a root dataset with one group per MDR subclass.
+# The cropped test artefact only carries Earthshine records. Closing the
+# earthshine group closes the shared file.
+function _open_earthshine(file; kwargs...)
+    return CDM.group(MetopDataset(file; kwargs...), "earthshine")
+end
+
 # EFG triplets use BSQ (sequential) layout: [E0..E31, F0..F31, G0..G31].
 # Julia's column-major reshape of (32, 3) naturally maps column 1=E, 2=F, 3=G,
 # so sat_zenith[:, 2, :] directly gives the F-component values.
@@ -96,6 +103,47 @@ end
           expected_lon
 end
 
+@testset "GOME-2 root dataset and groups" begin
+    if !isfile(GOME2_V13_FILE)
+        @info "Skipping GOME-2 group test: test file not found at $GOME2_V13_FILE"
+        return
+    end
+
+    ds = MetopDataset(GOME2_V13_FILE)
+
+    # The root exposes no variables or dimensions, only attributes and groups.
+    @test isempty(CDM.varnames(ds))
+    @test isempty(CDM.dimnames(ds))
+    @test CDM.attrib(ds, "format_major_version") == "13"
+    err = try
+        ds["radiance_1a"]
+        nothing
+    catch ex
+        ex
+    end
+    @test err isa ErrorException
+    @test occursin("group", sprint(showerror, err))
+
+    # The cropped test file only contains Earthshine records.
+    @test CDM.groupnames(ds) == ["earthshine"]
+    @test_throws ErrorException CDM.group(ds, "sun")
+
+    earthshine = CDM.group(ds, "earthshine")
+    @test earthshine isa MetopDataset
+    @test typeof(earthshine).parameters[1] == MetopDatasets.GOME_XXX_1B_V13
+    @test CDM.name(earthshine) == "earthshine"
+    @test CDM.parentdataset(earthshine) === ds
+    @test CDM.name(ds) == "/"
+    @test isnothing(CDM.parentdataset(ds))
+    # repeated access returns the cached group
+    @test CDM.group(ds, "earthshine") === earthshine
+
+    # the root dataset can be displayed, including its groups
+    @test occursin("earthshine", sprint(show, ds))
+
+    close(ds)
+end
+
 @testset "GOME-2 lazy spectral cache" begin
     if !isfile(GOME2_V13_FILE)
         @info "Skipping GOME-2 cache test: test file not found at $GOME2_V13_FILE"
@@ -105,7 +153,7 @@ end
     spectral_key = :gome2_spectral_info
     output_selection_key = :gome2_output_selection_info
 
-    ds = MetopDataset(GOME2_V13_FILE)
+    ds = _open_earthshine(GOME2_V13_FILE)
 
     @test !haskey(ds.cache, spectral_key)
     _ = CDM.dimnames(ds)
@@ -117,7 +165,7 @@ end
     @test haskey(ds.cache, spectral_key)
     close(ds)
 
-    ds = MetopDataset(GOME2_V13_FILE)
+    ds = _open_earthshine(GOME2_V13_FILE)
     @test !haskey(ds.cache, output_selection_key)
     rad_var = CDM.variable(ds, "radiance_1a")
     _ = CDM.attrib(rad_var, "output_selection_mode")
@@ -147,7 +195,7 @@ end
         return
     end
 
-    ds = MetopDataset(GOME2_V13_FILE; auto_convert = false)
+    ds = _open_earthshine(GOME2_V13_FILE; auto_convert = false)
     all_names = Set(CDM.varnames(ds))
     @test !("wavelength_1a" in all_names)
     @test !("radiance_1a" in all_names)
@@ -168,7 +216,7 @@ end
         return
     end
 
-    ds = MetopDataset(GOME2_V13_FILE)
+    ds = _open_earthshine(GOME2_V13_FILE)
 
     @testset "Basic dataset properties" begin
         @test ds.main_product_header.format_major_version == 13

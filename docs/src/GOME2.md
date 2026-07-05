@@ -1,6 +1,5 @@
 ## Experimental
 The support for GOME-2 is experimental for the following reason 
-- Only MDR-1b-Earthshine record are read. Measurements of the sun and the moon are skipped.
 - The logic for the geolocation need to be documented and validated. The different bands have different numbers of measurements per scan line but the scan line always has 32 points with coordinates. 
 - A random test exampled showed weird radiances for band 2a.
 
@@ -14,9 +13,11 @@ Two format versions are supported:
 - **V13** (NRT products): format\_major\_version 13, subclass version 6
 - **V12** (FDR R3 reprocessed products): format\_major\_version 12, subclass version 5
 
-Only MDR-1b-Earthshine records (instrument subclass 6) are read. Other record subclasses (e.g. subclass 7 for Sun reference spectra) have different binary layouts and are filtered out automatically.
+The product contains up to four MDR subclasses with different binary layouts: Earthshine (subclass 6), Calibration (7), Sun (8) and Moon (9). Earthshine records carry the nadir-scan measurements and are always present. Sun and Calibration records appear in granules covering the once-per-day solar calibration sequence, and Moon records only during the ~monthly lunar calibration campaigns.
 
 ### Opening a dataset
+
+Opening a GOME-2 L1B product returns a root dataset where each MDR subclass present in the file is exposed as a group. The root itself only carries the global attributes.
 
 ```julia
 using MetopDatasets
@@ -24,7 +25,24 @@ import CommonDataModel as CDM
 
 ds = MetopDataset("GOME_xxx_1B_M01_20260303213859Z_cropped_10.nat")
 println(ds.attrib["format_major_version"]) # 13
-println(ds.dim["atrack"]) # number of scan lines
+println(CDM.groupnames(ds)) # subclasses present, e.g. ["earthshine"]
+
+ds_earthshine = CDM.group(ds, "earthshine")
+println(ds_earthshine.dim["atrack"]) # number of scan lines
+
+# Sun, Calibration and Moon data are read the same way when present:
+if "sun" in CDM.groupnames(ds)
+    ds_sun = CDM.group(ds, "sun")
+    solar_irradiance = ds_sun["radiance_1a"][:, :, :]
+end
+
+close(ds) # closes the root dataset and all its groups
+```
+
+The examples below use the earthshine group:
+
+```julia
+ds = CDM.group(MetopDataset("GOME_xxx_1B_M01_20260303213859Z_cropped_10.nat"), "earthshine")
 ```
 
 ### Geolocation
@@ -72,6 +90,16 @@ println(rad_var.attrib["units"])  # "photon s-1 cm-2 nm-1 sr-1" or "1"
 
 - Mode 0 (`abs_rad`): calibrated radiance in photon s-1 cm-2 nm-1 sr-1
 - Mode 1 (`norm_rad`): sun-normalized radiance (dimensionless)
+
+### Sun, Moon and Calibration groups
+
+The non-Earthshine subclasses expose the same spectral variables (`wavelength_{band}`, `radiance_{band}`, ...) but the physical meaning of the radiance differs:
+
+- `sun`: calibrated solar irradiance (photon s-1 cm-2 nm-1)
+- `moon`: calibrated lunar radiance (photon s-1 cm-2 nm-1 sr-1). Moon records also carry lunar geometry variables such as `lunar_azimuth`, `lunar_elevation`, `lunar_phase` and `lunar_fraction`.
+- `calibration`: signal from the internal calibration sources (Dark/LED/WLS/SLS). The `output_selection_mode` attribute of the spectral variables reports the source derived from the per-record `OBSERVATION_MODE` field.
+
+The synthesised `latitude`/`longitude` variables are only defined for the earthshine group since the other subclasses have no CENTRE field.
 
 ### Auxiliary variables
 

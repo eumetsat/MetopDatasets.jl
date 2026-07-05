@@ -33,6 +33,12 @@ Setting `high_precision=true` will in some case convert these variables to `Floa
 `maskingvalue = NaN` will replace `missing` values with NaN. This normally floats but can create issues for integers. See documentation
 page for more information.
 
+Products with several types of data records (currently only GOME-2 L1B) are opened as a
+root dataset where each record subclass is exposed as a group, e.g.
+`CommonDataModel.group(ds, "earthshine")`. See `CommonDataModel.groupnames` to list the
+subclasses present in a product. Closing the root dataset also closes all its groups
+since they share the underlying file.
+
 ## Example
 ```julia-repl
 julia> file_path = "test/testData/ASCA_SZR_1B_M03_20230329063300Z_20230329063558Z_N_C_20230329081417Z"
@@ -62,25 +68,21 @@ julia> close(ds);
 ``` 
 """
 function MetopDataset(file_path::AbstractString; auto_convert::Bool = true,
-        high_precision::Bool = false, maskingvalue = missing,
-        mdr_subclass::Symbol = :earthshine)
+        high_precision::Bool = false, maskingvalue = missing)
     return MetopDataset(
         open(file_path, "r"); auto_convert = auto_convert,
-        high_precision = high_precision, maskingvalue = maskingvalue,
-        mdr_subclass = mdr_subclass)
+        high_precision = high_precision, maskingvalue = maskingvalue)
 end
 
 # method to enable `do` syntax.
 function MetopDataset(f::Function, file_path::AbstractString;
-        auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing,
-        mdr_subclass::Symbol = :earthshine)
+        auto_convert::Bool = true, high_precision::Bool = false, maskingvalue = missing)
     file_pointer = open(file_path, "r")
     ds = nothing
     try
         ds = MetopDataset(
             file_pointer; auto_convert = auto_convert,
-            high_precision = high_precision, maskingvalue = maskingvalue,
-            mdr_subclass = mdr_subclass)
+            high_precision = high_precision, maskingvalue = maskingvalue)
         return f(ds)
     finally
         if isnothing(ds)
@@ -93,28 +95,28 @@ end
 
 function MetopDataset(
         file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false,
-        maskingvalue = missing, mdr_subclass::Symbol = :earthshine)
+        maskingvalue = missing)
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
-
-    # GOME-2 only: swap Earthshine (default) for the caller-requested subclass.
-    # `_gome2_subclass_type` is a no-op for non-GOME types and for
-    # mdr_subclass=:earthshine.
-    record_type = _gome2_subclass_type(record_type, mdr_subclass)
-
-    if record_type <: GOME_XXX_1B
-        @warn "GOME2 support is experimental" maxlog=1
-    end
 
     # skip secondary header if present
     _skip_sphr(file_pointer, main_product_header.total_sphr)
 
+    return _construct_dataset(record_type, file_pointer, main_product_header,
+        auto_convert, high_precision, maskingvalue)
+end
+
+# Instrument-specific dataset construction can be added by dispatching on the
+# record type. GOME-2 L1B uses this to return a root dataset that exposes the
+# MDR subclasses as groups.
+function _construct_dataset(record_type::Type{<:DataRecord}, file_pointer::IO,
+        main_product_header::MainProductHeader, auto_convert::Bool,
+        high_precision::Bool, maskingvalue)
     record_layouts = read_record_layouts(file_pointer, main_product_header;
         record_type = record_type)
     data_record_layouts = filter(x -> x.record_type == record_type, record_layouts)
     if isempty(data_record_layouts)
-        error("No records of type $(record_type) found in the product. " *
-              "(GOME-2: the requested mdr_subclass may not be present in this file.)")
+        error("No records of type $(record_type) found in the product.")
     end
     data_record_count = data_record_layouts[end].record_range[end]
 

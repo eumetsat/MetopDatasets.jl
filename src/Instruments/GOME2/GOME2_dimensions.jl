@@ -16,6 +16,10 @@ function get_dimensions(T::Type{<:GOME_XXX_1B})
     if T <: Union{GOME_XXX_1B_MOON_V13, GOME_XXX_1B_MOON_V12}
         dims["lunar_point"] = 5
     end
+    # Calibration/Sun/Moon MDRs have FPA_TEMP with one value per main channel.
+    if :fpa_temp in fieldnames(T)
+        dims["main_bands"] = 6
+    end
     return dims
 end
 
@@ -24,6 +28,7 @@ const GOME2_SIZE_TO_DIMS = Dict{Any, Vector{String}}(
     (3,) => ["efg"],
     (4, 2) => ["corner", "geo_component"],
     (5,) => ["lunar_point"],
+    (6,) => ["main_bands"], # to support the "fpa_temp" variable.
     (10,) => ["band"],
     (15,) => ["stokes_band"],
     (15, 32) => ["stokes_band", "scan_position"],

@@ -5,22 +5,24 @@
 const GOME_xxx_1B_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_V13.csv")
 const GOME_xxx_1B_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_V12.csv")
 
-const GOME_xxx_1B_SUN_V13_format         = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_SUN_V13.csv")
-const GOME_xxx_1B_SUN_V12_format         = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_SUN_V12.csv")
-const GOME_xxx_1B_MOON_V13_format        = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_MOON_V13.csv")
-const GOME_xxx_1B_MOON_V12_format        = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_MOON_V12.csv")
-const GOME_xxx_1B_CALIBRATION_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_CALIBRATION_V13.csv")
-const GOME_xxx_1B_CALIBRATION_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_CALIBRATION_V12.csv")
+const GOME_xxx_1B_SUN_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_SUN_V13.csv")
+const GOME_xxx_1B_SUN_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_SUN_V12.csv")
+const GOME_xxx_1B_MOON_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_MOON_V13.csv")
+const GOME_xxx_1B_MOON_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_MOON_V12.csv")
+const GOME_xxx_1B_CALIBRATION_V13_format = @path joinpath(
+    @__DIR__, "csv_formats/GOME_xxx_1B_CALIBRATION_V13.csv")
+const GOME_xxx_1B_CALIBRATION_V12_format = @path joinpath(
+    @__DIR__, "csv_formats/GOME_xxx_1B_CALIBRATION_V12.csv")
 
 ########### Record types ###########
 abstract type GOME_XXX_1B <: DataRecord end
 
 eval(record_struct_expression(GOME_xxx_1B_V13_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_V12_format, GOME_XXX_1B))
-eval(record_struct_expression(GOME_xxx_1B_SUN_V13_format,         GOME_XXX_1B))
-eval(record_struct_expression(GOME_xxx_1B_SUN_V12_format,         GOME_XXX_1B))
-eval(record_struct_expression(GOME_xxx_1B_MOON_V13_format,        GOME_XXX_1B))
-eval(record_struct_expression(GOME_xxx_1B_MOON_V12_format,        GOME_XXX_1B))
+eval(record_struct_expression(GOME_xxx_1B_SUN_V13_format, GOME_XXX_1B))
+eval(record_struct_expression(GOME_xxx_1B_SUN_V12_format, GOME_XXX_1B))
+eval(record_struct_expression(GOME_xxx_1B_MOON_V13_format, GOME_XXX_1B))
+eval(record_struct_expression(GOME_xxx_1B_MOON_V12_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_CALIBRATION_V13_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_CALIBRATION_V12_format, GOME_XXX_1B))
 
@@ -35,8 +37,8 @@ MetopDatasets.get_flexible_dim_fields(::Type{<:GOME_XXX_1B}) = OrderedDict{Symbo
 # L1B MDR subclass IDs: 6=Earthshine, 7=Calibration, 8=Sun, 9=Moon.
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_V13}) = 6
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_V12}) = 6
-MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_SUN_V13})  = 8
-MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_SUN_V12})  = 8
+MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_SUN_V13}) = 8
+MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_SUN_V12}) = 8
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_MOON_V13}) = 9
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_MOON_V12}) = 9
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_CALIBRATION_V13}) = 7
@@ -77,26 +79,23 @@ function MetopDatasets.data_record_type(
     end
 end
 
-"""
-    _gome2_subclass_type(default_type, mdr_subclass)
-
-Swap the Earthshine type returned by `data_record_type` for a Sun / Moon / Calibration
-variant. Non-GOME types and `mdr_subclass = :earthshine` pass through unchanged.
-"""
-function _gome2_subclass_type(default_type::Type, mdr_subclass::Symbol)::Type
-    if !(default_type <: GOME_XXX_1B) || mdr_subclass == :earthshine
-        return default_type
+# Map a subclass name to the record type reading that subclass. `record_type` is the
+# Earthshine type returned by `data_record_type` for this product version.
+function MetopDatasets._get_subclass_type(
+        record_type::Type{<:GOME_XXX_1B}, subclass::Symbol)
+    if subclass == :default || subclass == :earthshine
+        return record_type
     end
-    is_v13 = (default_type === GOME_XXX_1B_V13)
-    if mdr_subclass === :calibration
+    is_v13 = (record_type === GOME_XXX_1B_V13)
+    if subclass === :calibration
         return is_v13 ? GOME_XXX_1B_CALIBRATION_V13 : GOME_XXX_1B_CALIBRATION_V12
-    elseif mdr_subclass === :sun
+    elseif subclass === :sun
         return is_v13 ? GOME_XXX_1B_SUN_V13 : GOME_XXX_1B_SUN_V12
-    elseif mdr_subclass === :moon
+    elseif subclass === :moon
         return is_v13 ? GOME_XXX_1B_MOON_V13 : GOME_XXX_1B_MOON_V12
     end
-    error("Unknown mdr_subclass `$(mdr_subclass)`. Expected one of " *
-          ":earthshine, :calibration, :sun, :moon.")
+    return error("Unknown subclass `$(subclass)`. Expected one of " *
+                 ":earthshine, :calibration, :sun, :moon.")
 end
 
 ########### Constants ###########
@@ -111,12 +110,16 @@ const GOME2_GEO_EARTH_ACTUAL_RECORD_SIZE = 99
 gome2_main_band_record_size(::Type{<:GOME_XXX_1B}) = GOME2_MAIN_BAND_RECORD_SIZE
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V13})  = GOME2_PMD_BAND_RECORD_SIZE_V13
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V12})  = GOME2_PMD_BAND_RECORD_SIZE_V12
+gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
+gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_MOON_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_MOON_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_CALIBRATION_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_CALIBRATION_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
+function gome2_pmd_band_record_size(::Type{GOME_XXX_1B_CALIBRATION_V13})
+    return GOME2_PMD_BAND_RECORD_SIZE_V13
+end
+function gome2_pmd_band_record_size(::Type{GOME_XXX_1B_CALIBRATION_V12})
+    return GOME2_PMD_BAND_RECORD_SIZE_V12
+end
 
 has_uncorrected_pmd(::Type{<:GOME_XXX_1B}) = true
 
@@ -158,9 +161,11 @@ function _gome2_field_offset(T::Type, target::Symbol)
             offset += native_sizeof(ft)
         end
     end
-    error("Field `$target` not found in $T")
+    return error("Field `$target` not found in $T")
 end
 
 gome2_rec_length_offset(T::Type{<:GOME_XXX_1B}) = _gome2_field_offset(T, :rec_length)
-gome2_num_recs_offset(T::Type{<:GOME_XXX_1B})   = _gome2_field_offset(T, :num_recs)
-gome2_fixed_header_size(T::Type{<:GOME_XXX_1B}) = gome2_num_recs_offset(T) + GOME2_GEO_REC_LENGTH_FIELD_SIZE
+gome2_num_recs_offset(T::Type{<:GOME_XXX_1B}) = _gome2_field_offset(T, :num_recs)
+function gome2_fixed_header_size(T::Type{<:GOME_XXX_1B})
+    return gome2_num_recs_offset(T) + GOME2_GEO_REC_LENGTH_FIELD_SIZE
+end
