@@ -2,9 +2,8 @@
 # License: MIT
 
 ########### CSV format paths ###########
-const GOME_xxx_1B_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_V13.csv")
-const GOME_xxx_1B_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_V12.csv")
-
+const GOME_xxx_1B_EARTHSHINE_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_EARTHSHINE_V13.csv")
+const GOME_xxx_1B_EARTHSHINE_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_EARTHSHINE_V12.csv")
 const GOME_xxx_1B_SUN_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_SUN_V13.csv")
 const GOME_xxx_1B_SUN_V12_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_SUN_V12.csv")
 const GOME_xxx_1B_MOON_V13_format = @path joinpath(@__DIR__, "csv_formats/GOME_xxx_1B_MOON_V13.csv")
@@ -17,8 +16,20 @@ const GOME_xxx_1B_CALIBRATION_V12_format = @path joinpath(
 ########### Record types ###########
 abstract type GOME_XXX_1B <: DataRecord end
 
-eval(record_struct_expression(GOME_xxx_1B_V13_format, GOME_XXX_1B))
-eval(record_struct_expression(GOME_xxx_1B_V12_format, GOME_XXX_1B))
+"""
+    GOME_XXX_1B_ROOT
+
+Sentinel data-record type parameterising the root `MetopDataset` of a GOME-2 L1B
+product. The root dataset exposes no variables itself; the MDR subclasses present in
+the file are accessed as groups (`"earthshine"`, `"calibration"`, `"sun"`, `"moon"`).
+"""
+abstract type GOME_XXX_1B_ROOT <: GOME_XXX_1B end
+struct GOME_XXX_1B_ROOT_V13 <: GOME_XXX_1B_ROOT end
+struct GOME_XXX_1B_ROOT_V12 <: GOME_XXX_1B_ROOT end
+
+
+eval(record_struct_expression(GOME_xxx_1B_EARTHSHINE_V13_format, GOME_XXX_1B))
+eval(record_struct_expression(GOME_xxx_1B_EARTHSHINE_V12_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_SUN_V13_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_SUN_V12_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_MOON_V13_format, GOME_XXX_1B))
@@ -35,8 +46,8 @@ end
 MetopDatasets.get_flexible_dim_fields(::Type{<:GOME_XXX_1B}) = OrderedDict{Symbol, Symbol}()
 
 # L1B MDR subclass IDs: 6=Earthshine, 7=Calibration, 8=Sun, 9=Moon.
-MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_V13}) = 6
-MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_V12}) = 6
+MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_EARTHSHINE_V13}) = 6
+MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_EARTHSHINE_V12}) = 6
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_SUN_V13}) = 8
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_SUN_V12}) = 8
 MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_MOON_V13}) = 9
@@ -47,8 +58,8 @@ MetopDatasets.get_instrument_subclass(::Type{<:GOME_XXX_1B_CALIBRATION_V12}) = 7
 # Only the Earthshine MDR interpolates a variable GEO_EARTH_ACTUAL block between the
 # fixed header and the REC_LENGTH/NUM_RECS dynamic prefix; the spectral parser branches on this.
 has_geo_earth_actual_prefix(::Type) = false
-has_geo_earth_actual_prefix(::Type{<:GOME_XXX_1B_V13}) = true
-has_geo_earth_actual_prefix(::Type{<:GOME_XXX_1B_V12}) = true
+has_geo_earth_actual_prefix(::Type{<:GOME_XXX_1B_EARTHSHINE_V13}) = true
+has_geo_earth_actual_prefix(::Type{<:GOME_XXX_1B_EARTHSHINE_V12}) = true
 
 # Raw-record API is disabled — MDR structs only model fixed-header fields; the variable
 # spectral payload is not part of the generated struct.
@@ -71,9 +82,9 @@ end
 function MetopDatasets.data_record_type(
         header::MainProductHeader, product_type::Val{:GOME_xxx_1B})::Type
     if header.format_major_version == 13
-        return GOME_XXX_1B_V13
+        return GOME_XXX_1B_ROOT_V13
     elseif header.format_major_version == 12
-        return GOME_XXX_1B_V12
+        return GOME_XXX_1B_ROOT_V12
     else
         error("No format found for format major version :$(header.format_major_version)")
     end
@@ -82,12 +93,11 @@ end
 # Map a subclass name to the record type reading that subclass. `record_type` is the
 # Earthshine type returned by `data_record_type` for this product version.
 function MetopDatasets._get_subclass_type(
-        record_type::Type{<:GOME_XXX_1B}, subclass::Symbol)
-    if subclass == :default || subclass == :earthshine
-        return record_type
-    end
-    is_v13 = (record_type === GOME_XXX_1B_V13)
-    if subclass === :calibration
+        record_type::Type{<:GOME_XXX_1B_ROOT}, subclass::Symbol)
+    is_v13 = (record_type === GOME_XXX_1B_ROOT_V13)
+    if subclass === :earthshine
+        return is_v13 ? GOME_XXX_1B_EARTHSHINE_V13 : GOME_XXX_1B_EARTHSHINE_V12
+    elseif subclass === :calibration
         return is_v13 ? GOME_XXX_1B_CALIBRATION_V13 : GOME_XXX_1B_CALIBRATION_V12
     elseif subclass === :sun
         return is_v13 ? GOME_XXX_1B_SUN_V13 : GOME_XXX_1B_SUN_V12
@@ -108,8 +118,8 @@ const GOME2_PMD_BAND_RECORD_SIZE_V12 = 16
 const GOME2_GEO_EARTH_ACTUAL_RECORD_SIZE = 99
 
 gome2_main_band_record_size(::Type{<:GOME_XXX_1B}) = GOME2_MAIN_BAND_RECORD_SIZE
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
+gome2_pmd_band_record_size(::Type{GOME_XXX_1B_EARTHSHINE_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
+gome2_pmd_band_record_size(::Type{GOME_XXX_1B_EARTHSHINE_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_MOON_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
@@ -141,8 +151,8 @@ const GOME2_GEO_REC_LENGTH_FIELD_SIZE = GOME2_N_BANDS * sizeof(UInt16)  # 10 × 
 const GOME2_GEO_REC_LENGTH_OFFSET_V13 = 7725
 const GOME2_GEO_REC_LENGTH_OFFSET_V12 = 8224
 
-gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_V13}) = GOME2_GEO_REC_LENGTH_OFFSET_V13
-gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_V12}) = GOME2_GEO_REC_LENGTH_OFFSET_V12
+gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_EARTHSHINE_V13}) = GOME2_GEO_REC_LENGTH_OFFSET_V13
+gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_EARTHSHINE_V12}) = GOME2_GEO_REC_LENGTH_OFFSET_V12
 
 # Non-Earthshine REC_LENGTH and NUM_RECS sit at a constant offset inside the fixed header.
 # The offsets are computed from the auto-generated struct so they track the CSV layout

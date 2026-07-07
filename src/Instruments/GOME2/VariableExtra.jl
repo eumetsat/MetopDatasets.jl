@@ -22,8 +22,8 @@ end
 
 const GOME2_SPECTRAL_VARNAMES = begin
     names = Symbol[]
-    append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V13))
-    append!(names, _gome2_spectral_varnames(GOME_XXX_1B_V12))
+    append!(names, _gome2_spectral_varnames(GOME_XXX_1B_EARTHSHINE_V13))
+    append!(names, _gome2_spectral_varnames(GOME_XXX_1B_EARTHSHINE_V12))
     unique(names)
 end
 
@@ -31,8 +31,8 @@ end
 const GOME2_EARTHSHINE_EXTRA_VARNAMES = (:latitude, :longitude)
 
 _gome2_has_centre_field(::Type) = false
-_gome2_has_centre_field(::Type{<:GOME_XXX_1B_V13}) = true
-_gome2_has_centre_field(::Type{<:GOME_XXX_1B_V12}) = true
+_gome2_has_centre_field(::Type{<:GOME_XXX_1B_EARTHSHINE_V13}) = true
+_gome2_has_centre_field(::Type{<:GOME_XXX_1B_EARTHSHINE_V12}) = true
 
 function _gome2_extra_varnames(R::Type{<:GOME_XXX_1B})
     extras = Symbol[]

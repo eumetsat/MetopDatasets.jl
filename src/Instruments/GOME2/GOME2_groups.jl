@@ -13,15 +13,6 @@
 # The groups share the file pointer of the root dataset, so closing any of them closes
 # the whole dataset.
 
-"""
-    GOME2L1BRoot
-
-Sentinel data-record type parameterising the root `MetopDataset` of a GOME-2 L1B
-product. The root dataset exposes no variables itself; the MDR subclasses present in
-the file are accessed as groups (`"earthshine"`, `"calibration"`, `"sun"`, `"moon"`).
-"""
-struct GOME2L1BRoot <: DataRecord end
-
 # MDR subclass IDs of the GOME-2 L1B product, in canonical group order.
 const GOME2_SUBCLASS_GROUP_NAMES = OrderedDict{UInt8, String}(
     0x06 => "earthshine",
@@ -36,17 +27,19 @@ const GOME2_GROUP_NAME_CACHE_KEY = :gome2_group_name
 const GOME2_PARENT_CACHE_KEY = :gome2_parent_dataset
 
 function MetopDatasets._construct_dataset(
-        record_type::Type{<:GOME_XXX_1B}, file_pointer::IO,
+        record_type::Type{<:GOME_XXX_1B_ROOT}, file_pointer::IO,
         main_product_header::MainProductHeader, auto_convert::Bool,
         high_precision::Bool, maskingvalue)
     @warn "GOME2 support is experimental" maxlog=1
 
+    internal_pointer_records = _read_internal_pointer_records(file_pointer, main_product_header.total_ipr)
+
     cache = Dict{Symbol, Any}(
-        GOME2_GROUP_NAMES_CACHE_KEY => _gome2_group_names(file_pointer),
+        GOME2_GROUP_NAMES_CACHE_KEY => _gome2_group_names(internal_pointer_records),
         GOME2_GROUPS_CACHE_KEY => Dict{String, MetopDataset}()
     )
 
-    return MetopDataset{GOME2L1BRoot, FixedRecordLayout}(file_pointer,
+    return MetopDataset{record_type, FixedRecordLayout}(file_pointer,
         main_product_header,
         FixedRecordLayout[],
         0,
@@ -56,31 +49,26 @@ function MetopDatasets._construct_dataset(
         cache)
 end
 
-# Scan all record headers and return the names of the MDR subclasses present in the
+# Scan all internal pointer records and return the names of the MDR subclasses present in the
 # file, in canonical order. Subclasses outside GOME2_SUBCLASS_GROUP_NAMES are ignored.
-function _gome2_group_names(file_pointer::IO)::Vector{String}
+function _gome2_group_names(internal_pointer_records)::Vector{String}
     subclasses = Set{UInt8}()
-    mdr_class = get_record_class(DataRecord)
-    dummy_group = get_instrument_group(DummyRecord)
-
-    seekstart(file_pointer)
-    while !eof(file_pointer)
-        record_offset = position(file_pointer)
-        header = native_read(file_pointer, RecordHeader)
-        if header.record_class == mdr_class && header.instrument_group != dummy_group
-            push!(subclasses, header.instrument_subclass)
+    for pointer in internal_pointer_records
+        is_data_record = pointer.record_class == get_record_class(DataRecord)
+        is_dummy_record = pointer.instrument_group == get_instrument_group(DummyRecord)
+        if is_data_record && !is_dummy_record
+            push!(subclasses, pointer.instrument_subclass)
         end
-        seek(file_pointer, record_offset + header.record_size)
     end
 
     return [name for (id, name) in GOME2_SUBCLASS_GROUP_NAMES if id in subclasses]
 end
 
-function CDM.groupnames(ds::MetopDataset{GOME2L1BRoot})
+function CDM.groupnames(ds::MetopDataset{<:GOME_XXX_1B_ROOT})
     return copy(ds.cache[GOME2_GROUP_NAMES_CACHE_KEY]::Vector{String})
 end
 
-function CDM.group(ds::MetopDataset{GOME2L1BRoot}, groupname::CDM.SymbolOrString)
+function CDM.group(ds::MetopDataset{<:GOME_XXX_1B_ROOT}, groupname::CDM.SymbolOrString)
     name = string(groupname)
     group_names = ds.cache[GOME2_GROUP_NAMES_CACHE_KEY]::Vector{String}
     if !(name in group_names)
@@ -89,12 +77,19 @@ function CDM.group(ds::MetopDataset{GOME2L1BRoot}, groupname::CDM.SymbolOrString
     end
 
     groups = ds.cache[GOME2_GROUPS_CACHE_KEY]::Dict{String, MetopDataset}
-    return get!(() -> _gome2_group_dataset(ds, name), groups, name)
+
+    if !haskey(groups, name)
+        groups[name] = _gome2_group_dataset(ds, name)
+    end
+
+    return groups[name]
 end
 
-function _gome2_group_dataset(ds::MetopDataset{GOME2L1BRoot}, name::String)
-    base_type = data_record_type(ds.main_product_header)
-    record_type = _get_subclass_type(base_type, Symbol(name))
+function _gome2_group_dataset(ds::MetopDataset{R}, name::String) where {R<:GOME_XXX_1B_ROOT}
+    record_type = _get_subclass_type(R, Symbol(name))
+
+    seek(ds.file_pointer, native_sizeof(MainProductHeader))
+    _skip_sphr(ds.file_pointer, ds.main_product_header.total_sphr)
 
     record_layouts = read_record_layouts(ds.file_pointer, ds.main_product_header;
         record_type = record_type)
@@ -117,11 +112,11 @@ function _gome2_group_dataset(ds::MetopDataset{GOME2L1BRoot}, name::String)
 end
 
 # The root dataset only exposes global attributes and groups.
-CDM.varnames(::MetopDataset{GOME2L1BRoot}) = String[]
-CDM.dimnames(::MetopDataset{GOME2L1BRoot}) = String[]
-MetopDatasets.get_dimensions(::Type{GOME2L1BRoot}) = OrderedDict{String, Int64}()
+CDM.varnames(::MetopDataset{<:GOME_XXX_1B_ROOT}) = String[]
+CDM.dimnames(::MetopDataset{<:GOME_XXX_1B_ROOT}) = String[]
+MetopDatasets.get_dimensions(::Type{<:GOME_XXX_1B_ROOT}) = OrderedDict{String, Int64}()
 
-function CDM.variable(ds::MetopDataset{GOME2L1BRoot}, varname::CDM.SymbolOrString)
+function CDM.variable(ds::MetopDataset{<:GOME_XXX_1B_ROOT}, varname::CDM.SymbolOrString)
     group_names = ds.cache[GOME2_GROUP_NAMES_CACHE_KEY]::Vector{String}
     return error("GOME-2 L1B variables are accessed through the subclass groups, e.g. " *
                  "`CommonDataModel.group(ds, \"earthshine\")[\"$varname\"]`. " *

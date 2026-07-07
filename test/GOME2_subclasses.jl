@@ -24,13 +24,13 @@ const GOME2_L1B_V12_MOON_FILE = get(ENV, "GOME2_L1B_V12_MOON_TEST_FILE", "")
     @test MetopDatasets.GOME_XXX_1B_CALIBRATION_V13 <: MetopDatasets.GOME_XXX_1B
     @test MetopDatasets.GOME_XXX_1B_CALIBRATION_V12 <: MetopDatasets.GOME_XXX_1B
 
-    @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_V13) == 6
+    @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) == 6
     @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_CALIBRATION_V13) ==
           7
     @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_SUN_V13) == 8
     @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_MOON_V13) == 9
 
-    @test MetopDatasets.has_geo_earth_actual_prefix(MetopDatasets.GOME_XXX_1B_V13)
+    @test MetopDatasets.has_geo_earth_actual_prefix(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13)
     @test !MetopDatasets.has_geo_earth_actual_prefix(MetopDatasets.GOME_XXX_1B_SUN_V13)
     @test !MetopDatasets.has_geo_earth_actual_prefix(MetopDatasets.GOME_XXX_1B_MOON_V13)
     @test !MetopDatasets.has_geo_earth_actual_prefix(MetopDatasets.GOME_XXX_1B_CALIBRATION_V13)
@@ -45,18 +45,16 @@ const GOME2_L1B_V12_MOON_FILE = get(ENV, "GOME2_L1B_V12_MOON_TEST_FILE", "")
 end
 
 @testset "GOME-2 subclass type selection" begin
-    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_V13, :default) ===
-          MetopDatasets.GOME_XXX_1B_V13
-    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_V13, :earthshine) ===
-          MetopDatasets.GOME_XXX_1B_V13
-    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_V13, :sun) ===
+    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_ROOT_V13, :earthshine) ===
+          MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13
+    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_ROOT_V13, :sun) ===
           MetopDatasets.GOME_XXX_1B_SUN_V13
-    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_V12, :moon) ===
+    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_ROOT_V12, :moon) ===
           MetopDatasets.GOME_XXX_1B_MOON_V12
-    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_V13, :calibration) ===
+    @test MetopDatasets._get_subclass_type(MetopDatasets.GOME_XXX_1B_ROOT_V13, :calibration) ===
           MetopDatasets.GOME_XXX_1B_CALIBRATION_V13
     @test_throws ErrorException MetopDatasets._get_subclass_type(
-        MetopDatasets.GOME_XXX_1B_V13, :unknown_subclass)
+        MetopDatasets.GOME_XXX_1B_ROOT_V13, :unknown_subclass)
 
     # generic fallback for record types without subclasses
     @test MetopDatasets._get_subclass_type(MetopDatasets.ASCA_SZR_1B_V13, :default) ===

@@ -82,7 +82,7 @@ end
 end
 
 @testset "GOME-2 L1B V12 dataset" begin
-    test_file = "testData/GOME_xxx_1B_V12.nat"
+    test_file = "testData/GOME_xxx_1B_EARTHSHINE_V12.nat"
     if !isfile(test_file)
         @info "Skipping GOME-2 V12 test: test file not found at $test_file"
         return
@@ -90,7 +90,7 @@ end
 
     ds = MetopDataset(test_file)
     @test ds.main_product_header.format_major_version == 12
-    @test typeof(ds).parameters[1] == MetopDatasets.GOME_XXX_1B_V12
+    @test typeof(ds).parameters[1] == MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12
 
     centre_var = CDM.variable(ds, "centre")
     @test CDM.attrib(centre_var, "geo_component_order") == "latitude, longitude"

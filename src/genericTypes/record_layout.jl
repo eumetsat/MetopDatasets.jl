@@ -56,11 +56,8 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
         fixed_size::Val{true};
         record_type::Type = data_record_type(main_product_header))::Vector{FixedRecordLayout}
     # read internal pointer records
-    internal_pointer_records = Vector{InternalPointerRecord}(undef,
+    internal_pointer_records = _read_internal_pointer_records(file_pointer, 
         main_product_header.total_ipr)
-    for i in eachindex(internal_pointer_records)
-        internal_pointer_records[i] = native_read(file_pointer, InternalPointerRecord)
-    end
 
     # get record layouts
     total_file_size = main_product_header.actual_product_size
@@ -70,6 +67,15 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
         record_type)
 
     return record_layouts
+end
+
+function _read_internal_pointer_records(file_pointer::IO, total_ipr::Integer)
+    internal_pointer_records = Vector{InternalPointerRecord}(undef,
+        total_ipr)
+    for i in eachindex(internal_pointer_records)
+        internal_pointer_records[i] = native_read(file_pointer, InternalPointerRecord)
+    end
+    return internal_pointer_records
 end
 
 """

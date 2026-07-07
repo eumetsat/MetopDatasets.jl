@@ -96,6 +96,7 @@ end
 function MetopDataset(
         file_pointer::IO; auto_convert::Bool = true, high_precision::Bool = false,
         maskingvalue = missing)
+    seekstart(file_pointer)
     main_product_header = native_read(file_pointer, MainProductHeader)
     record_type = data_record_type(main_product_header)
 

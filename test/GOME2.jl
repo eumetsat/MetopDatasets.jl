@@ -36,18 +36,18 @@ function _assert_sat_zenith_triplet_layout(ds::MetopDataset)
 end
 
 @testset "GOME-2 L1B record types" begin
-    @test MetopDatasets.GOME_XXX_1B_V13 <: MetopDatasets.GOME_XXX_1B
-    @test MetopDatasets.GOME_XXX_1B_V12 <: MetopDatasets.GOME_XXX_1B
+    @test MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13 <: MetopDatasets.GOME_XXX_1B
+    @test MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12 <: MetopDatasets.GOME_XXX_1B
     @test MetopDatasets.GOME_XXX_1B <: MetopDatasets.DataRecord
-    @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_V13) == false
-    @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_V12) == false
-    @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_V13) == 6
-    @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_V13) ==
+    @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) == false
+    @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12) == false
+    @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) == 6
+    @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) ==
           (12, 12, 12, 12, 12, 12, 16, 16, 16, 16)
-    @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_V12) ==
+    @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12) ==
           (12, 12, 12, 12, 12, 12, 16, 16, 16, 16)
-    @test MetopDatasets.has_uncorrected_pmd(MetopDatasets.GOME_XXX_1B_V13)
-    @test MetopDatasets.has_uncorrected_pmd(MetopDatasets.GOME_XXX_1B_V12)
+    @test MetopDatasets.has_uncorrected_pmd(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13)
+    @test MetopDatasets.has_uncorrected_pmd(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12)
 end
 
 @testset "GOME-2 spectral fill tuple decoding" begin
@@ -130,7 +130,7 @@ end
 
     earthshine = CDM.group(ds, "earthshine")
     @test earthshine isa MetopDataset
-    @test typeof(earthshine).parameters[1] == MetopDatasets.GOME_XXX_1B_V13
+    @test typeof(earthshine).parameters[1] == MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13
     @test CDM.name(earthshine) == "earthshine"
     @test CDM.parentdataset(earthshine) === ds
     @test CDM.name(ds) == "/"
@@ -180,7 +180,7 @@ end
     end
 
     err = try
-        MetopDatasets.read_first_record(GOME2_V13_FILE, MetopDatasets.GOME_XXX_1B_V13)
+        MetopDatasets.read_first_record(GOME2_V13_FILE, MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13)
         nothing
     catch ex
         ex
@@ -221,7 +221,7 @@ end
     @testset "Basic dataset properties" begin
         @test ds.main_product_header.format_major_version == 13
         @test ds.data_record_count > 0
-        @test typeof(ds).parameters[1] == MetopDatasets.GOME_XXX_1B_V13
+        @test typeof(ds).parameters[1] == MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13
     end
 
     @testset "Dimension validation" begin
