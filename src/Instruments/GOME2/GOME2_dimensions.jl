@@ -2,7 +2,7 @@
 # License: MIT
 
 function get_dimensions(T::Type{<:GOME_XXX_1B})
-    return OrderedDict(
+    dims = OrderedDict(
         "geo_component" => 2,
         "efg" => 3,
         "corner" => 4,
@@ -12,12 +12,23 @@ function get_dimensions(T::Type{<:GOME_XXX_1B})
         "scanner" => 65,
         "pmd_readout" => 256
     )
+    # Moon MDR adds 5-element HJKLM lunar pointing vectors (GEO_MOON).
+    if T <: Union{GOME_XXX_1B_MOON_V13, GOME_XXX_1B_MOON_V12}
+        dims["lunar_point"] = 5
+    end
+    # Calibration/Sun/Moon MDRs have FPA_TEMP with one value per main channel.
+    if :fpa_temp in fieldnames(T)
+        dims["main_bands"] = 6
+    end
+    return dims
 end
 
 const GOME2_SIZE_TO_DIMS = Dict{Any, Vector{String}}(
     (2,) => ["geo_component"],
     (3,) => ["efg"],
     (4, 2) => ["corner", "geo_component"],
+    (5,) => ["lunar_point"],
+    (6,) => ["main_bands"], # to support the "fpa_temp" variable.
     (10,) => ["band"],
     (15,) => ["stokes_band"],
     (15, 32) => ["stokes_band", "scan_position"],
@@ -35,7 +46,7 @@ function get_field_dimensions(T::Type{<:GOME_XXX_1B},
     if !(fieldtype(T, field_name) <: Array)
         return String[]
     end
-    
+
     array_size = _get_array_size(T, field_name)
     haskey(GOME2_SIZE_TO_DIMS, array_size) ||
         error("Dimensions not set for field $field_name with size $array_size")

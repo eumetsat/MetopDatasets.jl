@@ -113,6 +113,20 @@ function data_record_type(header::MainProductHeader, product_type::Val{T}) where
     return error("Method missing for $T")
 end
 
+"""
+    _get_subclass_type(record_type::Type{<:DataRecord}, subclass::Symbol)::Type
+
+Map a subclass name to the record type reading that subclass. `record_type` is the
+default type returned by `data_record_type`. Products with multiple record subclasses
+(currently only GOME-2 L1B) add methods for their record types.
+"""
+function _get_subclass_type(record_type::Type{<:DataRecord}, subclass::Symbol)
+    if subclass == :default
+        return record_type
+    end
+    return error("Record type $record_type has no subclass `$subclass`.")
+end
+
 # get_dimensions and get_field_dimensions should be implemented manually but fallback methods exits 
 """
     get_dimensions(T::Type{<:BinaryRecord})::OrderedDict{String, <:Integer}

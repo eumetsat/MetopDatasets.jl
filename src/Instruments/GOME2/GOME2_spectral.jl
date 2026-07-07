@@ -6,12 +6,15 @@
 
 Precomputed spectral layout metadata for GOME-2 MDR records. Computed once when
 creating the spectral DiskArrays, then used for random access into variable-length
-spectral data sections.
+spectral data sections. `geo_data_sizes` is the byte length of the variable
+GEO_EARTH_ACTUAL prefix (Earthshine only; all-zero for Sun/Moon/Calibration).
 """
 struct GomeSpectralInfo
     record_offsets::Vector{Int64}      # byte offset of each MDR in file
-    geo_rec_length_offset::Int64       # offset of GEO_REC_LENGTH within a record
+    geo_rec_length_offset::Int64       # offset of GEO_REC_LENGTH within a record (Earthshine);
+                                       # 0 for non-Earthshine subclasses
     geo_data_sizes::Vector{Int64}      # n_records: summed GEO_EARTH_ACTUAL payload size
+                                       # (Earthshine); all-zero for non-Earthshine
     rec_lengths::Matrix{Int64}         # 10 × n_records: spectral elements per band
     num_recs::Matrix{Int64}            # 10 × n_records: readout count per band
     wavelength_offsets::Matrix{Int64}  # 10 × n_records: absolute wavelength section offsets
@@ -27,6 +30,17 @@ Scan all MDR records to extract per-record spectral dimensions (REC_LENGTH, NUM_
 and compute layout information needed for random access to spectral data.
 """
 function compute_spectral_info(
+        file_pointer::IO,
+        record_layouts::Vector{<:RecordLayout},
+        record_type::Type{<:GOME_XXX_1B})
+    if has_geo_earth_actual_prefix(record_type)
+        return _compute_spectral_info_earthshine(file_pointer, record_layouts, record_type)
+    else
+        return _compute_spectral_info_simple(file_pointer, record_layouts, record_type)
+    end
+end
+
+function _compute_spectral_info_earthshine(
         file_pointer::IO,
         record_layouts::Vector{<:RecordLayout},
         record_type::Type{<:GOME_XXX_1B})
@@ -86,6 +100,59 @@ function compute_spectral_info(
 
     return GomeSpectralInfo(
         record_offsets, geo_offset, geo_data_sizes,
+        rec_lengths, num_recs, wavelength_offsets, data_offsets,
+        max_rec_lengths, max_num_recs)
+end
+
+function _compute_spectral_info_simple(
+        file_pointer::IO,
+        record_layouts::Vector{<:RecordLayout},
+        record_type::Type{<:GOME_XXX_1B})
+    record_offsets = _layouts_to_offsets(record_layouts)
+    n_records = length(record_offsets)
+    rec_length_offset = gome2_rec_length_offset(record_type)
+    num_recs_offset = gome2_num_recs_offset(record_type)
+    band_record_sizes = gome2_band_record_sizes(record_type)
+    fixed_header_size = gome2_fixed_header_size(record_type)
+
+    geo_data_sizes = zeros(Int64, n_records)
+    rec_lengths = Matrix{Int64}(undef, GOME2_N_BANDS, n_records)
+    num_recs = Matrix{Int64}(undef, GOME2_N_BANDS, n_records)
+    wavelength_offsets = Matrix{Int64}(undef, GOME2_N_BANDS, n_records)
+    data_offsets = Matrix{Int64}(undef, GOME2_N_BANDS, n_records)
+
+    for i in 1:n_records
+        record_start = record_offsets[i]
+
+        seek(file_pointer, record_start + rec_length_offset)
+        rl = Vector{UInt16}(undef, GOME2_N_BANDS)
+        read!(file_pointer, rl)
+        rl_decoded = Int64.(ntoh.(rl))
+        rec_lengths[:, i] .= rl_decoded
+
+        seek(file_pointer, record_start + num_recs_offset)
+        nr = Vector{UInt16}(undef, GOME2_N_BANDS)
+        read!(file_pointer, nr)
+        nr_decoded = Int64.(ntoh.(nr))
+        num_recs[:, i] .= nr_decoded
+
+        # Wavelength + band-data section starts right after the fixed header.
+        cursor = record_start + fixed_header_size
+        for j in 1:GOME2_N_BANDS
+            wavelength_offsets[j, i] = cursor
+            cursor += rl_decoded[j] * 4  # Int32 wavelength
+        end
+        for j in 1:GOME2_N_BANDS
+            data_offsets[j, i] = cursor
+            cursor += nr_decoded[j] * rl_decoded[j] * band_record_sizes[j]
+        end
+    end
+
+    max_rec_lengths = vec(maximum(rec_lengths, dims = 2))
+    max_num_recs = vec(maximum(num_recs, dims = 2))
+
+    return GomeSpectralInfo(
+        record_offsets, 0, geo_data_sizes,
         rec_lengths, num_recs, wavelength_offsets, data_offsets,
         max_rec_lengths, max_num_recs)
 end

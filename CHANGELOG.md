@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add support for all GOME-2 L1B MDR subclasses (earthshine, calibration, sun, moon). A GOME-2 L1B product now opens as a root dataset where each subclass present in the file is exposed as a group following the `CommonDataModel` group interface, e.g. `CommonDataModel.group(ds, "earthshine")`. Earthshine-only synthesised variables (latitude, longitude) remain gated to Earthshine. New record-layout CSVs were derived from [stcorp/codadef-eps](https://github.com/stcorp/codadef-eps).
+
 ## v0.2.3
 - Add historic format version for ASCAT Level 2 Soil Moisture
 
