@@ -19,6 +19,10 @@ This code is licensed under MIT license. See file LICENSE for details on the usa
 * [Simon Kok Lupemba](mailto://simon.koklupemba@eumetsat.int) - *Maintainer* - [EUMETSAT](http://www.eumetsat.int)
 * [Jonas Wilzewski](mailto://jonas.wilzewski@eumetsat.int) - *Contributor* - [EUMETSAT](http://www.eumetsat.int)
 
+## Contributors
+Special thanks to our contributors
+- [jovanbrakus](https://github.com/jovanbrakus) : Implemented GOME2-L1B reader
+
 ## Installation
 MetopDatasets.jl can be installed via Pkg and the url to the GitHub repository.
 

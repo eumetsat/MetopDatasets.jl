@@ -104,11 +104,6 @@ end
 end
 
 @testset "GOME-2 root dataset and groups" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 group test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     ds = MetopDataset(GOME2_V13_FILE)
 
     # The root exposes no variables or dimensions, only attributes and groups.
@@ -145,10 +140,6 @@ end
 end
 
 @testset "GOME-2 lazy spectral cache" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 cache test: test file not found at $GOME2_V13_FILE"
-        return
-    end
 
     spectral_key = :gome2_spectral_info
     output_selection_key = :gome2_output_selection_info
@@ -174,11 +165,7 @@ end
 end
 
 @testset "GOME-2 raw record API disabled" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 raw record API test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
+    
     err = try
         MetopDatasets.read_first_record(GOME2_V13_FILE, MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13)
         nothing
@@ -190,10 +177,6 @@ end
 end
 
 @testset "GOME-2 auto_convert gating" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 auto_convert test: test file not found at $GOME2_V13_FILE"
-        return
-    end
 
     ds = _open_earthshine(GOME2_V13_FILE; auto_convert = false)
     all_names = Set(CDM.varnames(ds))
@@ -211,11 +194,6 @@ end
 end
 
 @testset "GOME-2 L1B V13 dataset" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 V13 test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     ds = _open_earthshine(GOME2_V13_FILE)
 
     @testset "Basic dataset properties" begin

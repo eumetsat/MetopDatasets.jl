@@ -30,7 +30,6 @@ function MetopDatasets._construct_dataset(
         record_type::Type{<:GOME_XXX_1B_ROOT}, file_pointer::IO,
         main_product_header::MainProductHeader, auto_convert::Bool,
         high_precision::Bool, maskingvalue)
-    @warn "GOME2 support is experimental" maxlog=1
 
     internal_pointer_records = _read_internal_pointer_records(file_pointer, main_product_header.total_ipr)
 
