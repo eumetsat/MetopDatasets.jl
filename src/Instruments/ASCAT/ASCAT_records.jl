@@ -194,7 +194,7 @@ end
 function data_record_type(header::MainProductHeader, product_type::Val{:ASCA_SMO_02})::Type
     if header.format_major_version == 12
         return ASCA_SMO_02_V12
-     elseif header.format_major_version == 11
+    elseif header.format_major_version == 11
         return ASCA_SMO_02_V11
     elseif header.format_major_version == 10
         return ASCA_SMO_02_V10

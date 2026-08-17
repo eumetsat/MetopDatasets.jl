@@ -97,9 +97,9 @@ end
     centre = CDM.variable(ds_earthshine, "centre")[:, :, 1]
     lat = ds_earthshine["latitude"][:, 1]
     lon = ds_earthshine["longitude"][:, 1]
-    
-    @test  all(-90 .< lat .< 90)
-    @test  all(-180 .< lon .< 180)
+
+    @test all(-90 .< lat .< 90)
+    @test all(-180 .< lon .< 180)
 
     lat_expected = [MetopDatasets._decode_centre_component(centre, s, 1) * 1e-6
                     for s in 1:32]
@@ -109,26 +109,25 @@ end
     @test all(isapprox.(lon, lon_expected; atol = 1e-10, rtol = 0))
 
     @test ds_earthshine.dim["atrack"] == 599
-    
+
     ds_calibration = ds.group["calibration"]
     @test ds_calibration.dim["atrack"] == 407
-    
-    rads = ds_calibration["radiance_3"][:,:,130]
+
+    rads = ds_calibration["radiance_3"][:, :, 130]
     channels = ds_calibration["rec_length_3"][130]
     read_outs = ds_calibration["num_recs_3"][130]
-    @test any(ismissing, rads)    
-    @test !any(ismissing, rads[1:channels,1:read_outs])    
-    
+    @test any(ismissing, rads)
+    @test !any(ismissing, rads[1:channels, 1:read_outs])
+
     @test_throws "Variable `latitude` is only defined for Earthshine MDRs" ds_calibration["latitude"]
 
     close(ds)
 end
 
-
 @testset "GOME-2 L1B moon" begin
     test_file = "testData/GOME_xxx_1B_M01_20260803162356Z_20260803162656Z_N_O_20260803171920Z"
 
-    ds = MetopDataset(test_file);
+    ds = MetopDataset(test_file)
 
     @test ds.main_product_header.format_major_version == 13
     @test "moon" in keys(ds.group)
@@ -137,7 +136,6 @@ end
     @test CDM.dimnames(ds_moon["lunar_azimuth"]) == ["lunar_point", "atrack"]
     @test CDM.dimnames(ds_moon["lunar_elevation"]) == ["lunar_point", "atrack"]
     @test all(-180 .< ds_moon["lunar_phase"][:] .< 180)
-    
 
     rad_var = CDM.variable(ds_moon, "radiance_1a")
     @test CDM.attrib(rad_var, "units") == "photon s-1 cm-2 nm-1 sr-1"
@@ -167,11 +165,10 @@ end
     close(ds)
 end
 
-
 @testset "GOME-2 L1B calibration" begin
     test_file = "testData/GOME_xxx_1B_M01_20260711223859Z_20260711224159Z_N_O_20260711233840Z"
 
-    ds = MetopDataset(test_file);
+    ds = MetopDataset(test_file)
 
     @test ds.main_product_header.format_major_version == 13
     @test "calibration" in keys(ds.group)
@@ -179,10 +176,10 @@ end
 
     @test ds_calibration.dim["atrack"] == 12
 
-    rads = ds_calibration["radiance_3"][:,:,6]
+    rads = ds_calibration["radiance_3"][:, :, 6]
     channels = ds_calibration["rec_length_3"][6]
-    read_outs = ds_calibration["num_recs_3"][6]   
-    @test !any(ismissing, rads[1:channels,1:read_outs])  
+    read_outs = ds_calibration["num_recs_3"][6]
+    @test !any(ismissing, rads[1:channels, 1:read_outs])
     @test_throws "Variable `latitude` is only defined for Earthshine MDRs" ds_calibration["latitude"]
 
     rad_var = CDM.variable(ds_calibration, "radiance_1a")
@@ -194,11 +191,10 @@ end
     @test occursin("dark", CDM.attrib(rad_var, "comment"))
 end
 
-
 @testset "GOME-2 L1B sun" begin
     test_file = "testData/GOME_xxx_1B_M01_20260712125658Z_20260712125958Z_N_O_20260712132857Z"
 
-    ds = MetopDataset(test_file);
+    ds = MetopDataset(test_file)
     @test ds.main_product_header.format_major_version == 13
     @test "sun" in keys(ds.group)
     ds_sun = ds.group["sun"]

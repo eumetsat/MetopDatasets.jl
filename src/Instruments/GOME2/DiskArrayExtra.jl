@@ -20,7 +20,8 @@ end
 const GOME2_VINTEGER_FILL_SCALE = typemin(Int8)
 const GOME2_INT32_FILL_VALUE = typemin(Int32)
 
-@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::V) where {T,V <: Integer}
+@inline function _decode_vinteger_or_nan(::Type{T}, sf::Int8, val::V) where {
+        T, V <: Integer}
     if sf == GOME2_VINTEGER_FILL_SCALE || val == typemin(V)
         return T(NaN)
     end
@@ -57,8 +58,7 @@ function DiskArrays.readblock!(
 
     for (k, rec_idx) in enumerate(i_record)
         rl = si.rec_lengths[bi, rec_idx]
-        wl_offsets, _ = 
-            _compute_spectral_section_offsets(si, rec_idx)
+        wl_offsets, _ = _compute_spectral_section_offsets(si, rec_idx)
 
         wl_start = first(i_wavelength)
         wl_end = min(last(i_wavelength), rl)

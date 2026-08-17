@@ -30,7 +30,6 @@ function MetopDatasets._construct_dataset(
         record_type::Type{<:GOME_XXX_1B_ROOT}, file_pointer::IO,
         main_product_header::MainProductHeader, auto_convert::Bool,
         high_precision::Bool, maskingvalue)
-
     internal_pointer_records = _read_internal_pointer_records(file_pointer, main_product_header.total_ipr)
 
     cache = Dict{Symbol, Any}(
@@ -84,7 +83,8 @@ function CDM.group(ds::MetopDataset{<:GOME_XXX_1B_ROOT}, groupname::CDM.SymbolOr
     return groups[name]
 end
 
-function _gome2_group_dataset(ds::MetopDataset{R}, name::String) where {R<:GOME_XXX_1B_ROOT}
+function _gome2_group_dataset(ds::MetopDataset{R}, name::String) where {R <:
+                                                                        GOME_XXX_1B_ROOT}
     record_type = _get_subclass_type(R, Symbol(name))
 
     seek(ds.file_pointer, native_sizeof(MainProductHeader))

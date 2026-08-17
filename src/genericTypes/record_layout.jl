@@ -56,7 +56,7 @@ function read_record_layouts(file_pointer::IO, main_product_header::MainProductH
         fixed_size::Val{true};
         record_type::Type = data_record_type(main_product_header))::Vector{FixedRecordLayout}
     # read internal pointer records
-    internal_pointer_records = _read_internal_pointer_records(file_pointer, 
+    internal_pointer_records = _read_internal_pointer_records(file_pointer,
         main_product_header.total_ipr)
 
     # get record layouts

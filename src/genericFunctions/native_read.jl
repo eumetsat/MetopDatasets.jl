@@ -85,8 +85,7 @@ function native_read_flexible(io::IO, T::Type{<:Record},
     flexible_dims_record = OrderedDict{Symbol, Int64}()
 
     vals = (_read_flex_field!(io, T, field_name,
-                record_dim_fields, flexible_dims_file, flexible_dims_record) for field_name in
-                                                                                 fieldnames(T))
+                record_dim_fields, flexible_dims_file, flexible_dims_record) for field_name in fieldnames(T))
 
     return T(vals...)
 end

@@ -92,7 +92,7 @@ function default_dimnames(v::MetopVariable{T, N, R}) where {T, N, R}
         return [RECORD_DIM_NAME]
     else
         names = get_field_dimensions(R, v.field_name)
-        return vcat(names,[RECORD_DIM_NAME])
+        return vcat(names, [RECORD_DIM_NAME])
     end
 end
 

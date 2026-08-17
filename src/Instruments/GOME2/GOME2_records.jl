@@ -27,7 +27,6 @@ abstract type GOME_XXX_1B_ROOT <: GOME_XXX_1B end
 struct GOME_XXX_1B_ROOT_V13 <: GOME_XXX_1B_ROOT end
 struct GOME_XXX_1B_ROOT_V12 <: GOME_XXX_1B_ROOT end
 
-
 eval(record_struct_expression(GOME_xxx_1B_EARTHSHINE_V13_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_EARTHSHINE_V12_format, GOME_XXX_1B))
 eval(record_struct_expression(GOME_xxx_1B_SUN_V13_format, GOME_XXX_1B))
@@ -118,8 +117,12 @@ const GOME2_PMD_BAND_RECORD_SIZE_V12 = 16
 const GOME2_GEO_EARTH_ACTUAL_RECORD_SIZE = 99
 
 gome2_main_band_record_size(::Type{<:GOME_XXX_1B}) = GOME2_MAIN_BAND_RECORD_SIZE
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_EARTHSHINE_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
-gome2_pmd_band_record_size(::Type{GOME_XXX_1B_EARTHSHINE_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
+function gome2_pmd_band_record_size(::Type{GOME_XXX_1B_EARTHSHINE_V13})
+    return GOME2_PMD_BAND_RECORD_SIZE_V13
+end
+function gome2_pmd_band_record_size(::Type{GOME_XXX_1B_EARTHSHINE_V12})
+    return GOME2_PMD_BAND_RECORD_SIZE_V12
+end
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_SUN_V12}) = GOME2_PMD_BAND_RECORD_SIZE_V12
 gome2_pmd_band_record_size(::Type{GOME_XXX_1B_MOON_V13}) = GOME2_PMD_BAND_RECORD_SIZE_V13
@@ -151,8 +154,12 @@ const GOME2_GEO_REC_LENGTH_FIELD_SIZE = GOME2_N_BANDS * sizeof(UInt16)  # 10 × 
 const GOME2_GEO_REC_LENGTH_OFFSET_V13 = 7725
 const GOME2_GEO_REC_LENGTH_OFFSET_V12 = 8224
 
-gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_EARTHSHINE_V13}) = GOME2_GEO_REC_LENGTH_OFFSET_V13
-gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_EARTHSHINE_V12}) = GOME2_GEO_REC_LENGTH_OFFSET_V12
+function gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_EARTHSHINE_V13})
+    return GOME2_GEO_REC_LENGTH_OFFSET_V13
+end
+function gome2_geo_rec_length_offset(::Type{GOME_XXX_1B_EARTHSHINE_V12})
+    return GOME2_GEO_REC_LENGTH_OFFSET_V12
+end
 
 # Non-Earthshine REC_LENGTH and NUM_RECS sit at a constant offset inside the fixed header.
 # The offsets are computed from the auto-generated struct so they track the CSV layout

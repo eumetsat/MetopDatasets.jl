@@ -37,7 +37,7 @@ ds_earthshine = ds.group["earthshine"]
 
 ### Geolocation
 
-Latitude and longitude are extracted from the interleaved CENTRE field. Each scan line has 32 ground pixels with geolocation. The second dimension of each spectral band corresponds to the number of readouts per scanline. In the cases where the number of readouts are 32, each spectral measurement simply corresponds to a ground pixel location. In the cases with fewer readout, e.g. 4 per scan line, the ground pixels should be downsampled to 4 points using an appropriate method. When a band has more than 32 readouts, often PMD bands, then the ground pixels should be upsampled instead. 
+Latitude and longitude are extracted from the interleaved CENTRE field. Each scan line has 32 ground pixels with geolocation. The second dimension of each spectral band corresponds to the number of readouts per scanline. In the cases where the number of readouts are 32, each spectral measurement simply corresponds to a ground pixel location. In the cases with fewer readouts, e.g. 4 per scan line, the ground pixels should be downsampled to 4 points using an appropriate method. When a band has more than 32 readouts, often PMD bands, then the ground pixels should be upsampled instead. 
 
 ```julia
 data_record_index = 105 # select a scanline/data_record
@@ -89,7 +89,7 @@ The figure above shows the ground pixels for a scanline. The pixels from the for
 
 ### Spectral variables
 
-The main observations in the product is the radiances of the main bands and their wavelength. The stokes fraction based on the PMD measurements are included to correct the radiances. The raw PMD measurements are also provided for advanced users.  
+The main observations in the product are the radiances of the main bands and their wavelength. The stokes fraction based on the PMD measurements are included to correct the radiances. The raw PMD measurements are also provided for advanced users.  
 
 Each band provides:
 - `wavelength_{band}` — wavelength grid in nm
@@ -159,7 +159,7 @@ The EFG triplet dimensions represent points E (before), F (centre), and G (after
 
 ### Sun radiances
 The sun radiances are measured once a day and also included in the GOME2-L1B products. They can be used to convert the radiance into reflection.
-The instrument measures several readouts over multiple scanlines when observing the sun. These can be filtered and averaged to give a precise spectrum of the incoming radiation. In the follow example we will just plot one selected sun radiance spectrum.
+The instrument measures several readouts over multiple scanlines when observing the sun. These can be filtered and averaged to give a precise spectrum of the incoming radiation. In the following example we will just plot one selected sun radiance spectrum.
 
 
 ```julia 
@@ -199,6 +199,6 @@ close(ds)
 
 ### Other record type
 
-There is also other record types available for expert users. These formats are not documented here. 
+There are also other record types available for expert users. These formats are not documented here. 
 - Calibration (`:calibration`)
 - Moon (`:moon`)
