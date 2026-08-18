@@ -41,7 +41,8 @@ end
     @test MetopDatasets.GOME_XXX_1B <: MetopDatasets.DataRecord
     @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) == false
     @test MetopDatasets.fixed_size(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12) == false
-    @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) == 6
+    @test MetopDatasets.get_instrument_subclass(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) ==
+          6
     @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13) ==
           (12, 12, 12, 12, 12, 12, 16, 16, 16, 16)
     @test MetopDatasets.gome2_band_record_sizes(MetopDatasets.GOME_XXX_1B_EARTHSHINE_V12) ==
@@ -104,11 +105,6 @@ end
 end
 
 @testset "GOME-2 root dataset and groups" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 group test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     ds = MetopDataset(GOME2_V13_FILE)
 
     # The root exposes no variables or dimensions, only attributes and groups.
@@ -145,11 +141,6 @@ end
 end
 
 @testset "GOME-2 lazy spectral cache" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 cache test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     spectral_key = :gome2_spectral_info
     output_selection_key = :gome2_output_selection_info
 
@@ -174,11 +165,6 @@ end
 end
 
 @testset "GOME-2 raw record API disabled" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 raw record API test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     err = try
         MetopDatasets.read_first_record(GOME2_V13_FILE, MetopDatasets.GOME_XXX_1B_EARTHSHINE_V13)
         nothing
@@ -190,11 +176,6 @@ end
 end
 
 @testset "GOME-2 auto_convert gating" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 auto_convert test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     ds = _open_earthshine(GOME2_V13_FILE; auto_convert = false)
     all_names = Set(CDM.varnames(ds))
     @test !("wavelength_1a" in all_names)
@@ -211,11 +192,6 @@ end
 end
 
 @testset "GOME-2 L1B V13 dataset" begin
-    if !isfile(GOME2_V13_FILE)
-        @info "Skipping GOME-2 V13 test: test file not found at $GOME2_V13_FILE"
-        return
-    end
-
     ds = _open_earthshine(GOME2_V13_FILE)
 
     @testset "Basic dataset properties" begin

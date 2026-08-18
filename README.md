@@ -8,9 +8,24 @@ MetopDatasets.jl is a package for reading products from the [METOP satellites](h
 
 MetopDatasets.jl exports the `MetopDataset` API which is an implementation of the [CommonDataModel.jl](https://github.com/JuliaGeo/CommonDataModel.jl) interface and thus provides data access similar to e.g. [NCDatasets.jl](https://github.com/JuliaGeo/NCDatasets.jl) and [GRIBDatasets.jl](https://github.com/JuliaGeo/GRIBDatasets.jl).
 
-Only a subset of the METOP native formats are supported currently but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__EPS%20Native). See [supported formats](https://eumetsat.github.io/MetopDatasets.jl/stable/#Supported-formats) for more information
-
 MetopDatasets.jl can also be used from Python. The recommend way is to use the [MetopPy](https://github.com/eumetsat/MetopPy) package which is a python wrapper for MetopDatasets.jl. For other alternatives, see the [python section](https://eumetsat.github.io/MetopDatasets.jl/stable/python) in documentation page.
+
+Only a subset of the METOP native formats are supported currently but we are continuously adding formats. The goal is to support all publicly available [native METOP products](https://data.eumetsat.int/extended?query=&filter=satellite__Metop&filter=availableFormats__EPS%20Native).
+
+## Supported formats
+- AMSU-A Level 1B
+- ASCAT Level 1B
+- ASCAT Level 2 Soil Moisture
+- GOME-2 Level 1B
+- HIRS Level 1B
+- IASI Level 1C
+- IASI Level 2 Combined Sounding
+- MHS Level 1B 
+
+### Formats not yet supported
+- AVHRR Level 1B
+- IASI Level 1C Principal Component Scores
+
 
 ## Copyright and License
 This code is licensed under MIT license. See file LICENSE for details on the usage and distribution terms.
@@ -18,6 +33,10 @@ This code is licensed under MIT license. See file LICENSE for details on the usa
 ## Authors
 * [Simon Kok Lupemba](mailto://simon.koklupemba@eumetsat.int) - *Maintainer* - [EUMETSAT](http://www.eumetsat.int)
 * [Jonas Wilzewski](mailto://jonas.wilzewski@eumetsat.int) - *Contributor* - [EUMETSAT](http://www.eumetsat.int)
+
+## Contributors
+Special thanks to our contributors
+- [jovanbrakus](https://github.com/jovanbrakus) : Implemented GOME2-L1B reader
 
 ## Installation
 MetopDatasets.jl can be installed via Pkg and the url to the GitHub repository.
@@ -79,11 +98,11 @@ The following dependencies are not included in the package but they are required
 | dependency | version| license | copyright | home_url | comments |
 |-----------|--------|---------|-----------|----------|----------|
 | CSV.jl | 0.10 | MIT | 2015: Jacob Quinn, JuliaData contributors, Julia Computing| https://github.com/JuliaData/CSV.jl| CSV utilities |
-| CommonDataModel.jl | 0.3 | MIT | 2023 JuliaGeo | https://github.com/JuliaGeo/CommonDataModel.jl | Exports the Dataset interface used by MetopDatasets |
+| CommonDataModel.jl | 0.4 | MIT | 2023 JuliaGeo | https://github.com/JuliaGeo/CommonDataModel.jl | Exports the Dataset interface used by MetopDatasets |
 | Compat.jl | 4.10| MIT | 2014, 2015, 2016, 2017: Stefan Karpinski and other contributors | https://github.com/JuliaLang/Compat.jl | Handle comparability with different julia versions |
 | DiskArrays.jl | 0.3, 0.4| MIT | 2019: Fabian Gans| https://github.com/JuliaIO/DiskArrays.jl | Interface to read arrays from files |
 | LazyArtifacts.jl | 1| MIT | 2009-2023: Jeff Bezanson, Stefan Karpinski, Viral B. Shah, and other contributors| https://github.com/JuliaPackaging/LazyArtifacts.jl | Handles test data as lazy artifact |
-| OrderedCollections.jl | 1| MIT | 2013 Dahua Lin| https://github.com/JuliaCollections/OrderedCollections.jl | Ordered dictionary |
+| OrderedCollections.jl | 1, 2| MIT | 2013 Dahua Lin| https://github.com/JuliaCollections/OrderedCollections.jl | Ordered dictionary |
 | PrecompileTools.jl | 1| MIT | 2023 Tim Holy and contributors | https://github.com/JuliaLang/PrecompileTools.jl | Precompile key methods |
 | RelocatableFolders.jl | 1| MIT | 2021: Michael Hatherly| https://github.com/JuliaPackaging/RelocatableFolders.jl | Make installation relocatable |
  

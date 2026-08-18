@@ -286,22 +286,22 @@ end
           ["NERRT", "xtrack_sounder_pixels", "atrack"]
 
     expected_out_co = Union{Missing, Float64}[1.4921e24, 1.4902e24, 1.4941e24, 1.4967e24,
-    missing, 1.4771e24, 1.4782e24, missing, 1.4571e24, 1.4572e24, 1.4578e24,
-    1.4578e24, missing, missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, missing, missing, 1.4412e24, missing,
-    missing, 1.4425e24, 1.4464e24, 1.4406e24, 1.4442e24, 1.4608e24, missing, 1.4607e24,
-    1.4607e24, missing, missing, missing, missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, 1.4595e24,
-    missing, missing, missing, missing, 1.4448e24,
-    1.4448e24, missing, missing, missing, 1.4543e24, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, missing, missing, missing, missing, 1.4592e24, missing,
-    missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, 1.4537e24, missing,
-    missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, missing, missing,
-    missing, missing, missing, missing, missing, missing]
+        missing, 1.4771e24, 1.4782e24, missing, 1.4571e24, 1.4572e24, 1.4578e24,
+        1.4578e24, missing, missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, missing, missing, 1.4412e24, missing,
+        missing, 1.4425e24, 1.4464e24, 1.4406e24, 1.4442e24, 1.4608e24, missing, 1.4607e24,
+        1.4607e24, missing, missing, missing, missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, 1.4595e24,
+        missing, missing, missing, missing, 1.4448e24,
+        1.4448e24, missing, missing, missing, 1.4543e24, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, missing, missing, missing, missing, 1.4592e24, missing,
+        missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, 1.4537e24, missing,
+        missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, missing, missing,
+        missing, missing, missing, missing, missing, missing]
 
     actual_out_co = ds["co_cp_air"][6, :, 3]
 

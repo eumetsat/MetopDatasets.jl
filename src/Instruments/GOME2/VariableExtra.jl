@@ -1,7 +1,6 @@
 # Copyright (c) 2024 EUMETSAT
 # License: MIT
 
-
 function _gome2_spectral_varnames(R::Type{<:GOME_XXX_1B})
     names = Symbol[]
     for (i, bname) in enumerate(GOME2_BAND_NAMES)
@@ -52,20 +51,20 @@ const GOME2_FLOAT_SPECTRAL_COMPONENTS = (
 const GOME2_OUTPUT_SELECTION_COMPONENTS = (
     :radiance, :radiance_error, :uncorrected_radiance, :uncorrected_radiance_error)
 const GOME2_OUTPUT_SELECTION_UNITS = Dict{Symbol, String}(
-    :abs_rad           => "photon s-1 cm-2 nm-1 sr-1",   # Earthshine, OUTPUT_SELECTION=0
-    :norm_rad          => "1",                            # Earthshine, OUTPUT_SELECTION=1
-    :solar_irradiance  => "photon s-1 cm-2 nm-1",         # Sun MDR
-    :lunar_radiance    => "photon s-1 cm-2 nm-1 sr-1",    # Moon MDR
+    :abs_rad => "photon s-1 cm-2 nm-1 sr-1",   # Earthshine, OUTPUT_SELECTION=0
+    :norm_rad => "1",                            # Earthshine, OUTPUT_SELECTION=1
+    :solar_irradiance => "photon s-1 cm-2 nm-1",         # Sun MDR
+    :lunar_radiance => "photon s-1 cm-2 nm-1 sr-1",    # Moon MDR
     # Calibration MDR: BAND_* compound carries the same calibrated units as
     # Earthshine, but the physical meaning per record depends on the
     # internal source (Dark/LED/WLS/SLS/SLS_diffuser) — see OBSERVATION_MODE.
-    :calibration_signal        => "photon s-1 cm-2 nm-1 sr-1",
-    :calibration_dark          => "photon s-1 cm-2 nm-1 sr-1",
-    :calibration_LED           => "photon s-1 cm-2 nm-1 sr-1",
-    :calibration_WLS           => "photon s-1 cm-2 nm-1 sr-1",
-    :calibration_SLS           => "photon s-1 cm-2 nm-1 sr-1",
-    :calibration_SLS_diffuser  => "photon s-1 cm-2 nm-1 sr-1",
-    :calibration_mixed         => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_signal => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_dark => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_LED => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_WLS => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_SLS => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_SLS_diffuser => "photon s-1 cm-2 nm-1 sr-1",
+    :calibration_mixed => "photon s-1 cm-2 nm-1 sr-1"
 )
 
 # Measurement mode for non-Earthshine MDRs (no OUTPUT_SELECTION field).
@@ -80,7 +79,6 @@ _gome2_default_mode(::Type{<:GOME_XXX_1B_CALIBRATION_V12}) = :calibration_signal
 function _is_gome2_extra_var(varname::Symbol)
     return varname in GOME2_EXTRA_VARNAMES
 end
-
 
 function CDM.varnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
     base_names = default_varnames(ds)
@@ -108,7 +106,7 @@ const GOME2_OBSERVATION_MODE_LABELS = Dict{UInt8, String}(
     0x09 => "SLS",
     0x0a => "SLS_diffuser",
     0x0b => "sun",
-    0x0c => "moon",
+    0x0c => "moon"
 )
 
 # Cache OBSERVATION_MODE values present in this dataset (one sorted UInt8 vector).
@@ -186,7 +184,6 @@ function _get_output_selection_info(ds::MetopDataset{R}) where {R <: GOME_XXX_1B
     return output_selection_info::Tuple{Symbol, Vector{UInt8}}
 end
 
-
 function _parse_spectral_varname(varname::Symbol)
     s = string(varname)
 
@@ -221,7 +218,6 @@ function _is_supported_spectral_component(
     end
     return true
 end
-
 
 function CDM.variable(
         ds::MetopDataset{R}, varname::CDM.SymbolOrString) where {R <: GOME_XXX_1B}
@@ -269,7 +265,6 @@ function CDM.variable(
     return MetopVariable{T, N, R, typeof(disk_array)}(ds, disk_array, varname)
 end
 
-
 # Both V13 and V12 store CENTRE as [latitude, longitude], matching the
 # descriptor CSV and CODA library specification.
 _lat_index(::Type{<:GOME_XXX_1B}) = 1  # 1-indexed: first component
@@ -285,9 +280,9 @@ function _output_selection_mode_attribute(mode::Symbol)
     elseif mode == :mixed
         return "mixed"
     elseif mode in (:solar_irradiance, :lunar_radiance,
-                    :calibration_signal, :calibration_dark, :calibration_LED,
-                    :calibration_WLS, :calibration_SLS, :calibration_SLS_diffuser,
-                    :calibration_mixed)
+        :calibration_signal, :calibration_dark, :calibration_LED,
+        :calibration_WLS, :calibration_SLS, :calibration_SLS_diffuser,
+        :calibration_mixed)
         return string(mode)
     end
     return "unknown"
@@ -312,7 +307,7 @@ function _output_selection_comment(mode::Symbol, values::Vector{UInt8})
     elseif mode == :lunar_radiance
         return "MDR-1b-Moon: calibrated lunar radiance (no OUTPUT_SELECTION field)."
     elseif mode in (:calibration_dark, :calibration_LED, :calibration_WLS,
-                    :calibration_SLS, :calibration_SLS_diffuser)
+        :calibration_SLS, :calibration_SLS_diffuser)
         m = match(r"^calibration_(.+)$", string(mode))
         return "MDR-1b-Calibration: $(m.captures[1]) measurement."
     elseif mode == :calibration_mixed
@@ -402,7 +397,6 @@ function DiskArrays.readblock!(
     return nothing
 end
 
-
 # Keep the fixed GOME-2 dimensions in GOME2_dimensions.jl and add the spectral
 # dimensions lazily here so dataset metadata stays aligned with the record definitions.
 function CDM.dimnames(ds::MetopDataset{R}) where {R <: GOME_XXX_1B}
@@ -450,7 +444,6 @@ function CDM.dim(ds::MetopDataset{R}, name::CDM.SymbolOrString) where {R <: GOME
     return get_dimensions(ds)[name]
 end
 
-
 function CDM.dimnames(v::MetopVariable{T, N, R}) where {T, N, R <: GOME_XXX_1B}
     if v.field_name in (:latitude, :longitude)
         return ["scan_position", RECORD_DIM_NAME]
@@ -470,7 +463,6 @@ function CDM.dimnames(v::MetopVariable{T, N, R}) where {T, N, R <: GOME_XXX_1B}
 
     return default_dimnames(v)
 end
-
 
 function CDM.attrib(
         v::MetopVariable{T, N, R}, name::CDM.SymbolOrString) where {T, N, R <: GOME_XXX_1B}
@@ -511,7 +503,7 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
             elseif mode == :calibration_signal
                 return "Calibrated calibration-mode signal for band $bname (Calibration MDR)"
             elseif mode in (:calibration_dark, :calibration_LED, :calibration_WLS,
-                            :calibration_SLS, :calibration_SLS_diffuser)
+                :calibration_SLS, :calibration_SLS_diffuser)
                 m = match(r"^calibration_(.+)$", string(mode))
                 return "Calibration-mode signal ($(m.captures[1])) for band $bname (Calibration MDR)"
             elseif mode == :calibration_mixed
@@ -532,7 +524,7 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
             elseif mode == :calibration_signal
                 return "Calibration-mode signal error for band $bname (Calibration MDR)"
             elseif mode in (:calibration_dark, :calibration_LED, :calibration_WLS,
-                            :calibration_SLS, :calibration_SLS_diffuser, :calibration_mixed)
+                :calibration_SLS, :calibration_SLS_diffuser, :calibration_mixed)
                 return "Calibration-mode signal error for band $bname (Calibration MDR)"
             elseif mode == :mixed
                 return "Radiance error for band $bname (mixed OUTPUT_SELECTION values: $(join(Int.(values), ", ")))"
@@ -568,20 +560,19 @@ function _gome2_extra_description(ds::MetopDataset{R}, field::Symbol) where {R <
     return ""
 end
 
-
 function get_cf_attributes(ds::MetopDataset{R}, field::Symbol,
         auto_convert::Bool)::AbstractDict{Symbol, Any} where {R <: GOME_XXX_1B}
     if field == :latitude
         return Dict{Symbol, Any}(
             :units => "degrees_north",
             :missing_value => typemin(Int32),
-            :scale_factor => 1e-6,
-            )
+            :scale_factor => 1e-6
+        )
     elseif field == :longitude
         return Dict{Symbol, Any}(
             :units => "degrees_east",
             :missing_value => typemin(Int32),
-            :scale_factor => 1e-6,)
+            :scale_factor => 1e-6)
     end
 
     parsed = _parse_spectral_varname(field)

@@ -12,9 +12,9 @@ GEO_EARTH_ACTUAL prefix (Earthshine only; all-zero for Sun/Moon/Calibration).
 struct GomeSpectralInfo
     record_offsets::Vector{Int64}      # byte offset of each MDR in file
     geo_rec_length_offset::Int64       # offset of GEO_REC_LENGTH within a record (Earthshine);
-                                       # 0 for non-Earthshine subclasses
+    # 0 for non-Earthshine subclasses
     geo_data_sizes::Vector{Int64}      # n_records: summed GEO_EARTH_ACTUAL payload size
-                                       # (Earthshine); all-zero for non-Earthshine
+    # (Earthshine); all-zero for non-Earthshine
     rec_lengths::Matrix{Int64}         # 10 × n_records: spectral elements per band
     num_recs::Matrix{Int64}            # 10 × n_records: readout count per band
     wavelength_offsets::Matrix{Int64}  # 10 × n_records: absolute wavelength section offsets
@@ -67,7 +67,8 @@ function _compute_spectral_info_earthshine(
         # Compute dynamic section start
         geo_data_size = sum(geo_rec_lengths) * GOME2_GEO_EARTH_ACTUAL_RECORD_SIZE
         geo_data_sizes[i] = geo_data_size
-        dynamic_start = record_start + geo_offset + GOME2_GEO_REC_LENGTH_FIELD_SIZE + geo_data_size
+        dynamic_start = record_start + geo_offset + GOME2_GEO_REC_LENGTH_FIELD_SIZE +
+                        geo_data_size
 
         # Read REC_LENGTH[10] from dynamic section
         seek(file_pointer, dynamic_start + GOME2_DYNAMIC_REC_LENGTH_REL_OFFSET)
