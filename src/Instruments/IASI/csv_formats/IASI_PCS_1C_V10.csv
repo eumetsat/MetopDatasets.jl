@@ -1,0 +1,43 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,DIM4,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,0,,1,1,1,1,REC_HEAD,20,20,0
+DEGRADED_INST_MDR,Quality of MDR has been degraded from nominal due to an instrument degradation,,,1,1,1,1,boolean,1,1,20
+DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a processing degradation,,,1,1,1,1,boolean,1,1,21
+GEPSIasiMode,Instrument mode,,,1,1,1,1,bitst(32),4,4,22
+GEPSOPSProcessingMode,Processing mode,,,1,1,1,1,bitst(32),4,4,26
+GEPSIdConf,System configuration at line level: PTSI; TEC conf file ID;…..,,,1,1,1,1,bitst(256),32,32,30
+OBT,On Board Time (Coarse time + Fine time),,,30,1,1,1,bitst(48),6,180,62,
+OnboardUTC,Date of IASI measure (on board UTC): Number of Days since 1 January 2000; Number of ms in the day,,,30,1,1,1,short cds time,6,180,242
+GEPSDatIasi,Date of IASI measure (Corrected UTC): Number of Days since 1 January 2000; Number of ms in the day,,UTC,30,1,1,1,short cds time,6,180,422
+GEPS_SP,Scan position for all observational targets,,,30,1,1,1,integer4,4,120,602
+GQisFlagQual,Quality flag for the system,,,3,4,30,1,boolean,1,360,722
+GQisFlagQualDetailed,Detailed Quality Flag for the system,,,4,30,1,1,bitst(16),2,240,1082
+GQisQualIndex,System-IASI general quality index,,,1,1,1,1,V-INTEGER4,5,5,1322
+GQisQualIndexLoc,Geometric quality index for sounder product,,,1,1,1,1,V-INTEGER4,5,5,1327
+GQisQualIndexRad,Radiometric quality index for sounder product,,,1,1,1,1,V-INTEGER4,5,5,1332
+GQisQualIndexSpect,Spectral quality index for sounder product,,,1,1,1,1,V-INTEGER4,5,5,1337
+GQisSysTecSondQual,System -TEC quality index for sounder,,,1,1,1,1,u-integer4,4,4,1342
+GGeoSondLoc,Location of pixel centre in geodetic coordinates (long; lat) for each sounder pixel,6,degrees,2,4,30,1,integer4,4,960,1346
+GGeoSondAnglesMETOP,Measurement angles for each sounder pixel (zenith; azimuth),6,degrees,2,4,30,1,integer4,4,960,2306
+GGeoSondAnglesSUN,Solar angles at the surface for each sounder pixel (zenith; azimuth),6,degrees,2,4,30,1,integer4,4,960,3266
+EARTH_SATELLITE_DISTANCE,Distance of satellite from Earth centre,,m,1,1,1,1,u-integer4,4,4,4226
+IDefCcsChannelId,Radiance Analysis: Identification of the AVHRR channel or pseudochannels used for Radiance Analysis,,,6,1,1,1,integer4,4,24,4230
+GCcsRadAnalNbClass,Radiance Analysis: Number of identified classes in the sounder FOV,,,4,30,1,1,integer4,4,480,4254
+GCcsRadAnalWgt,Radiance Analysis: sounder FOV Radiance Analysis (% covered by each class),,,7,4,30,1,V-INTEGER4,5,4200,4734
+GCcsRadAnalY,Radiance Analysis: Y Angular position of the centre of gravity,6,degrees,7,4,30,1,integer4,4,3360,8934
+GCcsRadAnalZ,Radiance Analysis: Z Angular position of the centre of gravity,6,degrees,7,4,30,1,integer4,4,3360,12294
+GCcsRadAnalMean,Radiance Analysis: Mean AVHRR radiances (all channels) of the sounder FOV classes,,W/m2/sr (ch. 1;2;3a) W/m2/sr/m-1 (ch 3b 4 5),6,7,4,30,V-INTEGER4,5,25200,15654
+GCcsRadAnalStd,Radiance Analysis: Standard deviation AVHRR radiances (all channels) of the sounder FOV classes,,W/m2/sr (ch. 1;2;3a) W/m2/sr/m-1 (ch 3b 4 5),6,7,4,30,V-INTEGER4,5,25200,40854
+GEUMAvhrr1BCldFrac,AVHRR L1B based cloud fraction,0,%,4,30,1,1,u-byte,1,120,66054
+GEUMAvhrr1BLandFrac,AVHRR L1B based land and coast fraction,0,%,4,30,1,1,u-byte,1,120,66174
+GEUMAvhrr1BQual,Quality indicator of GEUMAvhrr1BCld and - LandFrac,0,,4,30,1,1,bitst(8),1,120,66294
+PcScoresB1P1,Band 1 PC scores coded with 4 bytes 0,,,NBS1P1,4,30,1,integer4,4,1440,66414
+PcScoresB1P2,Band 1 PC scores coded with 2 bytes 0,,,NBS1P2,4,30,1,integer2,2,4800,67854
+PcScoresB1P3,Band 1 PC scores coded with 1 byte  0,,,NBS1P3,4,30,1,byte,1,6840,72654
+PcScoresB2P1,Band 2 PC scores coded with 4 bytes 0,,,NBS2P1,4,30,1,integer4,4,1440,79494
+PcScoresB2P2,Band 2 PC scores coded with 2 bytes 0,,,NBS2P2,4,30,1,integer2,2,4800,80934
+PcScoresB2P3,Band 2 PC scores coded with 1 byte  0,,,NBS2P3,4,30,1,byte,1,11640,85734
+PcScoresB3P1,Band 3 PC scores coded with 4 bytes 0,,,NBS3P1,4,30,1,integer4,4,1440,97374
+PcScoresB3P2,Band 3 PC scores coded with 2 bytes 0,,,NBS3P2,4,30,1,integer2,2,4800,98814
+PcScoresB3P3,Band 3 PC scores coded with 1 byte  0,,,NBS3P3,4,30,1,byte,1,6840,103614
+ResidualRMS,Residual RMS per band,3,,3,4,30,1,u-integer2,2,720,110454
+TOTAL SIZE,,,,,,,,,,,111174
