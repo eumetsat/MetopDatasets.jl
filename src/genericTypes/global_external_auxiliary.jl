@@ -6,10 +6,9 @@ struct GlobalExternalAuxiliary <: Record
     content::String
 end
 
-
 function native_read(io::IO, T::Type{GlobalExternalAuxiliary})::GlobalExternalAuxiliary
     record_header = native_read(io, RecordHeader)
-    
+
     # read the content
     content_size = record_header.record_size - native_sizeof(RecordHeader)
     record_content_bytes = Array{UInt8}(undef, content_size)

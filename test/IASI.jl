@@ -4,6 +4,7 @@
 using MetopDatasets, Test
 import CommonDataModel as CDM
 import OrderedCollections: OrderedDict
+import Statistics
 
 test_data_artifact = MetopDatasets.get_test_data_artifact()
 
@@ -158,7 +159,7 @@ end
     @test giard isa MetopDatasets.GIADR_IASI_SND_02_V11
 
     # test sizes against std values
-    flex_sizes = MetopDatasets.get_iasi_l2_flex_size(giard)
+    flex_sizes = MetopDatasets.get_flexible_dims_from_giard(giard)
 
     @test flex_sizes[:NEW] == 12
     @test flex_sizes[:NLO] == 101
@@ -338,6 +339,45 @@ end
 
     @test all(skipmissing(temp_e_array_index) .== skipmissing(temp_e_disk_array_index))
     @test ismissing.(temp_e_array_index) == ismissing.(temp_e_disk_array_index)
+
+    close(ds)
+end
+
+@testset "IASI L1C Principal Component Scores (PCS)" begin
+    test_file = joinpath(
+        test_data_artifact, "IASI_PCS_1C_M01_20260319210859Z_cropped_10.nat")
+
+    @test !MetopDatasets.fixed_size(MetopDatasets.IASI_PCS_1C_V10)
+    @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_PCS_1C_V10)
+
+    giadr_pcs = read_first_record(
+        test_file, MetopDatasets.GIADR_IASI_PCS_1C_V10)
+
+    @test sum(getproperty(giadr_pcs, Symbol("nbrscoresband1_part$i")) for i in 1:3) == 90
+    @test sum(getproperty(giadr_pcs, Symbol("nbrscoresband2_part$i")) for i in 1:3) == 120
+    @test sum(getproperty(giadr_pcs, Symbol("nbrscoresband3_part$i")) for i in 1:3) == 90
+
+    ds = MetopDataset(test_file)
+
+    @test size(ds["pcscoresb2p2"]) ==
+          (ds.dim["NBS2P2"], ds.dim["sounder_pixel"], ds.dim["xtrack"], ds.dim["atrack"])
+    @test MetopDatasets.dimnames(ds["pcscoresb2p2"]) ==
+          ["NBS2P2", "sounder_pixel", "xtrack", "atrack"]
+
+    lon = ds["ggeosondloc"][1, :, :, :]
+    lat = ds["ggeosondloc"][2, :, :, :]
+    @test all(-180 .< lon .< 180)
+    @test all(-90 .< lat .< 90)
+
+    @test !any(ismissing(Array(ds["pcscoresb2p2"])))
+
+    # test the the principal components scores at
+    mean_ps_01 = Statistics.mean(abs.(ds["pcscoresb2p2"][1, :, :, :]))
+    mean_ps_11 = Statistics.mean(abs.(ds["pcscoresb2p2"][11, :, :, :]))
+    mean_ps_21 = Statistics.mean(abs.(ds["pcscoresb2p2"][21, :, :, :]))
+    mean_ps_31 = Statistics.mean(abs.(ds["pcscoresb2p2"][31, :, :, :]))
+    mean_ps_41 = Statistics.mean(abs.(ds["pcscoresb2p2"][41, :, :, :]))
+    @test mean_ps_41 < mean_ps_31 < mean_ps_21 < mean_ps_11 < mean_ps_01
 
     close(ds)
 end

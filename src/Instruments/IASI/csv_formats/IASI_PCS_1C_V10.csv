@@ -5,7 +5,7 @@ DEGRADED_PROC_MDR,Quality of MDR has been degraded from nominal due to a process
 GEPSIasiMode,Instrument mode,,,1,1,1,1,bitst(32),4,4,22
 GEPSOPSProcessingMode,Processing mode,,,1,1,1,1,bitst(32),4,4,26
 GEPSIdConf,System configuration at line level: PTSI; TEC conf file ID;…..,,,1,1,1,1,bitst(256),32,32,30
-OBT,On Board Time (Coarse time + Fine time),,,30,1,1,1,bitst(48),6,180,62,
+OBT,On Board Time (Coarse time + Fine time),,,30,1,1,1,bitst(48),6,180,62
 OnboardUTC,Date of IASI measure (on board UTC): Number of Days since 1 January 2000; Number of ms in the day,,,30,1,1,1,short cds time,6,180,242
 GEPSDatIasi,Date of IASI measure (Corrected UTC): Number of Days since 1 January 2000; Number of ms in the day,,UTC,30,1,1,1,short cds time,6,180,422
 GEPS_SP,Scan position for all observational targets,,,30,1,1,1,integer4,4,120,602

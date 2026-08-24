@@ -149,3 +149,60 @@ function get_field_dimensions(
     end
     return res
 end
+
+############  IASI_PCS_1C  ################
+
+function _get_fixed_dimensions(T::Type{IASI_PCS_1C_V10})
+    dimensions_dict = OrderedDict(
+        "lon_lat" => 2,
+        "zenith_azimuth" => 2,
+        "band" => 3,
+        "sounder_pixel" => 4,
+        "avhrr_channel" => 6,
+        "fov_class" => 7,
+        "xtrack" => 30
+    )
+    return dimensions_dict
+end
+
+function get_dimensions(T::Type{IASI_PCS_1C_V10},
+        data_record_layouts::Vector{<:RecordLayout})::OrderedDict{String, <:Integer}
+    dimensions_dict = OrderedDict{String, Integer}()
+    layout = only(data_record_layouts)
+
+    for d in keys(layout.flexible_dims_file)
+        dimensions_dict[string(d)] = layout.flexible_dims_file[d]
+    end
+
+    merge!(dimensions_dict, _get_fixed_dimensions(T))
+
+    return dimensions_dict
+end
+
+function get_field_dimensions(
+        T::Type{IASI_PCS_1C_V10}, field_name::Symbol)
+    res = String[]
+
+    if !(fieldtype(T, field_name) <: Array)
+        return res
+    end
+
+    dimension_dict = _get_fixed_dimensions(T)
+    array_size = _get_array_size(T, field_name)
+
+    for d in array_size
+        if d isa Symbol
+            push!(res, string(d))
+        elseif d == 2
+            if field_name == :ggeosondloc
+                push!(res, "lat_lon")
+            else
+                push!(res, "zenith_azimuth")
+            end
+        else
+            names = [dim_name for (dim_name, dim_val) in dimension_dict if dim_val == d]
+            push!(res, string(first(names)))
+        end
+    end
+    return res
+end
