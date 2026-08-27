@@ -42,6 +42,9 @@ function get_flexible_dim_fields(::Type{IASI_PCS_1C_V10})
     return OrderedDict{Symbol, Symbol}(
     )
 end
+
+get_eigenvector_file_name(ds, band_n) = read_single_record(ds.file_pointer, GlobalExternalAuxiliary, band_n).content
+
 ######### level 2###########
 
 abstract type IASI_SND_02 <: DataRecord end

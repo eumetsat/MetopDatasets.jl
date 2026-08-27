@@ -5,6 +5,8 @@ using MetopDatasets, Test
 import CommonDataModel as CDM
 import OrderedCollections: OrderedDict
 import Statistics
+using BlockDiagonals
+using LinearAlgebra
 
 test_data_artifact = MetopDatasets.get_test_data_artifact()
 
@@ -380,4 +382,36 @@ end
     @test mean_ps_41 < mean_ps_31 < mean_ps_21 < mean_ps_11 < mean_ps_01
 
     close(ds)
+end
+
+
+@testset "Principal Component Scores reconstruction" begin
+    n_components = 30
+    n_channels = 900
+    n_bands = 3
+
+    ### Test custom_block_view_mul!
+    for dtype in [Float32, Float64]
+        b = rand(dtype, n_components);
+        b_original = copy(b)
+        M = BlockDiagonal([rand(dtype, 200, 9),rand(dtype, 400, 12),rand(dtype, 300, 9)]);
+        M_original = copy(M)
+
+
+        for channel_range in [300:870, 500:870, 870:-3:300]
+            M_dense = M[channel_range,:]
+            M_dense_view = view(M_full_dense , channel_range,:)
+            c1 = zeros(length(channel_range));
+            c2 = zeros(length(channel_range));
+
+            mul!(c1, M_dense, b);
+            MetopDatasets.custom_block_view_mul!(c2, M, channel_range, b);
+
+            @test isapprox(c1, c2)
+            @test M == M_original
+            @test b == b_original
+        end
+    end
+
+
 end

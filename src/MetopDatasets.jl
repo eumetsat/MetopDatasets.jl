@@ -15,6 +15,9 @@ using PrecompileTools: @setup_workload, @compile_workload
 using RelocatableFolders: @path
 import LazyArtifacts
 import OrderedCollections: OrderedDict
+import LinearAlgebra: mul!
+import BlockDiagonals: BlockDiagonal
+import HDF5
 
 const RECORD_DIM_NAME = "atrack"
 

@@ -154,13 +154,14 @@ end
 
 function _get_fixed_dimensions(T::Type{IASI_PCS_1C_V10})
     dimensions_dict = OrderedDict(
+        "spectral" => 8461,
         "lon_lat" => 2,
         "zenith_azimuth" => 2,
         "band" => 3,
         "sounder_pixel" => 4,
         "avhrr_channel" => 6,
         "fov_class" => 7,
-        "xtrack" => 30
+        "xtrack" => 30,
     )
     return dimensions_dict
 end

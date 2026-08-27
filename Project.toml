@@ -4,24 +4,30 @@ version = "0.2.4"
 authors = ["lupemba <simon.koklupemba@eumetsat.int> and contributors"]
 
 [deps]
+BlockDiagonals = "0a1fb500-61f7-11e9-3c65-f5ef3456f9f0"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CommonDataModel = "1fbeeb36-5f17-413c-809b-666fb144f157"
 Compat = "34da2185-b29b-5c13-b0c7-acf172513d20"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 DiskArrays = "3c3547ce-8d99-4f5e-a174-61eb10b00ae3"
+HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
 LazyArtifacts = "4af54fe1-eca0-43a8-85a7-787d91b784e3"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 OrderedCollections = "bac558e1-5e72-5ebc-8fee-abe8a469f55d"
 PrecompileTools = "aea7be01-6a6a-4083-8856-8a6e6704d82a"
 RelocatableFolders = "05181044-ff0b-4ac5-8273-598c1e38db00"
 
 [compat]
 Aqua = "0.8.9"
+BlockDiagonals = "0.2.0"
 CSV = "0.10"
 CommonDataModel = "0.4"
 Compat = "4.10"
 Dates = "1"
 DiskArrays = "0.3, 0.4"
+HDF5 = "0.17"
 LazyArtifacts = "1"
+LinearAlgebra = "1"
 NCDatasets = "0.14"
 OrderedCollections = "1, 2.0"
 PrecompileTools = "1"
@@ -39,4 +45,4 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Aqua", "NCDatasets", "SafeTestsets", "Statistics", "Test"]
+test = ["Aqua", "BlockDiagonals", "LinearAlgebra", "NCDatasets", "SafeTestsets", "Statistics", "Test"]
