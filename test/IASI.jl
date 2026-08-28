@@ -384,7 +384,6 @@ end
     close(ds)
 end
 
-
 @testset "Principal Component Scores reconstruction" begin
     n_components = 30
     n_channels = 900
@@ -392,20 +391,18 @@ end
 
     ### Test custom_block_view_mul!
     for dtype in [Float32, Float64]
-        b = rand(dtype, n_components);
+        b = rand(dtype, n_components)
         b_original = copy(b)
-        M = BlockDiagonal([rand(dtype, 200, 9),rand(dtype, 400, 12),rand(dtype, 300, 9)]);
+        M = BlockDiagonal([rand(dtype, 200, 9), rand(dtype, 400, 12), rand(dtype, 300, 9)])
         M_original = copy(M)
 
-
         for channel_range in [300:870, 500:870, 870:-3:300]
-            M_dense = M[channel_range,:]
-            M_dense_view = view(M_full_dense , channel_range,:)
-            c1 = zeros(length(channel_range));
-            c2 = zeros(length(channel_range));
+            M_dense = M[channel_range, :]
+            c1 = zeros(length(channel_range))
+            c2 = zeros(length(channel_range))
 
-            mul!(c1, M_dense, b);
-            MetopDatasets.custom_block_view_mul!(c2, M, channel_range, b);
+            mul!(c1, M_dense, b)
+            MetopDatasets.custom_block_view_mul!(c2, M, channel_range, b)
 
             @test isapprox(c1, c2)
             @test M == M_original
@@ -413,5 +410,35 @@ end
         end
     end
 
+    test_file_IASI_PCS = joinpath(test_data_artifact, "IASI_PCS_1C_M01_20260319210859Z_cropped_10.nat")
+    ds = MetopDataset(test_file_IASI_PCS)
 
+    @test isapprox((1 ./ ds["spectra_wavenumber"][92]), 14.97566454511419e-6)
+    @test length(ds["spectra_wavenumber"]) == 8461
+
+    reconstruct_spectrum = MetopDatasets.reconstruct_iasi_spectrum(ds)
+    @test size(reconstruct_spectrum, 1) == 8461
+    @test eltype(reconstruct_spectrum) == Float32
+    @test isapprox(reconstruct_spectrum[1591, 2, 5, 4], 0.00023, atol = 1e-6)
+
+    a = Array(reconstruct_spectrum)
+    @test eltype(a) == Float32
+    # check lazy indexing works
+    @test isapprox(reconstruct_spectrum[1:2000, 4, :, :], a[1:2000, 4, :, :])
+    @test isapprox(reconstruct_spectrum[92, :, :, :], a[92, :, :, :])
+    @test isapprox(reconstruct_spectrum[8000:-5:5000, 2, 5:-1:1, 2:4], a[
+        8000:-5:5000, 2, 5:-1:1, 2:4])
+
+    close(ds)
+
+    # high precision
+    ds_high = MetopDataset(test_file_IASI_PCS, high_precision = true)
+
+    reconstruct_spectrum = MetopDatasets.reconstruct_iasi_spectrum(ds_high)
+    @test eltype(reconstruct_spectrum) == Float64
+    test_val = reconstruct_spectrum[1591, 2, 5, 4]
+    @test test_val isa Float64
+    @test isapprox(test_val, 0.00023, atol = 1e-6)
+
+    close(ds_high)
 end

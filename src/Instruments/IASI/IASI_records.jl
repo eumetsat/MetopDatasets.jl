@@ -43,9 +43,13 @@ function get_flexible_dim_fields(::Type{IASI_PCS_1C_V10})
     )
 end
 
-get_eigenvector_file_name(ds, band_n) = read_single_record(ds.file_pointer, GlobalExternalAuxiliary, band_n).content
+function get_eigenvector_file_name(ds, band_n)
+    return read_single_record(ds.file_pointer, GlobalExternalAuxiliary, band_n).content
+end
 
 ######### level 2###########
+const IASI_L2_V10_ERROR_DATA_NAME = :error_data
+const IASI_L2_V10_ERROR_DATA_DESCRIPTION = "Contents depend on MDR.FLG_STER field (Data is not parsed)"
 
 abstract type IASI_SND_02 <: DataRecord end
 
@@ -122,10 +126,6 @@ function get_missing_value(
         return nothing
     end
 end
-
-## 
-const IASI_L2_V10_ERROR_DATA_NAME = :error_data
-const IASI_L2_V10_ERROR_DATA_DESCRIPTION = "Contents depend on MDR.FLG_STER field (Data is not parsed)"
 
 ### Common functions ####
 function get_flexible_dims_from_giard(file_pointer::IO, T::Type{<:DataRecord})

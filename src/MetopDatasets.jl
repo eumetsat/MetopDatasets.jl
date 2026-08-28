@@ -51,7 +51,7 @@ export MetopDataset
 
 # helper functions
 export read_single_record, read_first_record, scale_iasi_spectrum, max_giadr_channel,
-       brightness_temperature, get_scaled
+       brightness_temperature, get_scaled, reconstruct_iasi_spectrum
 
 # export cfvariable to enable maskingvalue 
 cfvariable = CDM.cfvariable
