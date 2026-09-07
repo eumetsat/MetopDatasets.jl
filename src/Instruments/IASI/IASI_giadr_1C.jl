@@ -5,7 +5,7 @@
 const GIADR_IASI_xxx_1C_V11_format = @path joinpath(
     @__DIR__, "csv_formats/GIADR_IASI_xxx_1C_V11.csv")
 
-abstract type GIADR_IASI_XXX_1C <: GlobalInternalAuxillary end
+abstract type GIADR_IASI_XXX_1C <: GlobalInternalAuxiliary end
 
 eval(record_struct_expression(GIADR_IASI_xxx_1C_V11_format, GIADR_IASI_XXX_1C))
 

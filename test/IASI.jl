@@ -4,6 +4,9 @@
 using MetopDatasets, Test
 import CommonDataModel as CDM
 import OrderedCollections: OrderedDict
+import Statistics
+using BlockDiagonals
+using LinearAlgebra
 
 test_data_artifact = MetopDatasets.get_test_data_artifact()
 
@@ -158,7 +161,7 @@ end
     @test giard isa MetopDatasets.GIADR_IASI_SND_02_V11
 
     # test sizes against std values
-    flex_sizes = MetopDatasets.get_iasi_l2_flex_size(giard)
+    flex_sizes = MetopDatasets.get_flexible_dims_from_giard(giard)
 
     @test flex_sizes[:NEW] == 12
     @test flex_sizes[:NLO] == 101
@@ -340,4 +343,102 @@ end
     @test ismissing.(temp_e_array_index) == ismissing.(temp_e_disk_array_index)
 
     close(ds)
+end
+
+@testset "IASI L1C Principal Component Scores (PCS)" begin
+    test_file = joinpath(
+        test_data_artifact, "IASI_PCS_1C_M01_20260319210859Z_cropped_10.nat")
+
+    @test !MetopDatasets.fixed_size(MetopDatasets.IASI_PCS_1C_V10)
+    @test MetopDatasets.fixed_size(MetopDatasets.GIADR_IASI_PCS_1C_V10)
+
+    giadr_pcs = read_first_record(
+        test_file, MetopDatasets.GIADR_IASI_PCS_1C_V10)
+
+    @test sum(getproperty(giadr_pcs, Symbol("nbrscoresband1_part$i")) for i in 1:3) == 90
+    @test sum(getproperty(giadr_pcs, Symbol("nbrscoresband2_part$i")) for i in 1:3) == 120
+    @test sum(getproperty(giadr_pcs, Symbol("nbrscoresband3_part$i")) for i in 1:3) == 90
+
+    ds = MetopDataset(test_file)
+
+    @test size(ds["pcscoresb2p2"]) ==
+          (ds.dim["NBS2P2"], ds.dim["sounder_pixel"], ds.dim["xtrack"], ds.dim["atrack"])
+    @test MetopDatasets.dimnames(ds["pcscoresb2p2"]) ==
+          ["NBS2P2", "sounder_pixel", "xtrack", "atrack"]
+
+    lon = ds["ggeosondloc"][1, :, :, :]
+    lat = ds["ggeosondloc"][2, :, :, :]
+    @test all(-180 .< lon .< 180)
+    @test all(-90 .< lat .< 90)
+
+    @test !any(ismissing(Array(ds["pcscoresb2p2"])))
+
+    # test the the principal components scores at
+    mean_ps_01 = Statistics.mean(abs.(ds["pcscoresb2p2"][1, :, :, :]))
+    mean_ps_11 = Statistics.mean(abs.(ds["pcscoresb2p2"][11, :, :, :]))
+    mean_ps_21 = Statistics.mean(abs.(ds["pcscoresb2p2"][21, :, :, :]))
+    mean_ps_31 = Statistics.mean(abs.(ds["pcscoresb2p2"][31, :, :, :]))
+    mean_ps_41 = Statistics.mean(abs.(ds["pcscoresb2p2"][41, :, :, :]))
+    @test mean_ps_41 < mean_ps_31 < mean_ps_21 < mean_ps_11 < mean_ps_01
+
+    close(ds)
+end
+
+@testset "Principal Component Scores reconstruction" begin
+    n_components = 30
+    n_channels = 900
+    n_bands = 3
+
+    ### Test custom_block_view_mul!
+    for dtype in [Float32, Float64]
+        b = rand(dtype, n_components)
+        b_original = copy(b)
+        M = BlockDiagonal([rand(dtype, 200, 9), rand(dtype, 400, 12), rand(dtype, 300, 9)])
+        M_original = copy(M)
+
+        for channel_range in [300:870, 500:870, 870:-3:300]
+            M_dense = M[channel_range, :]
+            c1 = zeros(length(channel_range))
+            c2 = zeros(length(channel_range))
+
+            mul!(c1, M_dense, b)
+            MetopDatasets.custom_block_view_mul!(c2, M, channel_range, b)
+
+            @test isapprox(c1, c2)
+            @test M == M_original
+            @test b == b_original
+        end
+    end
+
+    test_file_IASI_PCS = joinpath(test_data_artifact, "IASI_PCS_1C_M01_20260319210859Z_cropped_10.nat")
+    ds = MetopDataset(test_file_IASI_PCS)
+
+    @test isapprox((1 ./ ds["spectra_wavenumber"][92]), 14.97566454511419e-6)
+    @test length(ds["spectra_wavenumber"]) == 8461
+
+    reconstruct_spectrum = MetopDatasets.reconstruct_iasi_spectrum(ds)
+    @test size(reconstruct_spectrum, 1) == 8461
+    @test eltype(reconstruct_spectrum) == Float32
+    @test isapprox(reconstruct_spectrum[1591, 2, 5, 4], 0.00023, atol = 1e-6)
+
+    a = Array(reconstruct_spectrum)
+    @test eltype(a) == Float32
+    # check lazy indexing works
+    @test isapprox(reconstruct_spectrum[1:2000, 4, :, :], a[1:2000, 4, :, :])
+    @test isapprox(reconstruct_spectrum[92, :, :, :], a[92, :, :, :])
+    @test isapprox(reconstruct_spectrum[8000:-5:5000, 2, 5:-1:1, 2:4], a[
+        8000:-5:5000, 2, 5:-1:1, 2:4])
+
+    close(ds)
+
+    # high precision
+    ds_high = MetopDataset(test_file_IASI_PCS, high_precision = true)
+
+    reconstruct_spectrum = MetopDatasets.reconstruct_iasi_spectrum(ds_high)
+    @test eltype(reconstruct_spectrum) == Float64
+    test_val = reconstruct_spectrum[1591, 2, 5, 4]
+    @test test_val isa Float64
+    @test isapprox(test_val, 0.00023, atol = 1e-6)
+
+    close(ds_high)
 end

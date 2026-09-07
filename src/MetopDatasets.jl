@@ -15,6 +15,9 @@ using PrecompileTools: @setup_workload, @compile_workload
 using RelocatableFolders: @path
 import LazyArtifacts
 import OrderedCollections: OrderedDict
+import LinearAlgebra: mul!
+import BlockDiagonals: BlockDiagonal
+import HDF5
 
 const RECORD_DIM_NAME = "atrack"
 
@@ -48,7 +51,7 @@ export MetopDataset
 
 # helper functions
 export read_single_record, read_first_record, scale_iasi_spectrum, max_giadr_channel,
-       brightness_temperature, get_scaled
+       brightness_temperature, get_scaled, reconstruct_iasi_spectrum
 
 # export cfvariable to enable maskingvalue 
 cfvariable = CDM.cfvariable
@@ -73,7 +76,8 @@ export cfvariable, dimnames
         "HIRS_xxx_1B_M01_20241104213353Z_cropped_10.nat",
         "AMSA_xxx_1B_M03_20250915221320Z_cropped_10.nat",
         "IASI_SND_02_M03_20250120105357Z_cropped_10.nat",
-        "IASI_xxx_1C_M01_20240925202059Z_cropped_5.nat"]
+        "IASI_xxx_1C_M01_20240925202059Z_cropped_5.nat",
+        "IASI_PCS_1C_M01_20260319210859Z_cropped_10.nat"]
 
     test_files = joinpath.(test_data_artifact, file_names)
 

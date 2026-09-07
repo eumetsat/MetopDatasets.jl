@@ -19,5 +19,5 @@ end
 const GIADR_MHS_RADIANCE_format = @path joinpath(
     @__DIR__, "csv_formats/GIADR_MHS_RADIANCE.csv")
 
-eval(record_struct_expression(GIADR_MHS_RADIANCE_format, GlobalInternalAuxillary))
+eval(record_struct_expression(GIADR_MHS_RADIANCE_format, GlobalInternalAuxiliary))
 get_instrument_subclass(::Type{<:GIADR_MHS_RADIANCE}) = 2

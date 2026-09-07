@@ -4,6 +4,7 @@
 using MetopDatasets, Test
 import CommonDataModel as CDM
 import OrderedCollections: OrderedDict
+import DiskArrays
 using Dates
 
 test_data_artifact = MetopDatasets.get_test_data_artifact()
@@ -50,6 +51,7 @@ end
 
     start_time_var = CDM.variable(ds, :record_start_time)
     @test start_time_var isa MetopDatasets.MetopVariable
+    @test DiskArrays.haschunks(start_time_var) isa DiskArrays.Chunked
     @test start_time_var[1:3] isa Vector{Float64}
     @test CDM.name(start_time_var) == "record_start_time"
     @test CDM.dimnames(start_time_var) == ["atrack"]
@@ -58,6 +60,7 @@ end
 
     latitude = ds["latitude"]
     @test latitude isa CDM.CFVariable
+    @test DiskArrays.haschunks(latitude) isa DiskArrays.Chunked
     lats = latitude[:, :]
     @test lats isa Array{Union{Missing, Float64}, 2}
     @test all(-90 .< lats .< 90)

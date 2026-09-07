@@ -141,8 +141,9 @@ OrderedDict{String, Int64} with 2 entries:
 ```
 """
 function get_dimensions(T::Type{<:BinaryRecord})::OrderedDict{String, <:Integer}
+    @warn "Using fallback dim names for $T" maxlog=1
     # find all array fields size
-    array_sizes = [MetopDatasets._get_array_size(T, n)
+    array_sizes = [_get_array_size(T, n)
                    for n in fieldnames(T) if fieldtype(T, n) <: Array]
 
     # get all unique dimensions
