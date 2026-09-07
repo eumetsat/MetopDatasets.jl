@@ -106,7 +106,7 @@ The following dependencies are not included in the package but they are required
 | OrderedCollections.jl | 1, 2| MIT | 2013 Dahua Lin| https://github.com/JuliaCollections/OrderedCollections.jl | Ordered dictionary |
 | PrecompileTools.jl | 1| MIT | 2023 Tim Holy and contributors | https://github.com/JuliaLang/PrecompileTools.jl | Precompile key methods |
 | RelocatableFolders.jl | 1| MIT | 2021: Michael Hatherly| https://github.com/JuliaPackaging/RelocatableFolders.jl | Make installation relocatable |
- HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"
+
 ### Test dependencies
 The following dependencies are only required for testing the software:
 | dependency | version| license | copyright | home_url | comments |
