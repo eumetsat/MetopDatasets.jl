@@ -1,7 +1,7 @@
 ## IASI
 
 The Infrared Atmospheric Sounding Interferometer (IASI) is an instrument on the METOP satellites. It is a hyper-spectral infrared sensor measuring upwelling radiation from a sun-synchronous orbit in 8461 spectral channels (645.0 - 2760.0 cm-1). These measurements are used to derive a plethora of geophysical variables (e.g. temperature and humidity profiles). This makes IASI a key data source for numerical weather prediction (NWP) and applications in atmospheric chemistry and monitoring of essential climate variables.
-See [IASI Level 1 product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASIL1C-ALL) and [IASI Level 2 product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASSND02) for more information.
+See [IASI Level 1 product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASIL1C-ALL), [IASI Level 1 Principal Component Scores product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASPCS01) and [IASI Level 2 product page](https://user.eumetsat.int/catalogue/EO:EUM:DAT:METOP:IASSND02) for more information.
 
 
 ## Static plot of L1C spectra
@@ -202,7 +202,86 @@ fig = let
 end
 ```
 ![Interactive IASI spectrum](interactive_IASI.png)
-It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context. 
+It is now possible to interactively explore the nearly 100 000 observations from an obit of IASI with the background map giving important context.
+
+## Using IASI Principal Component Scores
+IASI radiance spectra are also available as Principal Component Scores (PCS). A single orbit of PCS data is approximately 100 MB, compared to an uncompressed IASI Level 1 orbit, which is around 2 GB.
+
+`MetopDataset` can be used to read IASI PCS products and provides methods to reconstruct the full IASI spectra from the scores. Note that the IASI principal component vectors are required for spectral reconstruction. These vectors are included in this package as a 200 MB lazy artifact, which is downloaded automatically the first time `reconstruct_iasi_spectrum` is called. This approach provides a smooth user experience for IASI PCS users while avoiding unnecessary disk usage for users who do not work with IASI data.
+
+The example below compares a reconstructed IASI spectrum with the original spectrum.
+```julia
+using MetopDatasets
+using CairoMakie
+
+ds      = MetopDataset("IASI_xxx_1C_M01_20260416213255Z_20260416231454Z_N_O_20260416222234Z.nat", maskingvalue=NaN)
+ds_pcs  = MetopDataset("IASI_PCS_1C_M01_20260416213255Z_20260416231454Z_N_O_20260416222424Z.nat", maskingvalue=NaN)
+
+# chose an observation to test.
+data_record_index = 670
+sounder_index = 3
+xtrack_index = 8
+
+# check the observation time and location match.
+lon_lat_original = ds["ggeosondloc"][:, sounder_index, xtrack_index, data_record_index]
+lon_lat_pcs = ds_pcs["ggeosondloc"][:, sounder_index, xtrack_index, data_record_index]
+if !isapprox(lon_lat_original, lon_lat_pcs)
+    error("Location not matching")
+end
+
+timestamp_original = ds["record_start_time"][data_record_index]
+timestamp_pcs = ds_pcs["record_start_time"][data_record_index]
+if timestamp_original != timestamp_pcs
+    error("Timestamp not matching")
+end
+
+# Create variable for the reconstruct spectrum.
+# Note: This downloads the 200 MB principal component vectors the first time.
+reconstruct_spectra_variable = reconstruct_iasi_spectrum(ds_pcs)
+
+# Indexing the variable reads the PCS and reconstructs the spectra.
+observation_reconstructed = reconstruct_spectra_variable[:, sounder_index, xtrack_index, data_record_index]
+# Reading the original spectrum.
+observation_original = ds["gs1cspect"][:, sounder_index, xtrack_index, data_record_index]
+
+# get wave numbers
+wavenumber_cm_original = ds["spectra_wavenumber"][:, data_record_index]./100
+wavenumber_cm_pcs = ds_pcs["spectra_wavenumber"][:]./100
+
+# plot figure
+let
+
+    fig = Figure()
+    ax1 = Axis(fig[1, 1],
+        limits= (nothing,nothing),
+        xlabel = "Wavenumber (cm-1)",
+        ylabel = "Radiance (W/m2/sr/m-1)",
+        )
+
+    lines!(ax1, wavenumber_cm_original, observation_original, label = "original")
+    lines!(ax1, wavenumber_cm_pcs, observation_reconstructed, label = "reconstruct")
+    lines!(ax1, wavenumber_cm_pcs, 
+        observation_reconstructed .- observation_original[1:length(observation_reconstructed)], label = "difference")
+    axislegend(ax1, position = :rt)
+
+    # add a second plot with zoom-in.
+    ax2 = Axis(fig[2, 1],
+        limits= ((1585,1600),(-5e-6,5e-5)),
+        xlabel = "Wavenumber (cm-1)",
+        ylabel = "Radiance (W/m2/sr/m-1)",
+        )
+
+    lines!(ax2, wavenumber_cm_original, observation_original, label = "original")
+    lines!(ax2, wavenumber_cm_pcs, observation_reconstructed, label = "reconstruct")
+    lines!(ax2, wavenumber_cm_pcs, 
+        observation_reconstructed .- observation_original[1:length(observation_reconstructed)], label = "difference")
+
+    fig
+end
+```
+![IASI PCS reconstruct](IASI_reconstruct.png)
+The top plot compares an IASI PCS reconstructed spectrum with the original Level 1 spectrum. The agreement is so good that the reconstructed curve completely overlaps the original. The bottom plot shows a zoomed-in view, where small differences between the original and reconstructed spectra become visible.
+
 
 ## Level 2 Combined Sounding Products 
 The IASI level 2 products contains derived atmospheric profiles of temperature, water vapour, ozone and trace gases. The availability of these profiles depend on cloud cover and therefore the number of profiles will vary through out the product. These variables of changing size are padded with fill values (default to `missing`) to generate an array that fits with the `MetopDataset` interface. This example plots the temperature and water vapour profiles next to a map showing the location of the observation. The example uses `maskingvalue = NaN` for selected variables to avoid `missing` values. We read the "first guess" variables (fg\_atmospheric\_water\_vapour, fg\_atmospheric\_temperature), because they contain the data from the statistical all-sky retrieval. The 1DVar algorithm that generates the "non-first guess" profiles will be phased out in favor of the statistical retrieval in the future.
