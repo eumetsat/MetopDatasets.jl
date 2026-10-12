@@ -13,7 +13,7 @@ import DiskArrays
 using Compat: @compat
 using PrecompileTools: @setup_workload, @compile_workload
 using RelocatableFolders: @path
-import LazyArtifacts
+import Artifacts
 import OrderedCollections: OrderedDict
 import LinearAlgebra: mul!
 import BlockDiagonals: BlockDiagonal
@@ -44,7 +44,7 @@ the first time the function it called.
 """
 function get_test_data_artifact()
     return joinpath(
-        LazyArtifacts.artifact"test_data_MetopDatasets", "reduced_data")
+        Artifacts.artifact"test_data_MetopDatasets", "reduced_data")
 end
 
 export MetopDataset
