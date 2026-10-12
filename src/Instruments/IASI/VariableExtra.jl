@@ -17,10 +17,10 @@ function CDM.variable(
 
     if ds.auto_convert && varname in (:gs1cspect, IASI_WAVENUMBER_NAME)
         disk_array = if varname == :gs1cspect
-            sepctrum_disk_array = IasiSpectrumDiskArray(
+            spectrum_disk_array = IasiSpectrumDiskArray(
                 ds.file_pointer, ds.data_record_layouts,
                 varname; high_precision = ds.high_precision)
-            sepctrum_disk_array
+            spectrum_disk_array
         elseif varname == IASI_WAVENUMBER_NAME
             wavenumber_disk_array = IasiWaveNumberDiskArray(ds, varname)
             wavenumber_disk_array

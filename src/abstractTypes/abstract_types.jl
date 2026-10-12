@@ -11,7 +11,7 @@ abstract type Header <: Record end
 
 abstract type SecondaryProductHeader <: Header end
 
-abstract type GlobalInternalAuxillary <: BinaryRecord end
+abstract type GlobalInternalAuxiliary <: BinaryRecord end
 
 abstract type RecordSubType end
 

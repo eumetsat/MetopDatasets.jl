@@ -147,3 +147,17 @@ function DiskArrays.readblock!(v::MetopVariable{T, N},
     aout .= getindex(parent(v), indexes...)
     return nothing
 end
+
+function DiskArrays.haschunks(v::MetopVariable{
+        T, N, R, <:DiskArrays.AbstractArray}) where {T, N, R}
+    return DiskArrays.haschunks(parent(v))
+end
+
+function DiskArrays.eachchunk(v::MetopVariable{
+        T, N, R, <:DiskArrays.AbstractArray}) where {T, N, R}
+    return DiskArrays.eachchunk(parent(v))
+end
+
+function CDM.chunking(v::MetopVariable{T, N, R, <:DiskArrays.AbstractArray}) where {T, N, R}
+    return (:chunked, (size(v)[1:(end - 1)]..., 1))
+end

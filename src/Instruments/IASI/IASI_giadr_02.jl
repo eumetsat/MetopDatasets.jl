@@ -4,7 +4,7 @@
 # Add IASI Level 2 meta data record.
 const IASI_L2_V10_03_PRESSURE_DIM = "n_o3_profiles"
 
-abstract type GIADR_IASI_SND_02 <: GlobalInternalAuxillary end
+abstract type GIADR_IASI_SND_02 <: GlobalInternalAuxiliary end
 
 const GIADR_IASI_SND_02_V11_format = @path joinpath(
     @__DIR__, "csv_formats/GIADR_IASI_SND_02_V11.csv")
@@ -59,7 +59,7 @@ function get_flexible_dim_fields(::Type{GIADR_IASI_SND_02_V10})
         :num_surface_emissivity_wavelengths => :NEW)
 end
 
-function get_iasi_l2_flex_size(giard::T) where {T <: GIADR_IASI_SND_02}
+function get_flexible_dims_from_giard(giard::T) where {T <: GIADR_IASI_SND_02}
     flex_size_prod = OrderedDict{Symbol, Int64}()
     giard_size_fields = get_flexible_dim_fields(typeof(giard))
 

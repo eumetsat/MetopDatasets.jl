@@ -23,7 +23,7 @@ end
 @testset "GIADR_MHS_RADIANCE" begin
     @test MetopDatasets.native_sizeof(MetopDatasets.GIADR_MHS_RADIANCE) == 478
     @test MetopDatasets.fixed_size(MetopDatasets.GIADR_MHS_RADIANCE)
-    @test MetopDatasets.GIADR_MHS_RADIANCE <: MetopDatasets.GlobalInternalAuxillary
+    @test MetopDatasets.GIADR_MHS_RADIANCE <: MetopDatasets.GlobalInternalAuxiliary
 
     mhs_giadr = read_first_record(MHS_test_file, MetopDatasets.GIADR_MHS_RADIANCE)
     speed_of_light = 299792458

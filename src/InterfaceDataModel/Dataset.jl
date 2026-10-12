@@ -240,6 +240,9 @@ function _valid_dimensions(ds::MetopDataset)
     return no_error_found
 end
 
+# MetopDataset does not use the "bounds" attribute
+CDM.boundsParentVar(ds::MetopDataset, varname) = ""
+
 ## helper function
 function _skip_sphr(file_pointer, n_headers)
     for _ in 1:n_headers

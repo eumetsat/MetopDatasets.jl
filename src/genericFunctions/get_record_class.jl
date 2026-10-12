@@ -4,7 +4,8 @@
 get_record_class(::Type{<:MainProductHeader}) = 1
 get_record_class(::Type{<:SecondaryProductHeader}) = 2
 get_record_class(::Type{<:InternalPointerRecord}) = 3
-get_record_class(::Type{<:GlobalInternalAuxillary}) = 5
+get_record_class(::Type{GlobalExternalAuxiliary}) = 4
+get_record_class(::Type{<:GlobalInternalAuxiliary}) = 5
 get_record_class(::Type{<:DummyRecord}) = 8
 get_record_class(::Type{<:DataRecord}) = 8
 

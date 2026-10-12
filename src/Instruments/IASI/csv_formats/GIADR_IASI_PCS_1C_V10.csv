@@ -1,0 +1,16 @@
+FIELD,DESCRIPTION,SF,UNITS,DIM1,DIM2,DIM3,TYPE,TYPE SIZE,FIELD SIZE,OFFSET
+RECORD_HEADER,Generic Record Header,0,,1,1,1,REC_HEAD,20,20,0
+NbrScoresBand1_Part1,The number of Band 1 PC scores,0,,1,1,1,u-integer2,2,2,20
+NbrScoresBand1_Part2,The number of Band 1 PC scores,0,,1,1,1,u-integer2,2,2,22
+NbrScoresBand1_Part3,The number of Band 1 PC scores,0,,1,1,1,u-integer2,2,2,24
+NbrScoresBand2_Part1,The number of Band 2 PC scores,0,,1,1,1,u-integer2,2,2,26
+NbrScoresBand2_Part2,The number of Band 2 PC scores,0,,1,1,1,u-integer2,2,2,28
+NbrScoresBand2_Part3,The number of Band 2 PC scores,0,,1,1,1,u-integer2,2,2,30
+NbrScoresBand3_Part1,The number of Band 3 PC scores,0,,1,1,1,u-integer2,2,2,32
+NbrScoresBand3_Part2,The number of Band 3 PC scores,0,,1,1,1,u-integer2,2,2,34
+NbrScoresBand3_Part3,The number of Band 3 PC scores,0,,1,1,1,u-integer2,2,2,36
+FirstChannel,First channel number of each spectral band,0,,3,1,1,u-integer2,2,6,38
+NbrChannels,Number of channels of each spectral band,0,,3,1,1,u-integer2,2,6,44
+ScoreQuantisationFactor,Quantisation factor for PC scores,2,,3,1,1,u-integer2,2,6,50
+ResidualQuantisationFactor,Quantisation factor for residual,2,,3,1,1,u-integer2,2,6,56
+TOTAL SIZE,,,,,,,,,,62

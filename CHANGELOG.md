@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Add support for IASI level 1C Principal Components Scores PCS. This also includes a `reconstruct_iasi_spectrum` that will get the principal component
+vectors as a lazy artifact and reconstruct the full IASI L1C spectrum.
+- Fix `DiskArrays.haschunks` for `MetopVariable`. Correctly propagate the chunking structure from `MetopDiskArray` to `MetopVariable` and `CMD.CFVariable`.
 
 ## v0.2.4
 - Add support for all GOME-2 L1B MDR subclasses (earthshine, calibration, sun, moon). A GOME-2 L1B product now opens as a root dataset where each subclass present in the file is exposed as a group following the `CommonDataModel` group interface, e.g. `CommonDataModel.group(ds, "earthshine")`. Earthshine-only synthesised variables (latitude, longitude) remain gated to Earthshine. New record-layout CSVs were derived from [stcorp/codadef-eps](https://github.com/stcorp/codadef-eps).
