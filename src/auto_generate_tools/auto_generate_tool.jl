@@ -34,18 +34,18 @@ const TYPE_NAMES = Dict("rec_head" => RecordHeader,
     "data_elem_flag" => DataElementFlags
 )
 
-function _get_field_name(row::CSV.Row)
+function _get_csv_field_name(row)
     return Symbol(lowercase(replace(row.FIELD, ' ' => '_')))
 end
 
-function _get_description(row::CSV.Row)::AbstractString
+function _get_csv_description(row)::AbstractString
     if ismissing(row.DESCRIPTION)
         return ""
     end
     return row.DESCRIPTION
 end
 
-function _get_scale_factor(row::CSV.Row)
+function _get_csv_scale_factor(row)
     # some SFs are being read as Int64 and some as InlineStrings
     if !ismissing(row.SF)
         if row.SF isa Integer
@@ -58,7 +58,7 @@ function _get_scale_factor(row::CSV.Row)
     end
 end
 
-function _data_row(row::CSV.Row)
+function _csv_data_row(row)
     if (row.OFFSET isa AbstractString) && strip(lowercase(row.OFFSET)) == "deleted"
         return false
     end
@@ -90,7 +90,7 @@ function _get_raw_format_dim(row)
     return (dim1, dim2, dim3, dim4)
 end
 
-function _get_type(row::CSV.Row)
+function _get_csv_type(row)
     element_type = TYPE_NAMES[lowercase(row.TYPE)]
     field_dims = _get_raw_format_dim(row)
 
@@ -123,23 +123,26 @@ end
 
 function _read_data_rows(file_name)
     csv_format = CSV.File(file_name)
-    is_data_rows = _data_row.(csv_format)
+    is_data_rows = _csv_data_row.(csv_format)
     return csv_format[is_data_rows]
 end
 
 function description_dict(file_name)
     csv_format = _read_data_rows(file_name)
-    return OrderedDict(_get_field_name.(csv_format) .=> _get_description.(csv_format))
+    return OrderedDict(_get_csv_field_name.(csv_format) .=>
+        _get_csv_description.(csv_format))
 end
 
 function scale_factor_dict(file_name)
     csv_format = _read_data_rows(file_name)
-    return OrderedDict(_get_field_name.(csv_format) .=> _get_scale_factor.(csv_format))
+    return OrderedDict(_get_csv_field_name.(csv_format) .=>
+        _get_csv_scale_factor.(csv_format))
 end
 
 function raw_format_dim_dict(file_name)
     csv_format = _read_data_rows(file_name)
-    return OrderedDict(_get_field_name.(csv_format) .=> _get_raw_format_dim.(csv_format))
+    return OrderedDict(_get_csv_field_name.(csv_format) .=>
+        _get_raw_format_dim.(csv_format))
 end
 
 """
@@ -164,7 +167,7 @@ function record_struct_expression(file_name, record_type)
     struct_name = Symbol(uppercase(struct_name))
 
     csv_format = _read_data_rows(file_name)
-    fields = [:($(_get_field_name(row))::$(_get_type(row))) for row in csv_format]
+    fields = [:($(_get_csv_field_name(row))::$(_get_csv_type(row))) for row in csv_format]
 
     auto_generated_code = quote
         struct $struct_name <: $record_type
