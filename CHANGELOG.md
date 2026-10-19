@@ -6,7 +6,6 @@
 - Add support for IASI level 1C Principal Components Scores PCS. This also includes a `reconstruct_iasi_spectrum` that will get the principal component
 vectors as a lazy artifact and reconstruct the full IASI L1C spectrum.
 - Fix `DiskArrays.haschunks` for `MetopVariable`. Correctly propagate the chunking structure from `MetopDiskArray` to `MetopVariable` and `CMD.CFVariable`.
-- Remove `LazyArtifacts` from the dependencies since it is only needed for julia versions older than 1.6 which are not supported by `MetopDatasets`.
 - Update compat bounds to include `CSV` version 1. 
 
 
