@@ -147,7 +147,7 @@ function _get_iasi_eigen_files(ds::MetopDataset{IASI_PCS_1C_V10})
                         MetopDatasets.read_single_record(ds, MetopDatasets.GlobalExternalAuxiliary, i).content, sat => "Mxx")
                     for i in 1:3]
 
-    eigen_artifact = Artifacts.artifact"iasi_pcs_eigenvectors"
+    eigen_artifact = LazyArtifacts.artifact"iasi_pcs_eigenvectors"
 
     return joinpath.(eigen_artifact, ev_filenames)
 end

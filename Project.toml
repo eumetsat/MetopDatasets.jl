@@ -4,7 +4,6 @@ version = "0.2.5"
 authors = ["lupemba <simon.koklupemba@eumetsat.int> and contributors"]
 
 [deps]
-Artifacts = "56f22d72-fd6d-98f1-02f0-08ddc0907c33"
 BlockDiagonals = "0a1fb500-61f7-11e9-3c65-f5ef3456f9f0"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CommonDataModel = "1fbeeb36-5f17-413c-809b-666fb144f157"
@@ -20,9 +19,8 @@ RelocatableFolders = "05181044-ff0b-4ac5-8273-598c1e38db00"
 
 [compat]
 Aqua = "0.8.9"
-Artifacts = "1.9"
 BlockDiagonals = "0.2.0"
-CSV = "0.10, 1.1"
+CSV = "0.10, 1"
 CommonDataModel = "0.4"
 Compat = "4.10"
 Dates = "1.9"
